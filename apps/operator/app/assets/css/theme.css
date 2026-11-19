@@ -1,0 +1,14 @@
+/*
+ * operator app colours. The colour scheme itself (surfaces, neutrals, palette) is shared:
+ * layers/base/app/assets/css/theme.css. Only the primary colour is set per app.
+ */
+
+/* ======================================================================
+ * PRIMARY COLOUR
+ * A plain colour (hex or rgb), e.g. --app-primary: #D4AF37;
+ * The whole primary scale, buttons, menu, badges and charts follow it.
+ * Empty: no colour chosen yet, so the shared default applies (layers/base theme.css).
+ * ====================================================================== */
+:root {
+  --app-primary: ;
+}

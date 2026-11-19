@@ -1,0 +1,35 @@
+{
+  "name": "ttklia-web",
+  "private": true,
+  "description": "TTKLIA v2 web: Nuxt 4 layers and the seven apps (doc 09, ADR 0002)",
+  "workspaces": [
+    "layers/*",
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:public": "npm run dev -w apps/public",
+    "dev:bus": "npm run dev -w apps/bus",
+    "dev:taxi": "npm run dev -w apps/taxi",
+    "dev:fleet": "npm run dev -w apps/fleet",
+    "dev:ride": "npm run dev -w apps/ride",
+    "dev:admin": "npm run dev -w apps/admin",
+    "dev:operator": "npm run dev -w apps/operator",
+    "dev:vendor": "npm run dev -w apps/vendor",
+    "dev:all": "node scripts/dev-all.mjs",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "generate:api": "npm run generate:api -w packages/api-client-ts",
+    "build": "npm run build --workspaces --if-present",
+    "build:public": "npm run build -w apps/public",
+    "build:bus": "npm run build -w apps/bus",
+    "build:taxi": "npm run build -w apps/taxi",
+    "build:fleet": "npm run build -w apps/fleet",
+    "build:ride": "npm run build -w apps/ride",
+    "build:admin": "npm run build -w apps/admin",
+    "build:operator": "npm run build -w apps/operator",
+    "build:vendor": "npm run build -w apps/vendor"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2"
+  }
+}

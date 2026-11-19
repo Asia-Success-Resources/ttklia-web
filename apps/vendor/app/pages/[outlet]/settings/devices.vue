@@ -1,0 +1,42 @@
+<script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
+// Devices: till PC, printer, terminal (table `devices`). Permission: vendor.staff.manage (doc 32).
+// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// The till is a device of type `pos` bound to this outlet (devices.vendor_outlet_id, doc 32). TODO(api): doc 32 lists no endpoint yet.
+
+interface Row extends Record<string, unknown> {
+  uuid: string
+  name: string
+  type: string
+  status: string
+  software_version: string | null
+  last_seen_at: string | null
+}
+
+const columns: TableColumn<Row>[] = [
+  { accessorKey: 'name', header: 'Name' },
+  { accessorKey: 'type', header: 'Type' },
+  { accessorKey: 'status', header: 'Status' },
+  { accessorKey: 'software_version', header: 'Software version' },
+  { accessorKey: 'last_seen_at', header: 'Last seen at' },
+]
+
+const vendorPath = useVendorPath()
+const search = ref('')
+const list = useApiList<Row>({ path: null })
+onMounted(() => list.load())
+</script>
+
+<template>
+  <OpsListPage
+    v-model:search="search"
+    title="Devices"
+    subject="devices"
+    :rows="list.rows.value"
+    :columns="columns"
+    :loading="list.pending.value"
+    :has-more="list.nextCursor.value !== null"
+    @more="list.load(list.nextCursor.value ?? undefined)"
+  />
+</template>

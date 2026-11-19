@@ -1,0 +1,11 @@
+{
+  "name": "@ttklia/ops-shell",
+  "private": true,
+  "type": "module",
+  "main": "./nuxt.config.ts",
+  "description": "Nuxt layer: the Fleet Management skeleton for every staff app (doc 09, 'Look and layout')",
+  "dependencies": {
+    "apexcharts": "^8.9.0",
+    "vue3-apexcharts": "^1.11.3"
+  }
+}
