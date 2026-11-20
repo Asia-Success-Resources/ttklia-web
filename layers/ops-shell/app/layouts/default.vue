@@ -1,5 +1,5 @@
 <template>
-  <OpsLayout>
-    <slot />
-  </OpsLayout>
+    <OpsLayout>
+        <slot />
+    </OpsLayout>
 </template>

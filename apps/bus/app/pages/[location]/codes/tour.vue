@@ -2,42 +2,43 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Tour codes: list (table `promotions`). Permission: bus.codes_tour.read (doc 27).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// GET /api/v1/ops/w/{workspace}/promotions (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+useHead({ title: 'Tour codes' })
 
 interface Row extends Record<string, unknown> {
-  uuid: string
-  code: string
-  product: string | null
-  type: string
-  value: number
-  max_uses: number | null
-  max_uses_per_user: number | null
+    uuid: string
+    code: string
+    product: string | null
+    type: string
+    value: number
+    max_uses: number | null
+    max_uses_per_user: number | null
 }
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: 'code', header: 'Code' },
-  { accessorKey: 'product', header: 'Product' },
-  { accessorKey: 'type', header: 'Type' },
-  { accessorKey: 'value', header: 'Value' },
-  { accessorKey: 'max_uses', header: 'Max uses' },
-  { accessorKey: 'max_uses_per_user', header: 'Max uses per user' },
+    { accessorKey: 'code', header: 'Code' },
+    { accessorKey: 'product', header: 'Product' },
+    { accessorKey: 'type', header: 'Type' },
+    { accessorKey: 'value', header: 'Value' },
+    { accessorKey: 'max_uses', header: 'Max uses' },
+    { accessorKey: 'max_uses_per_user', header: 'Max uses per user' },
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: null, workspaceScoped: true })
+const list = useApiList<Row>({ path: '/promotions', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
 <template>
-  <OpsListPage
-    v-model:search="search"
-    title="Tour codes"
-    subject="tour codes"
-    :rows="list.rows.value"
-    :columns="columns"
-    :loading="list.pending.value"
-    :has-more="list.nextCursor.value !== null"
+    <OpsListPage
+        v-model:search="search"
+        title="Tour codes"
+        subject="tour codes"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :has-more="list.nextCursor.value !== null"
     
-    @more="list.load(list.nextCursor.value ?? undefined)"
-  />
+        @more="list.load(list.nextCursor.value ?? undefined)"
+    />
 </template>

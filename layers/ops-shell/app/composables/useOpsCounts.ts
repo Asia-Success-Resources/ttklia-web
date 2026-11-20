@@ -3,6 +3,6 @@
  * TODO(api): doc 04 has no counts endpoint yet; the counts stay empty until it exists.
  */
 export function useOpsCounts() {
-  const counts = useState<Record<string, number>>('ops-counts', () => ({}))
-  return { counts }
+    const counts = useState<Record<string, number>>('ops-counts', () => ({}))
+    return { counts }
 }

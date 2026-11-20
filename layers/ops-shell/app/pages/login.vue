@@ -22,72 +22,72 @@ const error = ref('')
 
 /** Only paths in this app, never another site. */
 function returnPath(): string {
-  const back = route.query.return
-  return typeof back === 'string' && back.startsWith('/') && !back.startsWith('//') ? back : '/'
+    const back = route.query.return
+    return typeof back === 'string' && back.startsWith('/') && !back.startsWith('//') ? back : '/'
 }
 
 async function submitLogin() {
-  loading.value = true
-  error.value = ''
-  try {
-    if (!runtime.apiBase) throw new ConfigMissing('NUXT_PUBLIC_API_BASE')
-    // Same field as fleet-management: an @ means an email address, otherwise a username.
-    const login = form.login.trim()
-    const res = await api.post<{ data?: { access_token?: string } }>('/auth/login', {
-      ...(login.includes('@') ? { email: login } : { username: login }),
-      password: form.password,
-      remember: form.remember,
-    })
-    const token = res?.data?.access_token
-    if (!token) throw new Error('No token in the login response')
-    setToken(token)
-    // Check the new token and load the user before leaving the page.
-    if (!(await getToken({ redirect: false }))) throw new Error('Token rejected')
-    await navigateTo(returnPath())
-  } catch (err) {
-    if (err instanceof ConfigMissing) error.value = `Sign-in is not configured (${err.setting}).`
-    else error.value = toProblem(err)?.detail ?? 'Sign-in failed. Check your username or email and password.'
-  } finally {
-    loading.value = false
-  }
+    loading.value = true
+    error.value = ''
+    try {
+        if (!runtime.apiBase) throw new ConfigMissing('NUXT_PUBLIC_API_BASE')
+        // Same field as fleet-management: an @ means an email address, otherwise a username.
+        const login = form.login.trim()
+        const res = await api.post<{ data?: { access_token?: string } }>('/auth/login', {
+            ...(login.includes('@') ? { email: login } : { username: login }),
+            password: form.password,
+            remember: form.remember,
+        })
+        const token = res?.data?.access_token
+        if (!token) throw new Error('No token in the login response')
+        setToken(token)
+        // Check the new token and load the user before leaving the page.
+        if (!(await getToken({ redirect: false }))) throw new Error('Token rejected')
+        await navigateTo(returnPath())
+    } catch (err) {
+        if (err instanceof ConfigMissing) error.value = `Sign-in is not configured (${err.setting}).`
+        else error.value = toProblem(err)?.detail ?? 'Sign-in failed. Check your username or email and password.'
+    } finally {
+        loading.value = false
+    }
 }
 </script>
 
 <template>
-  <div class="flex min-h-screen w-full overflow-hidden bg-(--ops-body)">
-    <!-- Picture: left half on large screens -->
-    <div class="relative hidden lg:block lg:w-1/2">
-      <img :src="cover" alt="" class="absolute inset-0 h-full w-full object-cover">
-      <div class="absolute inset-0 bg-gradient-to-l from-black/40 to-transparent" />
-      <div class="absolute bottom-12 left-12 text-white">
-        <h1 class="text-4xl font-bold italic tracking-tighter">TTKLIA</h1>
-        <p class="mt-2 font-mono text-sm opacity-80">Welcome back. Sign in to continue.</p>
-      </div>
+    <div class="flex min-h-screen w-full overflow-hidden bg-(--ops-body)">
+        <!-- Picture: left half on large screens -->
+        <div class="relative hidden lg:block lg:w-1/2">
+            <img :src="cover" alt="" class="absolute inset-0 h-full w-full object-cover">
+            <div class="absolute inset-0 bg-gradient-to-l from-black/40 to-transparent" />
+            <div class="absolute bottom-12 left-12 text-white">
+                <h1 class="text-4xl font-bold italic tracking-tighter">TTKLIA</h1>
+                <p class="mt-2 font-mono text-sm opacity-80">Welcome back. Sign in to continue.</p>
+            </div>
+        </div>
+
+        <!-- Form: right half -->
+        <div class="flex min-h-screen w-full flex-col items-center bg-(--ops-card) lg:w-1/2">
+            <main class="my-auto w-full max-w-[440px] px-4 py-16">
+                <h1 class="mb-8 text-center text-4xl font-extrabold tracking-tight text-gray-800 md:text-left dark:text-white/90">
+                    Sign in
+                </h1>
+
+                <form class="space-y-4" @submit.prevent="submitLogin">
+                    <UFormField label="Username or email address" name="login" required>
+                        <UInput v-model="form.login" type="text" autocomplete="username" required class="w-full" />
+                    </UFormField>
+
+                    <UFormField label="Password" name="password" required>
+                        <UInput v-model="form.password" type="password" autocomplete="current-password" required class="w-full" />
+                    </UFormField>
+
+                    <UCheckbox v-model="form.remember" label="Keep me logged in" class="pt-1" />
+
+                    <UAlert v-if="error" :description="error" color="error" variant="subtle" />
+
+                    <UButton type="submit" :loading="loading" :label="loading ? 'Signing in…' : 'Sign in'" block class="mt-6" />
+                </form>
+            </main>
+        </div>
     </div>
-
-    <!-- Form: right half -->
-    <div class="flex min-h-screen w-full flex-col items-center bg-(--ops-card) lg:w-1/2">
-      <main class="my-auto w-full max-w-[440px] px-4 py-16">
-        <h1 class="mb-8 text-center text-4xl font-extrabold tracking-tight text-gray-800 md:text-left dark:text-white/90">
-          Sign in
-        </h1>
-
-        <form class="space-y-4" @submit.prevent="submitLogin">
-          <UFormField label="Username or email address" name="login" required>
-            <UInput v-model="form.login" type="text" autocomplete="username" required class="w-full" />
-          </UFormField>
-
-          <UFormField label="Password" name="password" required>
-            <UInput v-model="form.password" type="password" autocomplete="current-password" required class="w-full" />
-          </UFormField>
-
-          <UCheckbox v-model="form.remember" label="Keep me logged in" class="pt-1" />
-
-          <UAlert v-if="error" :description="error" color="error" variant="subtle" />
-
-          <UButton type="submit" :loading="loading" :label="loading ? 'Signing in…' : 'Sign in'" block class="mt-6" />
-        </form>
-      </main>
-    </div>
-  </div>
 </template>

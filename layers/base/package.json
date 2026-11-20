@@ -1,17 +1,18 @@
 {
-  "name": "@ttklia/base",
-  "private": true,
-  "type": "module",
-  "main": "./nuxt.config.ts",
-  "description": "Nuxt layer: theme, auth, API composables, permissions, realtime, i18n, error page (doc 09)",
-  "dependencies": {
-    "@boxicons/core": "1.0.6",
-    "@nuxt/ui": "^4.12.2",
-    "@nuxtjs/i18n": "^10.6.0",
-    "@pinia/nuxt": "^1.0.3",
-    "laravel-echo": "^2.6.3",
-    "pinia": "^4.1.0",
-    "pusher-js": "^8.6.0",
-    "tailwindcss": "^4.3.5"
-  }
+    "name": "@ttklia/base",
+    "private": true,
+    "type": "module",
+    "main": "./nuxt.config.ts",
+    "description": "Nuxt layer: theme, auth, API composables, permissions, realtime, i18n, error page (doc 09)",
+    "dependencies": {
+        "@boxicons/core": "1.0.6",
+        "@internationalized/date": "^3.12.4",
+        "@nuxt/ui": "^4.12.2",
+        "@nuxtjs/i18n": "^10.6.0",
+        "@pinia/nuxt": "^1.0.3",
+        "laravel-echo": "^2.6.3",
+        "pinia": "^4.1.0",
+        "pusher-js": "^8.6.0",
+        "tailwindcss": "^4.3.5"
+    }
 }

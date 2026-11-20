@@ -1,6 +1,7 @@
 <script setup lang="ts">
 // Users: roles per workspace (table `users`). Permission: global.users.read (doc 27).
 // TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+useHead({ title: 'User' })
 
 const route = useRoute()
 const id = computed(() => String(route.params.id ?? route.params.uuid ?? ''))

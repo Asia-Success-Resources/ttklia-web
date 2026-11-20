@@ -1,15 +1,15 @@
 {
-  "name": "@ttklia/api-client-ts",
-  "private": true,
-  "type": "module",
-  "description": "Generated TypeScript client for the TTKLIA API (openapi-typescript + openapi-fetch). Not edited by hand.",
-  "scripts": {
-    "generate:api": "node scripts/generate.mjs"
-  },
-  "devDependencies": {
-    "openapi-typescript": "^7.13.0"
-  },
-  "dependencies": {
-    "openapi-fetch": "^0.17.0"
-  }
+    "name": "@ttklia/api-client-ts",
+    "private": true,
+    "type": "module",
+    "description": "Generated TypeScript client for the TTKLIA API (openapi-typescript + openapi-fetch). Not edited by hand.",
+    "scripts": {
+        "generate:api": "node scripts/generate.mjs"
+    },
+    "devDependencies": {
+        "openapi-typescript": "^7.13.0"
+    },
+    "dependencies": {
+        "openapi-fetch": "^0.17.0"
+    }
 }

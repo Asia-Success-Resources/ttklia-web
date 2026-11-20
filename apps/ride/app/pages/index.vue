@@ -2,21 +2,22 @@
 // E-hailing: Fleet-style dashboard (doc 09, "Dashboard"): four metric cards, then chart and list cards.
 // TODO(api): doc 04 has no dashboard endpoint yet; values stay empty ("—") until it does.
 // TODO(api): live map of drivers and rides with Google Maps JS (runtimeConfig.public.mapsKey, doc 09).
+useHead({ title: 'Dashboard' })
 const series = [{ name: 'This week', data: [] as number[] }]
 </script>
 
 <template>
-  <div>
-    <OpsBreadcrumb title="E-hailing" />
-    <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">
-      <OpsMetricCard label="Drivers online" :value="null" icon="i-bx-user-check" />
-      <OpsMetricCard label="Open requests" :value="null" icon="i-bx-clock-3" />
-      <OpsMetricCard label="Rides today" :value="null" icon="i-bx-car" />
-      <OpsMetricCard label="Fares today" :value="null" :money="true" icon="i-bx-wallet" />
+    <div>
+        <OpsBreadcrumb title="Teeko Ride" />
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 md:gap-6">
+            <OpsMetricCard label="Drivers online" :value="null" icon="i-bx-user-check" />
+            <OpsMetricCard label="Open requests" :value="null" icon="i-bx-clock-3" />
+            <OpsMetricCard label="Rides today" :value="null" icon="i-bx-car" />
+            <OpsMetricCard label="Fares today" :value="null" :money="true" icon="i-bx-wallet" />
+        </div>
+        <div class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2 md:gap-6">
+            <OpsChartCard title="This week" :series="series" />
+            <OpsListCard title="Latest" :items="[]" />
+        </div>
     </div>
-    <div class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2 md:gap-6">
-      <OpsChartCard title="This week" :series="series" />
-      <OpsListCard title="Latest" :items="[]" />
-    </div>
-  </div>
 </template>

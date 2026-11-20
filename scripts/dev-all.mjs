@@ -11,14 +11,14 @@
 import { spawn } from 'node:child_process'
 
 const APPS = [
-  { name: 'admin', port: 3000, path: '/' },
-  { name: 'bus', port: 3001, path: '/klia2' },
-  { name: 'taxi', port: 3002, path: '/klia-taxi' },
-  { name: 'fleet', port: 3003, path: '/' },
-  { name: 'ride', port: 3005, path: '/' },
-  { name: 'operator', port: 3006, path: '/' },
-  { name: 'public', port: 3007, path: '/' },
-  { name: 'vendor', port: 3004, path: '/' },
+    { name: 'admin', port: 3000, path: '/' },
+    { name: 'bus', port: 3001, path: '/klia2' },
+    { name: 'taxi', port: 3002, path: '/klia-taxi' },
+    { name: 'fleet', port: 3003, path: '/' },
+    { name: 'ride', port: 3005, path: '/' },
+    { name: 'operator', port: 3006, path: '/' },
+    { name: 'public', port: 3007, path: '/' },
+    { name: 'vendor', port: 3004, path: '/' },
 ]
 
 const COLOURS = [36, 33, 35, 32, 34, 91, 96, 93, 95, 92] // ANSI: cyan, yellow, magenta, green, blue, …
@@ -27,8 +27,8 @@ const colour = (i, text) => (process.stdout.isTTY ? `\x1b[${COLOURS[i % COLOURS.
 const wanted = process.argv.slice(2)
 const unknown = wanted.filter((name) => !APPS.some((app) => app.name === name))
 if (unknown.length) {
-  console.error(`Unknown app: ${unknown.join(', ')}. Known: ${APPS.map((app) => app.name).join(', ')}`)
-  process.exit(1)
+    console.error(`Unknown app: ${unknown.join(', ')}. Known: ${APPS.map((app) => app.name).join(', ')}`)
+    process.exit(1)
 }
 const apps = wanted.length ? APPS.filter((app) => wanted.includes(app.name)) : APPS
 
@@ -40,39 +40,39 @@ apps.forEach((app, i) => console.log(`  ${colour(i, app.name.padEnd(width))}  ht
 console.log('')
 
 apps.forEach((app, i) => {
-  const prefix = colour(i, `[${app.name.padEnd(width)}]`)
-  // detached: each app gets its own process group, so stopping it also stops nuxt's child processes.
-  const child = spawn('npm', ['run', 'dev', '-w', `apps/${app.name}`, '--', '--port', String(app.port)], {
-    stdio: ['ignore', 'pipe', 'pipe'],
-    detached: true,
-    env: { ...process.env, FORCE_COLOR: '1' },
-  })
-  children.push(child)
-
-  for (const stream of [child.stdout, child.stderr]) {
-    let buffer = ''
-    stream.on('data', (chunk) => {
-      buffer += chunk
-      const lines = buffer.split('\n')
-      buffer = lines.pop()
-      for (const line of lines) if (line.trim()) console.log(`${prefix} ${line}`)
+    const prefix = colour(i, `[${app.name.padEnd(width)}]`)
+    // detached: each app gets its own process group, so stopping it also stops nuxt's child processes.
+    const child = spawn('npm', ['run', 'dev', '-w', `apps/${app.name}`, '--', '--port', String(app.port)], {
+        stdio: ['ignore', 'pipe', 'pipe'],
+        detached: true,
+        env: { ...process.env, FORCE_COLOR: '1' },
     })
-  }
-  child.on('exit', (code) => console.log(`${prefix} stopped${code ? ` (exit ${code})` : ''}`))
+    children.push(child)
+
+    for (const stream of [child.stdout, child.stderr]) {
+        let buffer = ''
+        stream.on('data', (chunk) => {
+            buffer += chunk
+            const lines = buffer.split('\n')
+            buffer = lines.pop()
+            for (const line of lines) if (line.trim()) console.log(`${prefix} ${line}`)
+        })
+    }
+    child.on('exit', (code) => console.log(`${prefix} stopped${code ? ` (exit ${code})` : ''}`))
 })
 
 let stopping = false
 function stopAll() {
-  if (stopping) return
-  stopping = true
-  for (const child of children) {
-    try {
-      process.kill(-child.pid, 'SIGTERM')
-    } catch {
-      // already stopped
+    if (stopping) return
+    stopping = true
+    for (const child of children) {
+        try {
+            process.kill(-child.pid, 'SIGTERM')
+        } catch {
+            // already stopped
+        }
     }
-  }
-  setTimeout(() => process.exit(0), 1500).unref()
+    setTimeout(() => process.exit(0), 1500).unref()
 }
 process.on('SIGINT', stopAll)
 process.on('SIGTERM', stopAll)

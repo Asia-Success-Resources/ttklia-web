@@ -5,56 +5,68 @@ import type { TableColumn } from '@nuxt/ui'
 // full-width search row, then the table and pagination (doc 09, "List page").
 // Slots: #actions, #search, #table, #export.
 const props = withDefaults(
-  defineProps<{
-    title: string
-    subject: string
-    rows: T[]
-    columns: TableColumn<T>[]
-    loading?: boolean
-    hasMore?: boolean
-    createTo?: string
-    canImport?: boolean
-    canExport?: boolean
-    note?: string
-  }>(),
-  { loading: false, hasMore: false, createTo: undefined, canImport: false, canExport: true, note: undefined },
+    defineProps<{
+        title: string
+        subject: string
+        rows: T[]
+        columns: TableColumn<T>[]
+        loading?: boolean
+        hasMore?: boolean
+        createTo?: string
+        canImport?: boolean
+        canExport?: boolean
+        note?: string
+    }>(),
+    { loading: false, hasMore: false, createTo: undefined, canImport: false, canExport: true, note: undefined },
 )
 const emit = defineEmits<{ more: []; export: []; import: [] }>()
 const search = defineModel<string>('search', { default: '' })
+
+// Date columns show DD/MM/YYYY (doc 09, "Dates and times"): a column with no cell of its own whose key
+// ends in `_at` gets date and time, one ending in `_date` (or `date`) gets the date only.
+const tableColumns = computed<TableColumn<T>[]>(() =>
+    props.columns.map((column) => {
+        const key = 'accessorKey' in column ? String(column.accessorKey) : ''
+        if (column.cell || !key) return column
+        if (key.endsWith('_at')) return { ...column, cell: ({ row }) => formatDateTime(row.original[key] as string | null) }
+        if (key === 'date' || key.endsWith('_date')) return { ...column, cell: ({ row }) => formatDate(row.original[key] as string | null) }
+        return column
+    }),
+)
 </script>
 
 <template>
-  <div>
-    <OpsBreadcrumb :title="props.title" />
-    <div class="rounded-xl border border-(--ops-border) bg-(--ops-card)">
-      <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
-        <div>
-          <h3 class="text-base font-medium text-gray-800 dark:text-white/90">{{ props.title }}</h3>
-          <p class="text-sm text-gray-500">Your most recent {{ props.subject }} list</p>
+    <div>
+        <OpsBreadcrumb :title="props.title" />
+        <div class="rounded-xl border border-(--ops-border) bg-(--ops-card)">
+            <div class="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                <div>
+                    <h3 class="text-base font-medium text-gray-800 dark:text-white/90">{{ props.title }}</h3>
+                    <p class="text-sm text-gray-500">Your most recent {{ props.subject }} list</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <slot name="actions" />
+                    <UButton v-if="props.canImport" label="Import" icon="i-bx-arrow-in-down-square-half" color="neutral" variant="outline" @click="emit('import')" />
+                    <slot name="export">
+                        <UButton v-if="props.canExport" label="Export" icon="i-bx-arrow-out-up-square-half" color="neutral" variant="outline" @click="emit('export')" />
+                    </slot>
+                    <UButton v-if="props.createTo" label="Create" icon="i-bx-plus" :to="props.createTo" />
+                </div>
+            </div>
+            <div class="border-t border-gray-100 px-5 py-3 dark:border-gray-800">
+                <slot name="search">
+                    <UInput v-model="search" icon="i-bx-search" placeholder="Search…" class="w-full" />
+                </slot>
+            </div>
+            <UAlert v-if="props.note" :description="props.note" color="warning" variant="subtle" class="mx-5 mb-3" />
+            <div class="border-t border-gray-100 dark:border-gray-800">
+                <slot name="table">
+                    <UTable :data="props.rows" :columns="tableColumns" :loading="props.loading" empty="No records yet" />
+                </slot>
+            </div>
+            <div v-if="props.hasMore" class="flex justify-center border-t border-gray-100 p-4 dark:border-gray-800">
+                <UButton label="Load more" color="neutral" variant="outline" @click="emit('more')" />
+            </div>
         </div>
-        <div class="flex items-center gap-2">
-          <slot name="actions" />
-          <UButton v-if="props.canImport" label="Import" icon="i-bx-arrow-in-down-square-half" color="neutral" variant="outline" @click="emit('import')" />
-          <slot name="export">
-            <UButton v-if="props.canExport" label="Export" icon="i-bx-arrow-out-up-square-half" color="neutral" variant="outline" @click="emit('export')" />
-          </slot>
-          <UButton v-if="props.createTo" label="Create" icon="i-bx-plus" :to="props.createTo" />
-        </div>
-      </div>
-      <div class="border-t border-gray-100 px-5 py-3 dark:border-gray-800">
-        <slot name="search">
-          <UInput v-model="search" icon="i-bx-search" placeholder="Search…" class="w-full" />
-        </slot>
-      </div>
-      <UAlert v-if="props.note" :description="props.note" color="warning" variant="subtle" class="mx-5 mb-3" />
-      <div class="border-t border-gray-100 dark:border-gray-800">
-        <slot name="table">
-          <UTable :data="props.rows" :columns="props.columns" :loading="props.loading" empty="No records yet" />
-        </slot>
-      </div>
-      <div v-if="props.hasMore" class="flex justify-center border-t border-gray-100 p-4 dark:border-gray-800">
-        <UButton label="Load more" color="neutral" variant="outline" @click="emit('more')" />
-      </div>
     </div>
-  </div>
 </template>

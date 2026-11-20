@@ -6,13 +6,13 @@
  * - admin and operator: none (global, or organisation-scoped).
  */
 export function useWorkspace() {
-  const route = useRoute()
-  const { bootstrap } = useBootstrap()
-  const slug = computed<string | null>(() => {
-    const params = route.params as Record<string, string | string[] | undefined>
-    const value = params.location ?? params.outlet
-    if (typeof value === 'string' && value !== '') return value
-    return bootstrap.value?.workspace?.slug ?? null
-  })
-  return { slug }
+    const route = useRoute()
+    const { bootstrap } = useBootstrap()
+    const slug = computed<string | null>(() => {
+        const params = route.params as Record<string, string | string[] | undefined>
+        const value = params.location ?? params.outlet
+        if (typeof value === 'string' && value !== '') return value
+        return bootstrap.value?.workspace?.slug ?? null
+    })
+    return { slug }
 }

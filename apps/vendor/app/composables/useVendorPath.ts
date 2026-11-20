@@ -4,6 +4,6 @@
  * Returns null when there is no outlet in the path, so lists stay empty instead of calling a wrong URL.
  */
 export function useVendorPath() {
-  const { slug } = useWorkspace()
-  return (path: string): string | null => (slug.value ? `/vendor-portal/o/${slug.value}/${path}` : null)
+    const { slug } = useWorkspace()
+    return (path: string): string | null => (slug.value ? `/vendor-portal/o/${slug.value}/${path}` : null)
 }

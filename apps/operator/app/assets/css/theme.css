@@ -10,5 +10,5 @@
  * Empty: no colour chosen yet, so the shared default applies (layers/base theme.css).
  * ====================================================================== */
 :root {
-  --app-primary: ;
+    --app-primary: ;
 }

@@ -4,5 +4,5 @@ await navigateTo('/global', { replace: true })
 </script>
 
 <template>
-  <div />
+    <div />
 </template>

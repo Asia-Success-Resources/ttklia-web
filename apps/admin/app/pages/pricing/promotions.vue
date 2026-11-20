@@ -2,42 +2,43 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Promotions: list (table `promotions`). Permission: global.pricing_promotions.read (doc 27). Admin app, every business (Sitemap 4).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// GET /api/v1/admin/pricing/promotions (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+useHead({ title: 'Promotions' })
 
 interface Row extends Record<string, unknown> {
-  uuid: string
-  code: string
-  product: string | null
-  type: string
-  value: number
-  max_uses: number | null
-  max_uses_per_user: number | null
+    uuid: string
+    code: string
+    product: string | null
+    type: string
+    value: number
+    max_uses: number | null
+    max_uses_per_user: number | null
 }
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: 'code', header: 'Code' },
-  { accessorKey: 'product', header: 'Product' },
-  { accessorKey: 'type', header: 'Type' },
-  { accessorKey: 'value', header: 'Value' },
-  { accessorKey: 'max_uses', header: 'Max uses' },
-  { accessorKey: 'max_uses_per_user', header: 'Max uses per user' },
+    { accessorKey: 'code', header: 'Code' },
+    { accessorKey: 'product', header: 'Product' },
+    { accessorKey: 'type', header: 'Type' },
+    { accessorKey: 'value', header: 'Value' },
+    { accessorKey: 'max_uses', header: 'Max uses' },
+    { accessorKey: 'max_uses_per_user', header: 'Max uses per user' },
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: null, workspaceScoped: false })
+const list = useApiList<Row>({ path: '/admin/pricing/promotions' })
 onMounted(() => list.load())
 </script>
 
 <template>
-  <OpsListPage
-    v-model:search="search"
-    title="Promotions"
-    subject="promotions"
-    :rows="list.rows.value"
-    :columns="columns"
-    :loading="list.pending.value"
-    :has-more="list.nextCursor.value !== null"
+    <OpsListPage
+        v-model:search="search"
+        title="Promotions"
+        subject="promotions"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :has-more="list.nextCursor.value !== null"
     
-    @more="list.load(list.nextCursor.value ?? undefined)"
-  />
+        @more="list.load(list.nextCursor.value ?? undefined)"
+    />
 </template>

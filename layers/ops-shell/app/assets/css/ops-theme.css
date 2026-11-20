@@ -4,40 +4,40 @@
  * layer's theme.css (--app-*), the accent from --app-primary. An app can still override any token.
  */
 :root {
-  --ops-body: var(--app-body);
-  --ops-sidebar: var(--app-surface);
-  --ops-header: var(--app-surface);
-  --ops-card: var(--app-card);
-  --ops-border: var(--app-border);
-  --ops-icon-bg: var(--app-icon-bg);
+    --ops-body: var(--app-body);
+    --ops-sidebar: var(--app-surface);
+    --ops-header: var(--app-surface);
+    --ops-card: var(--app-card);
+    --ops-border: var(--app-border);
+    --ops-icon-bg: var(--app-icon-bg);
 
-  /* Menu: active item is solid primary with dark text; hover is primary at 70%. */
-  --ops-nav-fg: oklch(37.3% 0.034 259.733);        /* gray-700 */
-  --ops-nav-hover-fg: oklch(37.3% 0.034 259.733);  /* gray-700 */
-  --ops-nav-hover-bg: color-mix(in oklab, var(--app-primary) 70%, transparent);
-  --ops-nav-active-fg: oklch(27.8% 0.033 256.848); /* gray-800 */
-  --ops-nav-active-bg: var(--app-primary);
+    /* Menu: active item is solid primary with dark text; hover is primary at 70%. */
+    --ops-nav-fg: oklch(37.3% 0.034 259.733);        /* gray-700 */
+    --ops-nav-hover-fg: oklch(37.3% 0.034 259.733);  /* gray-700 */
+    --ops-nav-hover-bg: color-mix(in oklab, var(--app-primary) 70%, transparent);
+    --ops-nav-active-fg: oklch(27.8% 0.033 256.848); /* gray-800 */
+    --ops-nav-active-bg: var(--app-primary);
 
-  /* Workspace badge: primary text on a light primary tint. */
-  --ops-badge-fg: var(--app-primary);
-  --ops-badge-bg: color-mix(in oklab, var(--app-primary) 12%, transparent);
+    /* Workspace badge: primary text on a light primary tint. */
+    --ops-badge-fg: var(--app-primary);
+    --ops-badge-bg: color-mix(in oklab, var(--app-primary) 12%, transparent);
 
-  /* ApexCharts needs plain colour strings; --app-primary is a registered <color>, so it reads as rgb(). */
-  --ops-chart-1: var(--app-primary);
-  --ops-chart-2: #579bfc;
+    /* ApexCharts needs plain colour strings; --app-primary is a registered <color>, so it reads as rgb(). */
+    --ops-chart-1: var(--app-primary);
+    --ops-chart-2: #579bfc;
 }
 
 .dark {
-  --ops-nav-fg: oklch(87.2% 0.01 258.338);         /* gray-300 */
-  --ops-nav-hover-fg: oklch(21% 0.034 264.665);    /* gray-900 */
-  --ops-badge-bg: color-mix(in oklab, var(--app-primary) 15%, transparent);
+    --ops-nav-fg: oklch(87.2% 0.01 258.338);         /* gray-300 */
+    --ops-nav-hover-fg: oklch(21% 0.034 264.665);    /* gray-900 */
+    --ops-badge-bg: color-mix(in oklab, var(--app-primary) 15%, transparent);
 }
 
 /* Sidebar menu scrolling, as in fleet-management: the menu scrolls, the scrollbar stays hidden. */
 .scrollbar-hidden {
-  -ms-overflow-style: none; /* IE/Edge */
-  scrollbar-width: none;    /* Firefox */
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none;    /* Firefox */
 }
 .scrollbar-hidden::-webkit-scrollbar {
-  display: none;            /* Chrome, Safari, Edge, Opera */
+    display: none;            /* Chrome, Safari, Edge, Opera */
 }

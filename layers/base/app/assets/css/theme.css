@@ -16,30 +16,30 @@
  * `primary` (buttons, badges, rings, links), the menu and the charts.
  * ====================================================================== */
 @property --app-primary {
-  syntax: '<color>';
-  inherits: true;
-  initial-value: #465fff;
+    syntax: '<color>';
+    inherits: true;
+    initial-value: #465fff;
 }
 
 /* Brand scale, derived from --app-primary. Nuxt UI's `primary` is mapped to `brand` (app.config.ts). */
 :root {
-  --color-brand-25: color-mix(in oklab, var(--app-primary) 5%, white);
-  --color-brand-50: color-mix(in oklab, var(--app-primary) 10%, white);
-  --color-brand-100: color-mix(in oklab, var(--app-primary) 20%, white);
-  --color-brand-200: color-mix(in oklab, var(--app-primary) 38%, white);
-  --color-brand-300: color-mix(in oklab, var(--app-primary) 58%, white);
-  --color-brand-400: color-mix(in oklab, var(--app-primary) 80%, white);
-  --color-brand-500: var(--app-primary);
-  --color-brand-600: color-mix(in oklab, var(--app-primary) 85%, black);
-  --color-brand-700: color-mix(in oklab, var(--app-primary) 70%, black);
-  --color-brand-800: color-mix(in oklab, var(--app-primary) 55%, black);
-  --color-brand-900: color-mix(in oklab, var(--app-primary) 45%, black);
-  --color-brand-950: color-mix(in oklab, var(--app-primary) 28%, black);
+    --color-brand-25: color-mix(in oklab, var(--app-primary) 5%, white);
+    --color-brand-50: color-mix(in oklab, var(--app-primary) 10%, white);
+    --color-brand-100: color-mix(in oklab, var(--app-primary) 20%, white);
+    --color-brand-200: color-mix(in oklab, var(--app-primary) 38%, white);
+    --color-brand-300: color-mix(in oklab, var(--app-primary) 58%, white);
+    --color-brand-400: color-mix(in oklab, var(--app-primary) 80%, white);
+    --color-brand-500: var(--app-primary);
+    --color-brand-600: color-mix(in oklab, var(--app-primary) 85%, black);
+    --color-brand-700: color-mix(in oklab, var(--app-primary) 70%, black);
+    --color-brand-800: color-mix(in oklab, var(--app-primary) 55%, black);
+    --color-brand-900: color-mix(in oklab, var(--app-primary) 45%, black);
+    --color-brand-950: color-mix(in oklab, var(--app-primary) 28%, black);
 }
 
 /* fleet-management kept the same primary in dark mode (no lighter shade). */
 :root.dark {
-  --ui-primary: var(--ui-color-primary-500);
+    --ui-primary: var(--ui-color-primary-500);
 }
 
 /* ======================================================================
@@ -49,103 +49,103 @@
  * Neutrals are zinc (app.config.ts). The ops-shell tokens build on these.
  * ====================================================================== */
 :root {
-  --app-body: #E4E9F7;
-  --app-surface: #fff;                       /* sidebar, header */
-  --app-card: #fff;
-  --app-card-light: #E4E9FF;                 /* fleet-management `card-light` */
-  --app-border: oklch(92.8% 0.006 264.531);  /* gray-200 */
-  --app-icon-bg: oklch(96.7% 0.003 264.542); /* gray-100 */
+    --app-body: #E4E9F7;
+    --app-surface: #fff;                       /* sidebar, header */
+    --app-card: #fff;
+    --app-card-light: #E4E9FF;                 /* fleet-management `card-light` */
+    --app-border: oklch(92.8% 0.006 264.531);  /* gray-200 */
+    --app-icon-bg: oklch(96.7% 0.003 264.542); /* gray-100 */
 }
 
 .dark {
-  --app-body: oklch(27.4% 0.006 286.033);    /* zinc-800 */
-  --app-surface: oklch(21% 0.006 285.885);   /* zinc-900 */
-  --app-card: oklch(21% 0.006 285.885);      /* zinc-900 */
-  --app-border: oklch(37% 0.013 285.805);    /* zinc-700 */
-  --app-icon-bg: oklch(37% 0.013 285.805);   /* zinc-700 */
+    --app-body: oklch(27.4% 0.006 286.033);    /* zinc-800 */
+    --app-surface: oklch(21% 0.006 285.885);   /* zinc-900 */
+    --app-card: oklch(21% 0.006 285.885);      /* zinc-900 */
+    --app-border: oklch(37% 0.013 285.805);    /* zinc-700 */
+    --app-icon-bg: oklch(37% 0.013 285.805);   /* zinc-700 */
 }
 
 body {
-  background-color: var(--app-body);
+    background-color: var(--app-body);
 }
 
 /* ======================================================================
  * FULL PALETTE from fleet-management, by role, for pages to use.
  * ====================================================================== */
 :root {
-  /* Board (dark data grid: vehicles, limo and van bookings) */
-  --gm-board-header: #2f3149;       /* grid header row */
-  --gm-board-row: #292c44;          /* row */
-  --gm-board-row-hover: #2f3350;    /* row hover, ghost button hover */
-  --gm-board-cell-hover: #363a5a;
-  --gm-board-popover: #30324e;      /* popovers and pickers */
-  --gm-board-input: #1f2136;        /* inputs inside the board */
-  --gm-board-chip: #45486a;         /* picker option */
-  --gm-board-chip-hover: #53577d;
-  --gm-board-avatar: #3a3f5c;
-  --gm-board-border: #33364f;       /* cell borders */
-  --gm-board-border-strong: #3a3d59;/* panel and toolbar borders */
-  --gm-board-border-group: #3f4263; /* group outline */
-  --gm-board-checkbox: #6b6f8a;
-  --gm-board-text: #d6d8e2;         /* body text */
-  --gm-board-text-soft: #c4c7d4;    /* header and label text */
-  --gm-board-text-muted: #9aa0b9;   /* read-only cells */
-  --gm-board-text-sub: #b4b8cf;     /* option sub-labels */
-  --gm-board-placeholder: #8b90ab;
-  --gm-board-shadow: rgba(0, 0, 0, 0.5);
+    /* Board (dark data grid: vehicles, limo and van bookings) */
+    --gm-board-header: #2f3149;       /* grid header row */
+    --gm-board-row: #292c44;          /* row */
+    --gm-board-row-hover: #2f3350;    /* row hover, ghost button hover */
+    --gm-board-cell-hover: #363a5a;
+    --gm-board-popover: #30324e;      /* popovers and pickers */
+    --gm-board-input: #1f2136;        /* inputs inside the board */
+    --gm-board-chip: #45486a;         /* picker option */
+    --gm-board-chip-hover: #53577d;
+    --gm-board-avatar: #3a3f5c;
+    --gm-board-border: #33364f;       /* cell borders */
+    --gm-board-border-strong: #3a3d59;/* panel and toolbar borders */
+    --gm-board-border-group: #3f4263; /* group outline */
+    --gm-board-checkbox: #6b6f8a;
+    --gm-board-text: #d6d8e2;         /* body text */
+    --gm-board-text-soft: #c4c7d4;    /* header and label text */
+    --gm-board-text-muted: #9aa0b9;   /* read-only cells */
+    --gm-board-text-sub: #b4b8cf;     /* option sub-labels */
+    --gm-board-placeholder: #8b90ab;
+    --gm-board-shadow: rgba(0, 0, 0, 0.5);
 
-  /* Board on light backgrounds */
-  --gm-text-strong: #323338;
-  --gm-text-soft: #676879;
+    /* Board on light backgrounds */
+    --gm-text-strong: #323338;
+    --gm-text-soft: #676879;
 
-  /* Actions and focus */
-  --gm-action: #0073ea;             /* main board button, focus outline */
-  --gm-action-hover: #0060b9;
-  --gm-focus: #579bfc;              /* focus ring, checkbox accent */
-  --gm-time-pill: #4b8cf5;          /* time range pill */
+    /* Actions and focus */
+    --gm-action: #0073ea;             /* main board button, focus outline */
+    --gm-action-hover: #0060b9;
+    --gm-focus: #579bfc;              /* focus ring, checkbox accent */
+    --gm-time-pill: #4b8cf5;          /* time range pill */
 
-  /* Errors */
-  --gm-danger: #e2445c;             /* required marker */
-  --gm-danger-soft: #e8697d;        /* field error text */
+    /* Errors */
+    --gm-danger: #e2445c;             /* required marker */
+    --gm-danger-soft: #e8697d;        /* field error text */
 
-  /* Statuses */
-  --gm-status-online: #00c875;
-  --gm-status-workshop: #fdab3d;
-  --gm-status-offline: #797e93;     /* also the unset-status colour */
+    /* Statuses */
+    --gm-status-online: #00c875;
+    --gm-status-workshop: #fdab3d;
+    --gm-status-offline: #797e93;     /* also the unset-status colour */
 
-  /* Group colour pool, in the original order */
-  --gm-group-1: #ff642e;
-  --gm-group-2: #579bfc;
-  --gm-group-3: #00c875;
-  --gm-group-4: #784bd1;
-  --gm-group-5: #fdab3d;
-  --gm-group-6: #e2445c;
-  --gm-group-7: #66ccff;
-  --gm-group-8: #037f4c;
+    /* Group colour pool, in the original order */
+    --gm-group-1: #ff642e;
+    --gm-group-2: #579bfc;
+    --gm-group-3: #00c875;
+    --gm-group-4: #784bd1;
+    --gm-group-5: #fdab3d;
+    --gm-group-6: #e2445c;
+    --gm-group-7: #66ccff;
+    --gm-group-8: #037f4c;
 
-  /* Auth pages (login, register, forgot password): light values */
-  --gm-auth-text: #1f2328;
-  --gm-auth-text-muted: #656d76;
-  --gm-auth-border: #d0d7de;
-  --gm-auth-input: #ffffff;
-  --gm-auth-button-secondary: #ffffff;
-  --gm-auth-link: #0969da;          /* links, focus ring */
-  --gm-auth-submit: #1f883d;
-  --gm-auth-submit-hover: #1a7f37;
-  --gm-auth-submit-disabled: #94d3a2;
+    /* Auth pages (login, register, forgot password): light values */
+    --gm-auth-text: #1f2328;
+    --gm-auth-text-muted: #656d76;
+    --gm-auth-border: #d0d7de;
+    --gm-auth-input: #ffffff;
+    --gm-auth-button-secondary: #ffffff;
+    --gm-auth-link: #0969da;          /* links, focus ring */
+    --gm-auth-submit: #1f883d;
+    --gm-auth-submit-hover: #1a7f37;
+    --gm-auth-submit-disabled: #94d3a2;
 
-  /* Google sign-in logo */
-  --gm-google-blue: #4285F4;
-  --gm-google-green: #34A853;
-  --gm-google-yellow: #FBBC05;
-  --gm-google-red: #EA4335;
+    /* Google sign-in logo */
+    --gm-google-blue: #4285F4;
+    --gm-google-green: #34A853;
+    --gm-google-yellow: #FBBC05;
+    --gm-google-red: #EA4335;
 }
 
 .dark {
-  /* Auth pages: dark values */
-  --gm-auth-text: #e6edf3;
-  --gm-auth-text-muted: #7d8590;
-  --gm-auth-border: #30363d;
-  --gm-auth-input: #0d1117;
-  --gm-auth-button-secondary: #21262d;
+    /* Auth pages: dark values */
+    --gm-auth-text: #e6edf3;
+    --gm-auth-text-muted: #7d8590;
+    --gm-auth-border: #30363d;
+    --gm-auth-input: #0d1117;
+    --gm-auth-button-secondary: #21262d;
 }

@@ -2,33 +2,34 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Refunds: requests and approvals (table `refunds`). Permission: vendor.refunds.request (doc 32).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// GET /api/v1/vendor-portal/o/{outlet}/refunds (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 // API: POST …/refunds, POST …/refunds/{id}/approve (doc 32). Who approves is TODO(pending: M5) doc 30. TODO(api): list endpoint and columns.
+useHead({ title: 'Refunds' })
 
 interface Row extends Record<string, unknown> {
-  uuid: string
-  name: string
+    uuid: string
+    name: string
 }
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'name', header: 'Name' },
 ]
 
 const vendorPath = useVendorPath()
 const search = ref('')
-const list = useApiList<Row>({ path: null })
+const list = useApiList<Row>({ path: '/refunds', outletScoped: true })
 onMounted(() => list.load())
 </script>
 
 <template>
-  <OpsListPage
-    v-model:search="search"
-    title="Refunds"
-    subject="refunds"
-    :rows="list.rows.value"
-    :columns="columns"
-    :loading="list.pending.value"
-    :has-more="list.nextCursor.value !== null"
-    @more="list.load(list.nextCursor.value ?? undefined)"
-  />
+    <OpsListPage
+        v-model:search="search"
+        title="Refunds"
+        subject="refunds"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :has-more="list.nextCursor.value !== null"
+        @more="list.load(list.nextCursor.value ?? undefined)"
+    />
 </template>

@@ -2,42 +2,43 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // System providers: operator API clients (table `system_providers`). Permission: bus.system_providers.read (doc 27).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// GET /api/v1/ops/w/{workspace}/system-providers (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+useHead({ title: 'System providers' })
 
 interface Row extends Record<string, unknown> {
-  uuid: string
-  name: string
-  kind: string
-  adapter: string
-  base_url: string | null
-  auth: string
-  soap_action_prefix: string | null
+    uuid: string
+    name: string
+    kind: string
+    adapter: string
+    base_url: string | null
+    auth: string
+    soap_action_prefix: string | null
 }
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'kind', header: 'Kind' },
-  { accessorKey: 'adapter', header: 'Adapter' },
-  { accessorKey: 'base_url', header: 'Base url' },
-  { accessorKey: 'auth', header: 'Auth' },
-  { accessorKey: 'soap_action_prefix', header: 'Soap action prefix' },
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'kind', header: 'Kind' },
+    { accessorKey: 'adapter', header: 'Adapter' },
+    { accessorKey: 'base_url', header: 'Base url' },
+    { accessorKey: 'auth', header: 'Auth' },
+    { accessorKey: 'soap_action_prefix', header: 'Soap action prefix' },
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: null, workspaceScoped: true })
+const list = useApiList<Row>({ path: '/system-providers', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
 <template>
-  <OpsListPage
-    v-model:search="search"
-    title="System providers"
-    subject="system providers"
-    :rows="list.rows.value"
-    :columns="columns"
-    :loading="list.pending.value"
-    :has-more="list.nextCursor.value !== null"
+    <OpsListPage
+        v-model:search="search"
+        title="System providers"
+        subject="system providers"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :has-more="list.nextCursor.value !== null"
     
-    @more="list.load(list.nextCursor.value ?? undefined)"
-  />
+        @more="list.load(list.nextCursor.value ?? undefined)"
+    />
 </template>

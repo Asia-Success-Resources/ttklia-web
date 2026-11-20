@@ -5,5 +5,5 @@ import { fileURLToPath } from 'node:url'
 // Expects the base layer to be extended by the app as well.
 // ops-theme.css holds the shell's colour tokens; an app recolours the shell by overriding them.
 export default defineNuxtConfig({
-  css: [fileURLToPath(new URL('./app/assets/css/ops-theme.css', import.meta.url))],
+    css: [fileURLToPath(new URL('./app/assets/css/ops-theme.css', import.meta.url))],
 })

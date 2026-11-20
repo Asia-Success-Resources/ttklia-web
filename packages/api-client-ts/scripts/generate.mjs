@@ -8,15 +8,15 @@ import { resolve } from 'node:path'
 
 const here = fileURLToPath(new URL('..', import.meta.url))
 const candidates = [
-  process.env.OPENAPI_FILE,
-  resolve(here, '../../../ttklia-api/openapi.yaml'),
-  resolve(here, '../../../ttklia-platform-docs/api/openapi.yaml'),
+    process.env.OPENAPI_FILE,
+    resolve(here, '../../../ttklia-api/openapi.yaml'),
+    resolve(here, '../../../ttklia-platform-docs/api/openapi.yaml'),
 ].filter(Boolean)
 
 const source = candidates.find((file) => existsSync(file))
 if (!source) {
-  console.error('No openapi.yaml found. Tried:\n' + candidates.join('\n'))
-  process.exit(1)
+    console.error('No openapi.yaml found. Tried:\n' + candidates.join('\n'))
+    process.exit(1)
 }
 mkdirSync(resolve(here, 'src'), { recursive: true })
 console.log(`Generating from ${source}`)

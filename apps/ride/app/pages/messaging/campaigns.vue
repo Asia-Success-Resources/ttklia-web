@@ -3,22 +3,23 @@ import type { TableColumn } from '@nuxt/ui'
 
 // Campaigns: blasts and reports (table `message_campaigns`). Permission: ride.messaging_campaigns.read (doc 27).
 // TODO(api): reads GET /ops/messaging/campaigns (doc 04) by hand until packages/api-client-ts is generated.
+useHead({ title: 'Campaigns' })
 
 interface Row extends Record<string, unknown> {
-  uuid: string
-  name: string
-  channel: string
-  purpose: string
-  audience: unknown
-  scheduled_at: string | null
+    uuid: string
+    name: string
+    channel: string
+    purpose: string
+    audience: unknown
+    scheduled_at: string | null
 }
 
 const columns: TableColumn<Row>[] = [
-  { accessorKey: 'name', header: 'Name' },
-  { accessorKey: 'channel', header: 'Channel' },
-  { accessorKey: 'purpose', header: 'Purpose' },
-  { accessorKey: 'audience', header: 'Audience' },
-  { accessorKey: 'scheduled_at', header: 'Scheduled at' },
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'channel', header: 'Channel' },
+    { accessorKey: 'purpose', header: 'Purpose' },
+    { accessorKey: 'audience', header: 'Audience' },
+    { accessorKey: 'scheduled_at', header: 'Scheduled at' },
 ]
 
 const search = ref('')
@@ -27,15 +28,15 @@ onMounted(() => list.load())
 </script>
 
 <template>
-  <OpsListPage
-    v-model:search="search"
-    title="Campaigns"
-    subject="campaigns"
-    :rows="list.rows.value"
-    :columns="columns"
-    :loading="list.pending.value"
-    :has-more="list.nextCursor.value !== null"
+    <OpsListPage
+        v-model:search="search"
+        title="Campaigns"
+        subject="campaigns"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :has-more="list.nextCursor.value !== null"
     
-    @more="list.load(list.nextCursor.value ?? undefined)"
-  />
+        @more="list.load(list.nextCursor.value ?? undefined)"
+    />
 </template>
