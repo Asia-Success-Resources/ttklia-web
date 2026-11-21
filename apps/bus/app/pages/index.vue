@@ -87,17 +87,18 @@ const stats = computed(() => {
     return cards
 })
 
-/** The month's three cards: all bookings, then those sold here and those collected here. */
+/** The month's four cards: all bookings, those sold here, those collected here, and the passengers they carry. */
 const monthCards = computed(() => {
     const m = data.value?.month
     if (!m) return []
-    const cards = [{ label: 'Total Bookings', bookings: m.bookings, pax: m.pax, hint: 'Sold here and collected here together' }]
+    const cards = [{ label: 'Total Bookings', count: m.bookings, unit: 'tickets' }]
     if (m.sale && m.collection) {
         cards.push(
-            { label: 'Sold Here', bookings: m.sale.bookings, pax: m.sale.pax, hint: 'Tickets bought at the counter, kiosk or web' },
-            { label: 'Collected Here', bookings: m.collection.bookings, pax: m.collection.pax, hint: 'Bought from the bus company or an online agent, picked up here' },
+            { label: 'Sold Here', count: m.sale.bookings, unit: 'tickets'},
+            { label: 'Collected Here', count: m.collection.bookings, unit: 'tickets' },
         )
     }
+    cards.push({ label: 'Total Pax', count: m.pax, unit: 'pax' })
     return cards
 })
 const showPoints = computed(() => data.value?.unused_points !== undefined && data.value.unused_points > 0)
@@ -127,20 +128,13 @@ const cardHead = 'border-b border-(--ops-border) px-6 py-4'
             </div>
 
             <!-- Secondary stats: the month's bookings, then split into sold here and collected here (they add up to it) -->
-            <div v-if="data.month || data.unused_points !== undefined" class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-3" :class="{ 'lg:grid-cols-4': showPoints }">
+            <div v-if="data.month || data.unused_points !== undefined" class="mb-6 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
                 <template v-if="data.month">
                     <div v-for="m in monthCards" :key="m.label" :class="card" class="p-5">
                         <p class="text-sm text-gray-500 dark:text-gray-400">{{ m.label }} · {{ data.month.label }}</p>
-                        <div class="mt-2 flex items-end justify-between gap-4">
-                            <h4 class="text-lg font-bold text-gray-800 dark:text-white/90">
-                                {{ num(m.bookings) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">tickets</span>
-                            </h4>
-                            <div class="text-right">
-                                <p class="text-lg font-bold text-gray-800 dark:text-white/90">{{ num(m.pax) }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400">Pax</p>
-                            </div>
-                        </div>
-                        <p class="mt-1 text-xs text-gray-400 dark:text-gray-500">{{ m.hint }}</p>
+                        <h4 class="mt-2 text-lg font-bold text-gray-800 dark:text-white/90">
+                            {{ num(m.count) }} <span class="text-sm font-medium text-gray-500 dark:text-gray-400">{{ m.unit }}</span>
+                        </h4>
                     </div>
                 </template>
                 <div v-if="showPoints" :class="card" class="p-5">
