@@ -39,7 +39,7 @@ export function useCounterSession(kind: CounterKind) {
         try {
             const [current, list] = await Promise.all([
                 api.get<{ data: SaleSession | null }>(path('/cash-sessions/current')),
-                api.get<{ data: SaleCounter[] | null }>(path('/locations'), { type: 'counter', counter_kind: kind }),
+                api.get<{ data: SaleCounter[] | null }>(path('/locations'), { counter_kind: kind, limit: 100 }),
             ])
             session.value = current?.data ?? null
             counters.value = Array.isArray(list?.data) ? list.data : []
@@ -50,12 +50,12 @@ export function useCounterSession(kind: CounterKind) {
         }
     }
 
-    async function start(counterUuid: string, openingFloatSen: number): Promise<boolean> {
+    async function start(counterId: number, openingFloatSen: number): Promise<boolean> {
         busy.value = true
         error.value = null
         try {
             const res = await api.post<{ data: SaleSession | null }>(path('/cash-sessions'), {
-                location_uuid: counterUuid,
+                location_id: counterId,
                 kind,
                 opening_float_sen: openingFloatSen,
             })
@@ -77,7 +77,7 @@ export function useCounterSession(kind: CounterKind) {
         busy.value = true
         error.value = null
         try {
-            await api.post(path(`/cash-sessions/${encodeURIComponent(current.uuid)}/close`), { counted_sen: countedSen, reason })
+            await api.post(path(`/cash-sessions/${current.id}/close`), { counted_sen: countedSen, reason })
             session.value = null
             await load()
             return true

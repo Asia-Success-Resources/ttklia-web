@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // The board's "Month list" panel, as fleet-management's WorkspacePanel: months under their year,
-// each with its number of date groups; "+" adds the month after the latest.
+// each with its number of date groups, newest first; "+" adds the month after the latest.
 const props = defineProps<{
     months: { month: string; groups: number }[]
     active: string
@@ -15,7 +15,8 @@ function monthLabel(month: string): string {
 
 const years = computed(() => {
     const byYear = new Map<string, { month: string; groups: number }[]>()
-    for (const entry of [...props.months].sort((a, b) => a.month.localeCompare(b.month))) {
+    // Newest first: the latest year on top, and within a year the latest month on top.
+    for (const entry of [...props.months].sort((a, b) => b.month.localeCompare(a.month))) {
         const year = entry.month.slice(0, 4)
         if (!byYear.has(year)) byYear.set(year, [])
         byYear.get(year)!.push(entry)

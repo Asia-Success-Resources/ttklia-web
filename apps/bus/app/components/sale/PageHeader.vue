@@ -15,7 +15,7 @@ const emit = defineEmits<{ info: []; end: [] }>()
             </div>
             <div class="flex gap-3">
                 <UButton label="Session Info" icon="i-bx-info-circle" color="neutral" variant="outline" size="lg" @click="emit('info')" />
-                <UButton label="End Session" icon="i-bx-log-out" color="error" size="lg" @click="emit('end')" />
+                <UButton label="End Session" icon="i-bx-arrow-out-right-square-half" color="error" size="lg" @click="emit('end')" />
             </div>
         </div>
     </div>

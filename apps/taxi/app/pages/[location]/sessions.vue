@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Sessions: counter cash sessions (table `cash_sessions`). Permission: taxi.sessions.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/cash-sessions (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/cash-sessions (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Sessions' })
 
 interface Row extends Record<string, unknown> {
@@ -25,7 +25,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/cash-sessions', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/cash-sessions', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

@@ -1,0 +1,46 @@
+<script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
+// Turnstiles: live lanes, modes (table `turnstiles`). Permission: bus.turnstiles.read (doc 27).
+// TODO(pending: V1) see doc 30.
+// TODO(pending: I1) see doc 30.
+// GET /api/ops/w/{workspace}/turnstiles (ttklia-api).
+useHead({ title: 'Turnstiles' })
+
+interface Row extends Record<string, unknown> {
+    uuid: string
+    name: string
+    lane_no: number
+    controller_ip: string
+    directions: string
+    side_a: string
+    platform_location_ids: unknown | null
+}
+
+const columns: TableColumn<Row>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'lane_no', header: 'Lane no' },
+    { accessorKey: 'controller_ip', header: 'Controller ip' },
+    { accessorKey: 'directions', header: 'Directions' },
+    { accessorKey: 'side_a', header: 'Side a' },
+    { accessorKey: 'platform_location_ids', header: 'Platform location ids' },
+]
+
+const search = ref('')
+const list = useApiList<Row>({ search, path: '/turnstiles', workspaceScoped: true })
+onMounted(() => list.load())
+</script>
+
+<template>
+    <OpsListPage
+        v-model:search="search"
+        title="Turnstiles"
+        subject="turnstiles"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :pagination="list.pagination.value"
+        note="Waiting on: V1, I1 (doc 30)."
+        @page="list.load"
+    />
+</template>

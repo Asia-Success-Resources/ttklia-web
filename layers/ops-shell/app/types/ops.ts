@@ -1,15 +1,21 @@
+/**
+ * A menu entry. A link has `to` and `permission`; a parent (ttklia-v2's submenu, e.g. Operations) has `children`
+ * instead, folds open in the sidebar, and shows when any child does.
+ */
 export interface OpsMenuItem {
     label: string
-    /** Path relative to the app root; the location is prepended when the app has one in its path. */
-    to: string
+    /** Path relative to the app root; the location is prepended when the app has one in its path. Not on a parent. */
+    to?: string
     /** Boxicons name (`i-bx-…`, https://boxicons.com) shown before the label, and alone when the sidebar is collapsed. */
     icon?: string
-    /** `<module>.<resource>.<action>` (doc 27). */
-    permission: string
+    /** `<module>.<resource>.<action>` (doc 27). Not on a parent. */
+    permission?: string
     /** Key into the pending counts that roll up onto the group (doc 09, sidebar). */
     countKey?: string
     /** `*` on the sitemap: no table yet in the data model (doc 09). */
     noTableYet?: boolean
+    /** Sub-items of a parent; one more level (e.g. Configuration › Tours › Tour packages) is allowed, as in v2. */
+    children?: OpsMenuItem[]
 }
 
 export interface OpsMenuGroup {
@@ -21,8 +27,13 @@ export interface OpsMenuGroup {
 export interface OpsBrand {
     /** Defaults to the app's `title`. */
     name?: string
-    /** Image path or URL. Defaults to /logo.png, i.e. apps/<app>/public/logo.png. */
+    /** Image path or URL. Defaults to /img/logo.png, i.e. apps/<app>/public/img/logo.png. */
     logo: string | null
+    /**
+     * A wide logo (wordmark) shown alone, without the name, while the sidebar is open; the square `logo` shows when it
+     * is collapsed. As ttklia-v2's sidebar (bus and taxi): /img/logo-full.png.
+     */
+    logoWide?: string | null
     /** Icon name (e.g. `i-bx-shapes`), shown only while the logo is missing or fails to load. */
     icon: string
 }
@@ -33,8 +44,13 @@ export interface OpsAppConfig {
     title: string
     /** Boxicons name for the workspace badge. */
     badgeIcon: string
-    /** True for bus, taxi and vendor: the location (or outlet) is the first part of the path (doc 16, doc 32). */
+    /** True for taxi and vendor: the location (or outlet) is the first part of the path (doc 16, doc 32). */
     locationInPath: boolean
+    /**
+     * Bus: no location in the path; the one chosen (on /choose-location, or from the workspace switcher) is kept in a
+     * cookie (useSavedLocation). The workspace type the app's locations have, e.g. 'bus_terminal'.
+     */
+    savedLocationType?: string
     menu: OpsMenuGroup[]
     brand?: Partial<OpsBrand>
 }

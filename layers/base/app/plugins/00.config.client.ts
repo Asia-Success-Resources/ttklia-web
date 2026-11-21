@@ -1,7 +1,7 @@
 /**
- * SPA apps are built once; the deploy job writes the settings into `config.json`
- * beside the files (doc 16, "Front-end config at scale", step 2). Read it before anything else.
- * The SSR `public` app gets the same values as environment variables instead.
+ * TODO(removed-from-docs): doc 16 (20 Nov 2026) no longer uses `config.json`. Every app now runs under PM2 and
+ * reads its settings from `/etc/ttklia/web/<app>.env` as NUXT_PUBLIC_* variables (doc 34). This plugin is kept as a
+ * harmless fallback: with no `config.json` it does nothing.
  */
 export default defineNuxtPlugin({
     name: 'ttklia-config',

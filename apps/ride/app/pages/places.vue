@@ -2,7 +2,7 @@
 <script setup lang="ts">
     import type { TableColumn } from '@nuxt/ui'
     // Places: POI catalogue, search cost (table `pois`). Permission: ride.places.read (doc 27).
-    // GET /api/v1/ops/w/{workspace}/places (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+    // GET /api/ops/w/{workspace}/places (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
     useHead({ title: 'Places' })
 
     interface Row extends Record<string, unknown> {
@@ -25,7 +25,7 @@
     ]
 
     const search = ref('')
-    const list = useApiList<Row>({ path: '/places', workspaceScoped: true })
+    const list = useApiList<Row>({ search, path: '/places', workspaceScoped: true })
     onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
 
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

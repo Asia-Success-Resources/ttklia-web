@@ -6,10 +6,9 @@ import { pickupTime } from './limoBoard'
 
 /**
  * One row of the board: a van trip with its route and its first assignment's driver and vehicle.
- * TODO(api): GET /fleet/van-trips is a stub; field names for the route and assignment from the generated client.
  */
 export interface VanRow {
-    uuid: string
+    id: number
     trip_no: string
     /** yyyy-mm-dd: what date groups sort on. */
     service_date: string
@@ -27,6 +26,12 @@ export interface VanRow {
     vehicle_plate: string | null
     pax_count: number | null
     remarks: string | null
+    van_route_id: number
+    driver_id: number | null
+    /** Active `fleet_assignments` on the trip, released when another driver is picked. */
+    assignment_ids: number[]
+    fuel_limit_sen: number | null
+    price_sen: number
 }
 
 export type VanStatus = 'planned' | 'assigned' | 'departed' | 'at_destination' | 'returned' | 'completed' | 'cancelled'

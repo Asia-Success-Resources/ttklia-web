@@ -10,5 +10,6 @@
  * Empty: no colour chosen yet, so the shared default applies (layers/base theme.css).
  * ====================================================================== */
 :root {
-    --app-primary: #F58D02;
+    /* --app-primary: #F58D02; */
+    --app-primary: #ffaa00;
 }

@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Integrations: list (no table). Permission: taxi.integrations.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/integrations (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/integrations (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Integrations' })
 
 interface Row extends Record<string, unknown> {
@@ -19,7 +19,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/integrations', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/integrations', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -31,8 +31,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

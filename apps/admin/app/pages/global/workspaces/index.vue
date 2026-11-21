@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Workspaces: KL2, LLP, TAXI, FLEET, RIDE (table `workspaces`). Permission: global.workspaces.read (doc 27).
-// GET /api/v1/admin/workspaces (ttklia-api WorkspaceController::index). `slug` is the row key; the table has no uuid.
+// GET /api/admin/workspaces (ttklia-api WorkspaceController::index). `slug` is the row key; the table has no uuid.
 useHead({ title: 'Workspaces' })
 
 interface Row extends Record<string, unknown> {
@@ -20,11 +20,12 @@ const columns: TableColumn<Row>[] = [
     { accessorKey: 'name', header: 'Name' },
     { accessorKey: 'type', header: 'Type' },
     { accessorKey: 'timezone', header: 'Timezone' },
-    { accessorKey: 'is_active', header: 'Is active' },
+    { accessorKey: 'is_active', header: 'Active' },
+    { id: 'open', header: '', cell: ({ row }) => h(resolveComponent('UButton'), { label: 'Open', variant: 'link', size: 'sm', to: `/global/workspaces/${row.original.code}` }) },
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/admin/workspaces', workspaceScoped: false })
+const list = useApiList<Row>({ search, path: '/admin/workspaces', workspaceScoped: false })
 onMounted(() => list.load())
 </script>
 
@@ -36,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

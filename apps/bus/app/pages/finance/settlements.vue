@@ -1,0 +1,46 @@
+<script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
+// Settlements: list (table `settlements`). Permission: bus.finance_settlements.read (doc 27).
+// TODO(pending: F1) see doc 30.
+// TODO(pending: F2) see doc 30.
+// GET /api/ops/w/{workspace}/finance/settlements (ttklia-api).
+useHead({ title: 'Settlements' })
+
+interface Row extends Record<string, unknown> {
+    uuid: string
+    gateway: string
+    settlement_date: string
+    total_sen: number
+    fee_sen: number
+    status: string
+    matched_at: string | null
+}
+
+const columns: TableColumn<Row>[] = [
+    { accessorKey: 'gateway', header: 'Gateway' },
+    { accessorKey: 'settlement_date', header: 'Settlement date' },
+    { accessorKey: 'total_sen', header: 'Total (RM)', cell: ({ row }) => formatSen(row.original.total_sen as number | null) },
+    { accessorKey: 'fee_sen', header: 'Fee (RM)', cell: ({ row }) => formatSen(row.original.fee_sen as number | null) },
+    { accessorKey: 'status', header: 'Status' },
+    { accessorKey: 'matched_at', header: 'Matched at' },
+]
+
+const search = ref('')
+const list = useApiList<Row>({ search, path: '/finance/settlements', workspaceScoped: true })
+onMounted(() => list.load())
+</script>
+
+<template>
+    <OpsListPage
+        v-model:search="search"
+        title="Settlements"
+        subject="settlements"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :pagination="list.pagination.value"
+        note="Waiting on: F1, F2 (doc 30)."
+        @page="list.load"
+    />
+</template>

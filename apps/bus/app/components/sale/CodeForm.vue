@@ -2,7 +2,7 @@
 import type { PaymentMethod } from '~/types/sale'
 
 // "Sell Code" tab, laid out like today's CodeForm.vue: value tiles on the left, Summary and payment on the right.
-// TODO(api): the code sale (table `access_codes` / stored value) has no write endpoint in doc 04 yet.
+// A prepaid value code (stored_value_codes, v2 CodeController@store): POST /orders type code, then POST /orders/{uuid}/pay.
 const emit = defineEmits<{ created: [] }>()
 
 // Today's fixed values (RM 10, 20, 50, 100, 200), in sen. TODO(pending): move to workspace settings.
@@ -10,10 +10,38 @@ const values = [1000, 2000, 5000, 10000, 20000]
 const valueSen = ref(0)
 const payment = ref<PaymentMethod | null>(null)
 const paid = ref<number | null>(null)
+const busy = ref(false)
+const error = ref<string | null>(null)
+const lastCode = ref<string | null>(null)
+
+const api = useApi()
+const { slug } = useWorkspace()
+const path = (p: string) => api.workspacePath(slug.value ?? '', p)
 
 async function confirmPayment() {
-    // TODO(api): sell the code, then print it through the counter agent.
-    emit('created')
+    if (!valueSen.value || !payment.value) return
+    busy.value = true
+    error.value = null
+    try {
+        const created = await api.post<{ data: { uuid: string } }>(path('/orders'), { type: 'code', value_sen: valueSen.value })
+        const uuid = created?.data?.uuid
+        if (!uuid) throw new Error('No order returned')
+        const res = await api.post<{ data: { code: { code: string } | null } }>(path(`/orders/${uuid}/pay`), {
+            method: payment.value,
+            paid_sen: payment.value === 'cash' ? Math.round((paid.value ?? 0) * 100) : undefined,
+        })
+        // TODO(api): print the code through the counter agent (doc 08).
+        lastCode.value = res?.data?.code?.code ?? null
+        valueSen.value = 0
+        payment.value = null
+        paid.value = null
+        emit('created')
+    } catch (e) {
+        const problem = toProblem(e)
+        error.value = problem?.detail ?? problem?.title ?? 'Unable to sell the code.'
+    } finally {
+        busy.value = false
+    }
 }
 </script>
 
@@ -43,9 +71,11 @@ async function confirmPayment() {
                         <dd class="text-xl font-bold text-gray-900 dark:text-white">{{ formatSen(valueSen) }}</dd>
                     </div>
                 </dl>
+                <UAlert v-if="lastCode" class="mb-4" color="success" variant="soft" icon="i-bx-check-circle" :title="`Code sold: ${lastCode}`" />
+                <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
                 <template v-if="valueSen !== 0">
                     <SalePaymentMethod v-model="payment" v-model:paid="paid" :total-sen="valueSen" />
-                    <UButton block size="xl" label="Confirm Payment" :disabled="!payment" @click="confirmPayment" />
+                    <UButton block size="xl" label="Confirm Payment" :loading="busy" :disabled="!payment" @click="confirmPayment" />
                 </template>
             </SalePanel>
         </div>

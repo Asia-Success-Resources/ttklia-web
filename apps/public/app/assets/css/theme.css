@@ -12,3 +12,11 @@
 :root {
     --app-primary: ;
 }
+
+/* ======================================================================
+ * TEEKO BRAND (teeko.ai, doc 09): the same app with data-brand="teeko" on <html>.
+ * TODO(pending: W1) the Teeko brand colour; empty keeps the shared default.
+ * ====================================================================== */
+:root[data-brand='teeko'] {
+    --app-primary: ;
+}

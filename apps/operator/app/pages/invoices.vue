@@ -4,7 +4,7 @@ import type { TableColumn } from '@nuxt/ui'
 // Invoices: e-invoices (table `einvoices`). Permission: operator.invoices.read (doc 27).
 // TODO(pending: F6) see doc 30.
 // TODO(pending: G4) see doc 30.
-// GET /api/v1/operator-portal/invoices (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/operator-portal/invoices (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Invoices' })
 
 interface Row extends Record<string, unknown> {
@@ -25,7 +25,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/operator-portal/invoices' })
+const list = useApiList<Row>({ search, path: '/operator-portal/invoices' })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
         note="Waiting on: F6, G4 (doc 30)."
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

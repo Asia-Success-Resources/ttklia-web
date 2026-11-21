@@ -12,7 +12,7 @@ type Method = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
 
 interface RequestOptions {
     query?: Record<string, string | number | boolean | undefined>
-    body?: Record<string, unknown> | unknown[]
+    body?: Record<string, unknown> | unknown[] | FormData
     /** POSTs that create money movement, a booking or a decision need a key (doc 04). Pass a stable key to retry safely. */
     idempotencyKey?: string
 }
@@ -56,6 +56,7 @@ export function useApi() {
             request<T>('POST', path, { body, idempotencyKey }),
         patch: <T>(path: string, body?: RequestOptions['body']) => request<T>('PATCH', path, { body }),
         put: <T>(path: string, body?: RequestOptions['body']) => request<T>('PUT', path, { body }),
+        del: <T>(path: string, body?: RequestOptions['body']) => request<T>('DELETE', path, { body }),
         /** Staff endpoints (ops web, counter, handheld) go under `/ops/w/{workspace}/…` (doc 04, Workspace). */
         workspacePath: (workspace: string, path: string) => `/ops/w/${encodeURIComponent(workspace)}${path}`,
     }

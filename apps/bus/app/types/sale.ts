@@ -4,13 +4,12 @@ import type { Sen } from '../../../../layers/base/app/types/api'
 export type CounterKind = 'booking' | 'product'
 
 /**
- * The open counter cash session (`GET /cash-sessions/current`, doc 04).
- * TODO(api): replace with the generated type.
+ * The open counter cash session (`GET /cash-sessions/current`, doc 04). Keyed by `id`: cash_sessions has no uuid.
  */
 export interface SaleSession {
-    uuid: string
+    id: number
     kind: CounterKind
-    counter_uuid: string
+    counter_id: number
     counter_name: string | null
     opened_at: string
     opening_float_sen: Sen
@@ -45,7 +44,7 @@ export interface SalePassenger {
 
 /** A counter offered on Start Session (`GET /locations?type=counter&counter_kind=…`, doc 04). */
 export interface SaleCounter {
-    uuid: string
+    id: number
     code: string
     name: string
     open_session: { user_name: string; opened_at: string } | null

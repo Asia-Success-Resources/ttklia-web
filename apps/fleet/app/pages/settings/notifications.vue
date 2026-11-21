@@ -3,7 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 
 // Notifications: WhatsApp rules, templates (table `notification_rules`). Permission: fleet.settings_notifications.read (doc 27).
 // TODO(pending: C2) see doc 30.
-// GET /api/v1/ops/w/{workspace}/settings/notifications (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/settings/notifications (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Notifications' })
 
 interface Row extends Record<string, unknown> {
@@ -26,7 +26,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/settings/notifications', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/settings/notifications', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -38,8 +38,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
         note="Waiting on: C2 (doc 30)."
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

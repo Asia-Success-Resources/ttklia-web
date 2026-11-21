@@ -12,6 +12,7 @@
  */
 const SUBDOMAIN: Record<string, string> = {
     public: 'www', // doc 16: the public app is www.ttklia.com
+    ride: 'teeko', // Teeko (e-hailing): the ride app is teeko.ttklia.com (doc 00, "Ride = Teeko")
 }
 
 /** Keep in step with APPS in scripts/dev-all.mjs. */

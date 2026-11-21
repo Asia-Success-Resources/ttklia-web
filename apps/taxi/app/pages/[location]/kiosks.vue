@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Kiosks: list (table `devices`). Permission: taxi.kiosks.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/devices (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/devices (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Kiosks' })
 
 interface Row extends Record<string, unknown> {
@@ -23,7 +23,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/devices', workspaceScoped: true, query: { type: 'kiosk_agent' } })
+const list = useApiList<Row>({ search, path: '/devices', workspaceScoped: true, query: { type: 'kiosk_agent' } })
 onMounted(() => list.load())
 </script>
 
@@ -35,8 +35,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

@@ -17,22 +17,22 @@ const props = withDefaults(
     }>(),
     { askOpeningCash: true, busy: false, error: null, preview: false },
 )
-const emit = defineEmits<{ start: [counterUuid: string, openingFloatSen: number]; endOther: []; preview: [] }>()
+const emit = defineEmits<{ start: [counterId: number, openingFloatSen: number]; endOther: []; preview: [] }>()
 
 const { me, can } = useMe()
 const { resolveTo } = useOpsShell()
 const canCreateCounter = computed(() => props.preview || can('bus.counters.write'))
-const counterUuid = ref<string | null>(null)
+const counterId = ref<number | null>(null)
 const openingCash = ref<number | null>(null)
 
 const blocked = computed(() => props.other !== null)
 const canStart = computed(
-    () => !blocked.value && !props.busy && counterUuid.value !== null && (!props.askOpeningCash || (openingCash.value !== null && openingCash.value >= 0)),
+    () => !blocked.value && !props.busy && counterId.value !== null && (!props.askOpeningCash || (openingCash.value !== null && openingCash.value >= 0)),
 )
 
 function submit() {
-    if (!canStart.value || !counterUuid.value) return
-    emit('start', counterUuid.value, props.askOpeningCash ? Math.round((openingCash.value ?? 0) * 100) : 0)
+    if (!canStart.value || !counterId.value) return
+    emit('start', counterId.value, props.askOpeningCash ? Math.round((openingCash.value ?? 0) * 100) : 0)
 }
 </script>
 
@@ -51,7 +51,7 @@ function submit() {
             class="mb-6"
             color="warning"
             variant="subtle"
-            icon="i-bx-error"
+            icon="i-bx-alert-circle"
             :title="`You have an active ${props.other.kind === 'product' ? 'product' : 'booking'} session`"
         >
             <template #description>
@@ -60,7 +60,7 @@ function submit() {
                 <UButton class="mt-3" label="End Current Session" color="warning" @click="emit('endOther')" />
             </template>
         </UAlert>
-        <UAlert v-if="props.error" class="mb-6" color="error" variant="subtle" icon="i-bx-error-circle" :title="props.error" />
+        <UAlert v-if="props.error" class="mb-6" color="error" variant="subtle" icon="i-bx-alert-circle" :title="props.error" />
         <UAlert
             v-if="props.preview"
             class="mb-6"
@@ -78,7 +78,7 @@ function submit() {
             <div class="lg:col-span-7">
                 <SalePanel title="1. Select Counter">
                     <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                        <template v-for="counter in props.counters" :key="counter.uuid">
+                        <template v-for="counter in props.counters" :key="counter.id">
                             <div v-if="counter.open_session" class="rounded-lg border border-(--ops-border) bg-gray-50 p-4 opacity-75 dark:bg-white/[0.02]">
                                 <div class="flex items-center justify-between">
                                     <span class="text-base font-semibold text-gray-500 dark:text-gray-400">{{ counter.name }}</span>
@@ -90,14 +90,14 @@ function submit() {
                                 v-else
                                 type="button"
                                 class="flex items-center justify-between rounded-lg border p-4 text-left transition"
-                                :class="counterUuid === counter.uuid
+                                :class="counterId === counter.id
                                     ? 'border-primary bg-primary/10 text-primary'
                                     : 'border-(--ops-border) text-gray-700 hover:bg-gray-50 dark:text-gray-300 dark:hover:bg-white/5'"
-                                :aria-pressed="counterUuid === counter.uuid"
-                                @click="counterUuid = counter.uuid"
+                                :aria-pressed="counterId === counter.id"
+                                @click="counterId = counter.id"
                             >
                                 <span class="text-base font-semibold">{{ counter.name }}</span>
-                                <UIcon v-if="counterUuid === counter.uuid" name="i-bx-check-circle" class="size-5" />
+                                <UIcon v-if="counterId === counter.id" name="i-bx-check-circle" class="size-5" />
                             </button>
                         </template>
                     </div>

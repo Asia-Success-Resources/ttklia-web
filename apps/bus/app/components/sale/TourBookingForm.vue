@@ -3,14 +3,14 @@ import type { PaymentMethod, SalePassenger } from '~/types/sale'
 
 // "Tour Booking" tab, laid out like today's TourBookingForm.vue: tour, package, date or
 // schedule and tickets on the left, Summary and payment on the right, passengers below.
-// TODO(api): packages and schedules from GET /tour-schedules, price from POST /quotes,
-// order from POST /orders and payment from POST /orders/{uuid}/pay (doc 04).
+// Tours are catalog items of type tour; POST /orders type tour, then POST /orders/{uuid}/pay.
+// The first passenger is the contact. TODO(api): tour schedules (no table yet, doc 18) and child/senior prices.
 const emit = defineEmits<{ created: [] }>()
 
-interface Tour { uuid: string; name: string; price_sen: number }
+interface Tour { id: number; name: string; price_sen: number; is_active: boolean }
 interface Schedule { uuid: string; date: string; time_text: string; available_seats: number | null }
 
-const tours = useApiList<Tour>({ path: '/catalog-items', workspaceScoped: true, query: { type: 'tour' } })
+const tours = useApiAll<Tour>({ path: '/catalog-items', workspaceScoped: true, query: { type: 'tour', is_active: 1 } })
 onMounted(() => tours.load())
 const schedules = ref<Schedule[]>([])
 
@@ -21,7 +21,8 @@ const tickets = reactive({ adult: 0, child: 0, senior: 0 })
 const passengers = ref<Record<string, SalePassenger>>({})
 const payment = ref<PaymentMethod | null>(null)
 const paid = ref<number | null>(null)
-const totalSen = ref(0)
+const busy = ref(false)
+const error = ref<string | null>(null)
 
 const hasSchedules = computed(() => schedules.value.length > 0)
 const paxSlots = computed(() => {
@@ -32,10 +33,49 @@ const paxSlots = computed(() => {
     return slots
 })
 const totalPax = computed(() => tickets.adult + tickets.child + tickets.senior)
+// Shown before the order exists; the order's own total (from the API) is what gets charged.
+const totalSen = computed(() => (tour.value?.price_sen ?? 0) * totalPax.value)
+const contact = computed(() => passengers.value[paxSlots.value[0]?.key ?? ''] ?? null)
+
+const api = useApi()
+const { slug } = useWorkspace()
+const path = (p: string) => api.workspacePath(slug.value ?? '', p)
 
 async function createTourBooking() {
-    // TODO(api): POST /orders with the tour line, then POST /orders/{uuid}/pay.
-    emit('created')
+    if (!tour.value || !totalPax.value || !payment.value) return
+    if (!contact.value?.name || !contact.value?.phone) {
+        error.value = 'Enter the first passenger\'s name and phone.'
+        return
+    }
+    busy.value = true
+    error.value = null
+    try {
+        const created = await api.post<{ data: { uuid: string; total_sen: number } }>(path('/orders'), {
+            type: 'tour',
+            catalog_item_id: tour.value.id,
+            tickets: { ...tickets },
+            contact_name: contact.value.name,
+            contact_phone: contact.value.phone,
+            contact_email: contact.value.email || undefined,
+        })
+        const order = created?.data
+        if (!order) throw new Error('No order returned')
+        await api.post(path(`/orders/${order.uuid}/pay`), {
+            method: payment.value,
+            paid_sen: payment.value === 'cash' ? Math.round((paid.value ?? 0) * 100) : undefined,
+        })
+        // TODO(api): print the receipt through the counter agent (doc 08).
+        tickets.adult = tickets.child = tickets.senior = 0
+        passengers.value = {}
+        payment.value = null
+        paid.value = null
+        emit('created')
+    } catch (e) {
+        const problem = toProblem(e)
+        error.value = problem?.detail ?? problem?.title ?? 'Unable to create the tour booking.'
+    } finally {
+        busy.value = false
+    }
 }
 </script>
 
@@ -90,8 +130,9 @@ async function createTourBooking() {
                             <dd class="text-xl font-bold text-gray-900 dark:text-white">{{ formatSen(totalSen) }}</dd>
                         </div>
                     </dl>
+                    <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
                     <SalePaymentMethod v-model="payment" v-model:paid="paid" :total-sen="totalSen" />
-                    <UButton block size="xl" label="Confirm Booking" :disabled="!tour || totalPax === 0 || !payment" @click="createTourBooking" />
+                    <UButton block size="xl" label="Confirm Booking" :loading="busy" :disabled="!tour || totalPax === 0 || !payment" @click="createTourBooking" />
                 </SalePanel>
             </div>
         </div>

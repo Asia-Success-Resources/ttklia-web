@@ -27,7 +27,7 @@ const columns: TableColumn<Row>[] = [
 
 const vendorPath = useVendorPath()
 const search = ref('')
-const list = useApiList<Row>({ path: '/vendor-portal/statements' })
+const list = useApiList<Row>({ search, path: '/vendor-portal/statements' })
 onMounted(() => list.load())
 </script>
 
@@ -39,7 +39,7 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        :pagination="list.pagination.value"
+        @page="list.load"
     />
 </template>

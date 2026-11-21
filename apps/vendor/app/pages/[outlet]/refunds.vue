@@ -17,7 +17,7 @@ const columns: TableColumn<Row>[] = [
 
 const vendorPath = useVendorPath()
 const search = ref('')
-const list = useApiList<Row>({ path: '/refunds', outletScoped: true })
+const list = useApiList<Row>({ search, path: '/refunds', outletScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -29,7 +29,7 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        :pagination="list.pagination.value"
+        @page="list.load"
     />
 </template>

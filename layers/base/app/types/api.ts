@@ -5,10 +5,20 @@
 /** Money is always integer sen (doc 04). */
 export type Sen = number
 
-/** Cursor pagination: `?cursor=…&limit=50` → `{ data, next_cursor }`. */
-export interface CursorPage<T> {
+/** One page of a list, numbered as in ttklia-v2: `?page=2&limit=10` → `{ data, meta }` (doc 04). */
+export interface PageMeta {
+    current_page: number
+    last_page: number
+    per_page: number
+    total: number
+    /** 1-based position of the first and last row on this page; null when the list is empty. */
+    from: number | null
+    to: number | null
+}
+
+export interface Page<T> {
     data: T[]
-    next_cursor: string | null
+    meta: PageMeta
 }
 
 /** RFC 9457 problem details with a stable `code` (doc 04, "Error codes"). */
@@ -50,35 +60,30 @@ export interface WorkspaceRef {
 /** `GET /me?workspace=…` (doc 27, "How it is enforced", step 5). TODO(api): final shape from the generated client. */
 export interface Me {
     uuid: string
-    /** Profile first name and surname; username or email when there is no profile. */
+    /** `users.name` (`profiles` was folded into `users` on 20 Nov 2026, doc 03). */
     name: string
-    username?: string | null
+    /** `users.locale`: ms, en, zh. */
+    locale?: string
     email: string | null
     phone_e164?: string | null
     status?: 'active' | 'suspended' | 'closed'
+    /** The profile picture (Account settings), or null for initials. */
+    avatar_url?: string | null
     /** Every workspace the user holds an assignment in. */
     workspaces: WorkspaceRef[]
     /** Holds a global role (no workspace): shows the Global tile in the workspace switcher (doc 09). */
     global?: boolean
     /** Permission names in the requested workspace, e.g. `bus.bookings.read`. */
     abilities: string[]
-    /** Table `profiles`: who the person is (users holds sign-in only). */
-    profile?: MeProfile | null
     /** Role names (global, plus the requested workspace's), for display only; menus follow `abilities`. */
     roles?: string[]
-}
-
-export interface MeProfile {
-    first_name: string
-    surname: string | null
-    locale: string
-    /** TODO(api): `profiles` has no picture column yet; the header falls back to initials. */
-    avatar_url?: string | null
 }
 
 /** `GET /bootstrap` (doc 04, doc 16). TODO(api): final shape from the generated client. */
 export interface Bootstrap {
     app: string
+    /** From the host's `app_domains` row; public app only: `teeko` on teeko.ai (doc 09). */
+    brand?: 'ttklia' | 'teeko'
     workspace: WorkspaceRef | null
     name: string
     logo_url: string | null

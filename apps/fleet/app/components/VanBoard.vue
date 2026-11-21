@@ -6,9 +6,10 @@ import type { VanColumnKey, VanRow, VanStatus } from '~/utils/vanBoard'
 // coloured date group per service date, each a table with a frozen checkbox and trip number, status chips,
 // driver and route pickers, and a summary row with the pickup and return time ranges and the total pax.
 //
-// TODO(api): GET /fleet/van-trips and PATCH /fleet/van-trips/{id} are stubs in ttklia-api, so the board starts
-// empty (never fake rows) and edits are not saved: each one says so. Trips are made each night from the rosters
-// (doc 19); doc 04 has no endpoint to add one by hand yet. Pickers read /fleet/van-routes and /drivers (also stubs).
+// GET /ops/w/{workspace}/fleet/van-trips?from&to (one month at a time) and …/months for the month list. Edits save at
+// once (PATCH /fleet/van-trips/{id}): Enter in Remarks or Pax, the time pickers, the status chip and the route picker.
+// The driver picker assigns the driver with the van they last drove (POST /fleet/assignments; the old one comes off).
+// Trips are made each night from the rosters (doc 19); "+ Add trip" adds one by hand (POST /fleet/van-trips).
 
 const props = withDefaults(
     defineProps<{
@@ -22,27 +23,57 @@ const props = withDefaults(
 )
 
 const toast = useToast()
-const list = useApiList<VanRow>({ path: '/fleet/van-trips', workspaceScoped: true })
-const routes = useApiList<{ id: number; name: string; code: string }>({ path: '/fleet/van-routes', workspaceScoped: true })
-const drivers = useApiList<{ id: number; name: string; plate_no: string | null }>({ path: '/drivers', workspaceScoped: true })
+const api = useFleetApi()
+const { can } = useMe()
+const canWrite = computed(() => can('fleet.van_trips.write'))
+
+const today = todayYmd()
+const activeMonth = ref(today.slice(0, 7))
+function monthRange(month: string) {
+    const [y, m] = month.split('-').map(Number) as [number, number]
+    return { from: ymd(new Date(y, m - 1, 1)), to: ymd(new Date(y, m, 0)) }
+}
+const list = useApiAll<VanRow>({
+    path: '/fleet/van-trips',
+    workspaceScoped: true,
+    query: () => ({ ...monthRange(activeMonth.value), status: props.statuses?.join(',') }),
+    max: 5000,
+})
+const routes = useApiAll<{ id: number; name: string; code: string; status: string }>({ path: '/fleet/van-routes', workspaceScoped: true })
+const drivers = useApiAll<{ id: number; name: string; usual_vehicle: string | null; usual_vehicle_id: number | null; day_status: string }>({
+    path: '/fleet/drivers/today',
+    workspaceScoped: true,
+})
+const monthCounts = ref<{ month: string; days: number }[]>([])
+async function loadMonths() {
+    try {
+        monthCounts.value = (await api.get<{ data: { month: string; days: number }[] }>('/fleet/van-trips/months')).data
+    } catch {
+        monthCounts.value = []
+    }
+}
 onMounted(() => {
     list.load()
+    loadMonths()
     routes.load()
     drivers.load()
 })
+watch(activeMonth, () => list.load())
 
-function notSaved(what: string) {
-    toast.add({
-        title: `${what} not saved`,
-        description: 'The van trips API is not connected yet.',
-        color: 'warning',
-        icon: 'i-bx-alert-circle',
-    })
+function failed(what: string, e: unknown) {
+    toast.add({ title: `${what} not saved`, description: fleetError(e), color: 'error', icon: 'i-bx-alert-circle' })
+}
+async function patch(row: VanRow, body: Record<string, unknown>, what: string) {
+    try {
+        await api.patch(`/fleet/van-trips/${row.id}`, body)
+        toast.add({ title: `${what} saved`, color: 'success' })
+    } catch (e) {
+        failed(what, e)
+    }
+    await list.load()
 }
 
 // ---------------------------------------------------------------- months and date groups
-const today = todayYmd()
-const activeMonth = ref(today.slice(0, 7))
 const addedMonths = ref<string[]>([])
 const addedDates = ref<string[]>([])
 const collapsed = ref<Record<string, boolean>>({})
@@ -61,8 +92,12 @@ const rowsByDate = computed(() => {
 const allDates = computed(() => [...new Set([...Object.keys(rowsByDate.value), ...addedDates.value])].sort())
 
 const months = computed(() => {
-    const keys = new Set([today.slice(0, 7), ...addedMonths.value, ...allDates.value.map((d) => d.slice(0, 7))])
-    return [...keys].sort().map((month) => ({ month, groups: allDates.value.filter((d) => d.startsWith(month)).length }))
+    const counts = new Map(monthCounts.value.map((m) => [m.month, m.days]))
+    const keys = new Set([today.slice(0, 7), ...addedMonths.value, ...counts.keys()])
+    return [...keys].sort().map((month) => ({
+        month,
+        groups: month === activeMonth.value ? allDates.value.filter((d) => d.startsWith(month)).length : (counts.get(month) ?? 0),
+    }))
 })
 
 function matches(row: VanRow): boolean {
@@ -146,22 +181,43 @@ function cancelAddGroup() {
 }
 
 // ---------------------------------------------------------------- rows
-function addTrip() {
-    // TODO(api): no endpoint to add a van trip by hand in doc 04 yet (trips come from the rosters).
-    notSaved('Trip')
+// "+ Add trip": a popup with the route and times, for a trip the rosters did not make.
+const { form: addForm, fieldError: addError, show: showAdd, submit: submitAdd } = useFormModal(() => ({
+    date: '', van_route_id: undefined as number | undefined, pickup: '06:00', back: '', remarks: '',
+}))
+const routeItems = computed(() => routes.rows.value.filter((r) => r.status === 'active').map((r) => ({ label: `${r.name} (${r.code})`, value: r.id })))
+function addTrip(date: string) {
+    showAdd({ date })
+}
+async function saveTrip() {
+    const saved = await submitAdd((d) => api.post('/fleet/van-trips', {
+        van_route_id: d.van_route_id,
+        pickup_at: `${d.date} ${d.pickup}`,
+        return_at: d.back ? `${d.date} ${d.back}` : null,
+        remarks: d.remarks || null,
+    }))
+    if (saved) {
+        toast.add({ title: 'Trip added', color: 'success' })
+        await Promise.all([list.load(), loadMonths()])
+    }
 }
 
 /** Inline edits save only on Enter; any other way out restores the saved value (as the limo board). */
-function commitEdit(event: Event, field: string, number = false) {
+function commitEdit(event: Event, row: VanRow, key: VanColumnKey, label: string) {
     const el = event.target as HTMLElement
-    if (number && el.innerText.trim() !== '' && !/^\d+$/.test(el.innerText.trim())) {
+    const value = el.innerText.trim()
+    if (key === 'pax' && value !== '' && !/^\d+$/.test(value)) {
         toast.add({ title: 'Pax must be a whole number', color: 'warning', icon: 'i-bx-alert-circle' })
         el.blur()
         return
     }
     el.blur()
-    // TODO(api): PATCH /fleet/van-trips/{id} (doc 04) with only the changed field.
-    notSaved(field)
+    if (key === 'pax') patch(row, { pax_count: value === '' ? null : Number(value) }, label)
+    else if (key === 'remarks') patch(row, { remarks: value || null }, label)
+}
+function saveTime(row: VanRow, key: VanColumnKey, value: string) {
+    if (!value) return
+    patch(row, { [key === 'returnTime' ? 'return_at' : 'pickup_at']: `${row.service_date} ${value}` }, key === 'returnTime' ? 'Return time' : 'Pick up time')
 }
 function revertEdit(event: Event, saved: string | null) {
     ;(event.target as HTMLElement).innerText = saved ?? ''
@@ -211,22 +267,46 @@ function openPickerMenu(row: VanRow, key: VanColumnKey, event: MouseEvent) {
     if (pickerMenu.row === row && pickerMenu.key === key) pickerMenu.row = null
     else place(pickerMenu, row, key, event)
 }
-function setStatus() {
+function setStatus(status: VanStatus) {
+    const row = statusMenu.row
     statusMenu.row = null
-    notSaved('Status')
+    if (!row || row.status === status) return
+    if (status === 'assigned') {
+        toast.add({ title: 'Pick a driver to assign the trip', color: 'info', icon: 'i-bx-info-circle' })
+        return
+    }
+    if (status === 'cancelled' && !confirm(`Cancel trip ${row.trip_no}? Its driver is taken off.`)) return
+    patch(row, { status }, 'Status')
 }
 
 const pickerNoun = computed(() => (pickerMenu.key === 'driverName' ? 'driver' : 'route'))
 const pickerOptions = computed(() => {
     const q = pickerMenu.query.trim().toLowerCase()
     const options = pickerMenu.key === 'driverName'
-        ? drivers.rows.value.map((d) => ({ id: d.id, name: d.name, sub: d.plate_no ?? '' }))
+        ? drivers.rows.value.map((d) => ({ id: d.id, name: d.name, sub: d.day_status === 'available' ? (d.usual_vehicle ?? '') : d.day_status.replace(/_/g, ' ') }))
         : routes.rows.value.map((r) => ({ id: r.id, name: r.name, sub: r.code.toUpperCase() }))
     return q ? options.filter((o) => o.name.toLowerCase().includes(q)) : options
 })
-function setPicker() {
+async function setPicker(id: number) {
+    const row = pickerMenu.row
+    const key = pickerMenu.key
     pickerMenu.row = null
-    notSaved(pickerNoun.value === 'driver' ? 'Driver' : 'Route')
+    if (!row) return
+    if (key === 'route') return patch(row, { van_route_id: id }, 'Route')
+    // Driver: their usual van goes with them; the one on the trip now comes off first.
+    const driver = drivers.rows.value.find((d) => d.id === id)
+    if (!driver?.usual_vehicle_id) {
+        toast.add({ title: 'No usual van for this driver', color: 'warning', icon: 'i-bx-alert-circle' })
+        return
+    }
+    try {
+        for (const assignment of row.assignment_ids) await api.post(`/fleet/assignments/${assignment}/release`)
+        await api.post('/fleet/assignments', { van_trip_id: row.id, driver_id: driver.id, vehicle_id: driver.usual_vehicle_id })
+        toast.add({ title: `${driver.name} assigned`, color: 'success' })
+    } catch (e) {
+        failed('Driver', e)
+    }
+    await list.load()
 }
 </script>
 
@@ -302,8 +382,10 @@ function setPicker() {
                         <div style="width: max-content; min-width: 100%">
                             <!-- Header, rows and the add row in one bordered card; overflow-clip keeps the frozen columns working. -->
                             <div class="overflow-clip rounded-t-md rounded-bl-md border border-(--gm-board-border-strong) [overflow-clip-margin:0px]">
-                                <!-- Column header -->
-                                <div class="flex items-stretch bg-(--gm-board-header) text-[13px] text-(--gm-board-text-soft)" style="height: 42px">
+                                <!-- Column header: sticky inside the group's scroll box (max-h 70vh, as fleet-management), so it stays
+                                     on top while the date's rows scroll under it, until the last row has gone by. The card's
+                                     overflow-clip is not a scroll container, so it does not stop the sticking. -->
+                                <div class="sticky top-0 z-40 flex items-stretch bg-(--gm-board-header) text-[13px] text-(--gm-board-text-soft) shadow-[0_1px_0_var(--gm-board-border-strong)]" style="height: 42px">
                                     <div :style="{ width: `${CHECKBOX_WIDTH}px` }" class="sticky left-0 z-30 flex shrink-0 items-center justify-center overflow-hidden rounded-tl-md bg-(--gm-board-header)">
                                         <div class="absolute bottom-0 left-0 top-0 w-1.5" :style="{ backgroundColor: group.color }" />
                                         <input type="checkbox" class="size-4 rounded border border-(--gm-board-checkbox) bg-transparent accent-(--gm-focus)" aria-label="Select all">
@@ -328,7 +410,7 @@ function setPicker() {
                                 <!-- Rows -->
                                 <div
                                     v-for="row in group.items"
-                                    :key="row.uuid"
+                                    :key="row.id"
                                     class="group/row flex items-stretch border-b border-(--gm-board-border) bg-(--gm-board-row) transition-colors hover:bg-(--gm-board-row-hover)"
                                     style="height: 38px"
                                 >
@@ -349,6 +431,7 @@ function setPicker() {
                                                 :class="{ 'outline-2 -outline-offset-2 outline-(--gm-action) outline': statusMenu.row === row }"
                                                 :style="statusStyle(row.status)"
                                                 title="Change status"
+                                                :disabled="!canWrite"
                                                 @click="openStatusMenu(row, $event)"
                                             >
                                                 {{ vanStatus(row.status)?.label ?? row.status }}
@@ -361,6 +444,7 @@ function setPicker() {
                                                 type="button"
                                                 class="group/picker flex size-full items-center justify-center gap-1 px-2 text-[13px] hover:bg-(--gm-board-cell-hover)"
                                                 :class="{ 'outline-2 -outline-offset-2 outline-(--gm-action) outline': pickerMenu.row === row && pickerMenu.key === col.key }"
+                                                :disabled="!canWrite"
                                                 @click="openPickerMenu(row, col.key, $event)"
                                             >
                                                 <span class="truncate" :class="vanCellValue(row, col.key) ? 'text-(--gm-board-text)' : 'text-(--gm-board-placeholder)'">
@@ -382,7 +466,8 @@ function setPicker() {
                                                 :value="vanCellValue(row, col.key)"
                                                 class="time-input w-full rounded bg-transparent px-2 text-center text-[13px] outline-none focus:ring-2 focus:ring-(--gm-focus)"
                                                 :aria-label="`${col.label} time for ${row.trip_no}`"
-                                                @change="($event.target as HTMLInputElement).value = vanCellValue(row, col.key); notSaved(`${col.label} time`)"
+                                                :disabled="!canWrite"
+                                                @change="saveTime(row, col.key, ($event.target as HTMLInputElement).value)"
                                             >
                                         </div>
 
@@ -391,9 +476,9 @@ function setPicker() {
                                             <span
                                                 class="w-full truncate px-2 text-center outline-none"
                                                 :inputmode="col.type === 'number' ? 'numeric' : undefined"
-                                                contenteditable
+                                                :contenteditable="canWrite"
                                                 spellcheck="false"
-                                                @keydown.enter.prevent="commitEdit($event, col.label, col.type === 'number')"
+                                                @keydown.enter.prevent="commitEdit($event, row, col.key, col.label)"
                                                 @keydown.esc="($event.target as HTMLElement).blur()"
                                                 @blur="revertEdit($event, vanCellValue(row, col.key))"
                                             >{{ vanCellValue(row, col.key) }}</span>
@@ -402,12 +487,12 @@ function setPicker() {
                                 </div>
 
                                 <!-- Add row (frozen) -->
-                                <div v-if="props.canAdd" class="group/add flex items-stretch bg-(--gm-board-row)" style="height: 40px">
+                                <div v-if="props.canAdd && canWrite" class="group/add flex items-stretch bg-(--gm-board-row)" style="height: 40px">
                                     <div :style="{ width: `${CHECKBOX_WIDTH}px` }" class="sticky left-0 z-30 shrink-0 overflow-hidden rounded-bl-md bg-(--gm-board-row)">
                                         <div class="absolute bottom-0 left-0 top-0 w-1.5 opacity-40 transition group-hover/add:opacity-100" :style="{ backgroundColor: group.color }" />
                                     </div>
                                     <div :style="{ left: `${CHECKBOX_WIDTH}px` }" class="sticky z-30 flex shrink-0 items-center bg-(--gm-board-row)">
-                                        <button type="button" class="whitespace-nowrap px-3 text-[13px] text-(--gm-board-placeholder) hover:text-(--gm-board-text)" @click="addTrip">
+                                        <button type="button" class="whitespace-nowrap px-3 text-[13px] text-(--gm-board-placeholder) hover:text-(--gm-board-text)" @click="addTrip(group.date)">
                                             + Add trip
                                         </button>
                                     </div>
@@ -464,6 +549,15 @@ function setPicker() {
         </div>
 
         <!-- Status and picker popovers: teleported, so the groups' scroll containers do not clip them -->
+        <OpsFormModal v-model:open="addForm.open" :title="`Add trip: ${addForm.data.date}`" :saving="addForm.saving" :error="addForm.error" submit-label="Add Trip" @submit="saveTrip">
+            <OpsFormField label="Route" required full :error="addError('van_route_id')">
+                <USelectMenu v-model="addForm.data.van_route_id" :items="routeItems" value-key="value" class="w-full" />
+            </OpsFormField>
+            <OpsFormField label="Pick up" required :error="addError('pickup_at')"><UInput v-model="addForm.data.pickup" type="time" class="w-full" /></OpsFormField>
+            <OpsFormField label="Return" :error="addError('return_at')"><UInput v-model="addForm.data.back" type="time" class="w-full" /></OpsFormField>
+            <OpsFormField label="Remarks" full :error="addError('remarks')"><UInput v-model="addForm.data.remarks" class="w-full" /></OpsFormField>
+        </OpsFormModal>
+
         <Teleport to="body">
             <template v-if="statusMenu.row">
                 <div class="fixed inset-0 z-[100]" @click="statusMenu.row = null" />
@@ -475,7 +569,7 @@ function setPicker() {
                         type="button"
                         class="relative min-h-8 rounded-sm px-3 py-1 text-[14px] font-medium transition hover:brightness-110"
                         :style="statusStyle(option.value)"
-                        @click="setStatus"
+                        @click="setStatus(option.value)"
                     >
                         {{ option.label }}
                     </button>
@@ -501,7 +595,7 @@ function setPicker() {
                             :key="option.id"
                             type="button"
                             class="flex min-h-8 items-center justify-between gap-2 rounded-sm bg-(--gm-board-chip) px-3 py-1 text-[14px] font-medium text-white transition hover:bg-(--gm-board-chip-hover)"
-                            @click="setPicker"
+                            @click="setPicker(option.id)"
                         >
                             <span class="truncate">{{ option.name }}</span>
                             <span class="shrink-0 text-[11px] text-(--gm-board-text-sub)">{{ option.sub }}</span>

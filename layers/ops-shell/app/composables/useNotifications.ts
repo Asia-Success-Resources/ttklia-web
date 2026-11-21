@@ -19,7 +19,7 @@ export interface NotificationFilter {
 
 interface NotificationPage {
     data: AppNotification[] | null
-    next_cursor: string | null
+    meta: import('../../../base/app/types/api').PageMeta
     total: number
     unread_count: number
     filters: NotificationFilter[]
@@ -35,7 +35,7 @@ export function useNotifications() {
     const recent = useState<AppNotification[]>('ops-notifications-recent', () => [])
     const unreadCount = useState<number>('ops-notifications-unread', () => 0)
 
-    async function page(query: { filter?: string; cursor?: string; limit?: number } = {}): Promise<NotificationPage | null> {
+    async function page(query: { filter?: string; page?: number; limit?: number } = {}): Promise<NotificationPage | null> {
         if (!enabled.value) return null
         return await api.get<NotificationPage>('/me/notifications', query)
     }

@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // System: API keys, IP allow-list, call log (table `operator_api_clients`). Permission: operator.system.read (doc 27).
-// GET /api/v1/operator-portal/system/api-clients (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/operator-portal/system/api-clients (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'System' })
 
 interface Row extends Record<string, unknown> {
@@ -23,7 +23,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/operator-portal/system/api-clients' })
+const list = useApiList<Row>({ search, path: '/operator-portal/system/api-clients' })
 onMounted(() => list.load())
 </script>
 
@@ -35,8 +35,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

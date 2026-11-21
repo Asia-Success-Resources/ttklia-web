@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url'
 
-// ride app: ride.ttklia.com. Rendering: SPA, static files on S3 behind CloudFront (doc 09).
+// ride app = Teeko (e-hailing): teeko.ttklia.com (ride.ttklia.com redirects there). Rendering: SPA, static files on S3 behind CloudFront (doc 09).
 // Layers as doc 09 lists them. Settings: doc 16, "Front-end config at scale".
 export default defineNuxtConfig({
     extends: ['../../layers/base', '../../layers/ops-shell'],

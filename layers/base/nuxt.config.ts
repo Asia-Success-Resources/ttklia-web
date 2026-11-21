@@ -14,7 +14,7 @@ export default defineNuxtConfig({
     ],
     runtimeConfig: {
         public: {
-            // NUXT_PUBLIC_API_BASE, includes /api/v1 (same as Flutter's API_BASE_URL)
+            // NUXT_PUBLIC_API_BASE, includes /api (same as Flutter's API_BASE_URL)
             apiBase: '',
             // NUXT_PUBLIC_AUTH_URL, the single login at the auth domain
             authUrl: '',

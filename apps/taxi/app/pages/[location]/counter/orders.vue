@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Counter: orders: find, reprint, request refund (table `orders`). Permission: taxi.counter_orders.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/orders (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/orders (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Counter: orders' })
 
 definePageMeta({ layout: 'counter' })
@@ -25,7 +25,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/orders', workspaceScoped: true, query: { channel: 'counter' } })
+const list = useApiList<Row>({ search, path: '/orders', workspaceScoped: true, query: { channel: 'counter' } })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

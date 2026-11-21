@@ -11,6 +11,9 @@ useHead({ title: 'My account' })
             <UCard><template #header>Wallet</template><p class="text-sm text-muted">{{ formatSen(null) }}</p></UCard>
             <UCard><template #header>Vouchers</template><p class="text-sm text-muted">None yet</p></UCard>
         </div>
-        <UButton class="mt-6" to="/account/invite" label="Invite friends" variant="outline" />
+        <div class="mt-6 flex gap-2">
+            <UButton to="/account/rides" label="My rides" variant="outline" />
+            <UButton to="/account/invite" label="Invite friends" variant="outline" />
+        </div>
     </PublicSection>
 </template>

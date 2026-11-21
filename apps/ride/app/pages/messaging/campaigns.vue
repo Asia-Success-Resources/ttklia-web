@@ -23,7 +23,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: "/ops/messaging/campaigns", workspaceScoped: true })
+const list = useApiList<Row>({ search, path: "/ops/messaging/campaigns", workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -35,8 +35,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

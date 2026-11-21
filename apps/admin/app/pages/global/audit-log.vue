@@ -2,30 +2,32 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Audit log: list (table `audit_logs`). Permission: global.audit_log.read (doc 27).
-// GET /api/v1/admin/audit-logs (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/admin/audit-logs (ttklia-api).
 useHead({ title: 'Audit log' })
 
 interface Row extends Record<string, unknown> {
-    uuid: string
+    id: number
     action: string
     subject_type: string
-    before: unknown | null
-    after: unknown | null
-    ip: string | null
+    subject_id: number
+    user_name: string | null
+    changes: { attribute: string; old: unknown; new: unknown }[] | Record<string, unknown> | null
     happened_at: string
 }
 
+// One row per change: who, which record, and each field's old → new value (App\Traits\HasAuditTrail).
+const describe = (c: Row['changes']) =>
+    Array.isArray(c) ? c.map((x) => `${x.attribute}: ${JSON.stringify(x.old)} → ${JSON.stringify(x.new)}`).join('; ') : c ? 'new record' : '-'
 const columns: TableColumn<Row>[] = [
+    { accessorKey: 'happened_at', header: 'When' },
+    { accessorKey: 'user_name', header: 'Who', cell: ({ row }) => row.original.user_name ?? '-' },
     { accessorKey: 'action', header: 'Action' },
-    { accessorKey: 'subject_type', header: 'Subject type' },
-    { accessorKey: 'before', header: 'Before' },
-    { accessorKey: 'after', header: 'After' },
-    { accessorKey: 'ip', header: 'Ip' },
-    { accessorKey: 'happened_at', header: 'Happened at' },
+    { accessorKey: 'subject_type', header: 'Record', cell: ({ row }) => `${row.original.subject_type} #${row.original.subject_id}` },
+    { accessorKey: 'changes', header: 'Changes', cell: ({ row }) => h('span', { class: 'whitespace-normal text-xs' }, describe(row.original.changes)) },
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/admin/audit-logs' })
+const list = useApiList<Row>({ search, path: '/admin/audit-logs' })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +39,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

@@ -1,0 +1,39 @@
+<script setup lang="ts">
+import type { TableColumn } from '@nuxt/ui'
+
+// Vip queue: VIP cut queue (no table). Permission: bus.vip_queue.read (doc 27).
+// TODO(pending: doc 09 gap) no table for this screen yet in tools/schema.py (sitemap "*").
+// TODO(api): ttklia-api has no list route for this screen yet; the list stays empty until it does.
+useHead({ title: 'VIP queue' })
+
+interface Row extends Record<string, unknown> {
+    uuid: string
+    name: string
+    status: string
+    updated_at: string
+}
+
+const columns: TableColumn<Row>[] = [
+    { accessorKey: 'name', header: 'Name' },
+    { accessorKey: 'status', header: 'Status' },
+    { accessorKey: 'updated_at', header: 'Updated at' },
+]
+
+const search = ref('')
+const list = useApiList<Row>({ search, path: null, workspaceScoped: true })
+onMounted(() => list.load())
+</script>
+
+<template>
+    <OpsListPage
+        v-model:search="search"
+        title="Vip queue"
+        subject="vip queue"
+        :rows="list.rows.value"
+        :columns="columns"
+        :loading="list.pending.value"
+        :pagination="list.pagination.value"
+        note="No table for this screen yet in the data model (doc 09, gap list)."
+        @page="list.load"
+    />
+</template>

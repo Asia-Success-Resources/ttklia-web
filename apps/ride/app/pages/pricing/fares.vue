@@ -3,7 +3,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Fares: list (table `fare_rules`). Permission: ride.pricing_fares.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/pricing/fares (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/pricing/fares (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Fares' })
 
 interface Row extends Record<string, unknown> {
@@ -26,7 +26,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/pricing/fares', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/pricing/fares', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -38,8 +38,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

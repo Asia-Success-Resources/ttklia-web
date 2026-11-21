@@ -215,7 +215,7 @@ export default defineAppConfig({
                     "permission": "finance.settlements.read"
                 },
                 {
-                    "label": "Einvoices",
+                    "label": "E-Invoices",
                     "to": "/finance/einvoices",
                     "icon": "i-bx-receipt",
                     "permission": "finance.einvoices.read"
@@ -242,6 +242,12 @@ export default defineAppConfig({
                     "to": "/pricing/fares",
                     "icon": "i-bx-price-tag",
                     "permission": "global.pricing_fares.read"
+                },
+                {
+                    "label": "Bus charges",
+                    "to": "/pricing/bus-charges",
+                    "icon": "i-bx-bus",
+                    "permission": "global.pricing_bus_charges.read"
                 },
                 {
                     "label": "Promotions",

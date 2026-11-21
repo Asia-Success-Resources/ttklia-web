@@ -1,21 +1,35 @@
 <script setup lang="ts">
 import type { PaymentMethod, SalePassenger } from '~/types/sale'
+import type { ChargeLine } from './ChargeLines.vue'
 
 // "Create Booking" tab, laid out like today's BookingForm.vue: details, tickets and trip on the
 // left (7/12), Summary and payment on the right (5/12), seats and passengers below.
-// TODO(api): trips from GET /bus/trips, seats from GET /bus/trips/{uuid}/seats, price from POST /quotes,
-// hold from POST /orders and payment from POST /orders/{uuid}/pay (doc 04). Not wired until the client exists.
+// Trips: GET /bus/trips?date&zone_id&sellable=1; seats: GET /bus/trips/{uuid}/seats; ticket types: GET /bus/ticket-types.
+// Confirm Seats holds them with POST /orders (5 minutes); Confirm Payment calls POST /orders/{uuid}/pay.
+// The charge lines and total always come from the API's order, never worked out here.
 const emit = defineEmits<{ created: [] }>()
 
-interface Zone { uuid: string; name: string }
+interface Zone { id: number; name: string }
 interface PassengerType { uuid: string; name: string }
 interface Trip { uuid: string; company: string; departs_at: string; trip_no: string | null; available_seats: number | null }
 interface Seat { uuid: string; seat_no: string; deck: 'lower' | 'upper'; available: boolean }
+interface SaleOrder { uuid: string; status: string; total_sen: number; charge_lines: ChargeLine[]; hold_expires_at: string | null; change_sen?: number | null }
 
-const zones = useApiList<Zone>({ path: '/zones', workspaceScoped: true })
-onMounted(() => zones.load())
-// TODO(api): no endpoint for passenger ticket types (Adult, Child, Senior, …) in doc 04 yet.
+const api = useApi()
+const { slug } = useWorkspace()
+const path = (p: string) => api.workspacePath(slug.value ?? '', p)
+
+const zones = useApiAll<Zone>({ path: '/zones', workspaceScoped: true, query: { type: 'bus_destination' } })
 const passengerTypes = ref<PassengerType[]>([])
+onMounted(async () => {
+    zones.load()
+    try {
+        const res = await api.get<{ data: PassengerType[] }>(path('/bus/ticket-types'))
+        passengerTypes.value = res?.data ?? []
+    } catch (e) {
+        error.value = problemText(e, 'Unable to load ticket types.')
+    }
+})
 const trips = ref<Trip[]>([])
 const seats = ref<Seat[]>([])
 const fetchingTrips = ref(false)
@@ -23,46 +37,147 @@ const fetchingTrips = ref(false)
 const date = ref('')
 const location = ref<Zone | undefined>()
 const reference = ref('')
+const contactName = ref('')
+const contactPhone = ref('')
+const contactEmail = ref('')
 const tickets = reactive<Record<string, number>>({})
 const tripId = ref<string | null>(null)
 const tripsExpanded = ref(true)
 const selectedHour = ref<string | null>(null)
 const selectedSeats = ref<string[]>([])
 const passengers = ref<Record<string, SalePassenger>>({})
-const held = ref(false)
+const order = ref<SaleOrder | null>(null)
+const held = computed(() => order.value !== null)
 const payment = ref<PaymentMethod | null>(null)
 const paid = ref<number | null>(null)
-const totalSen = ref(0)
+const busy = ref(false)
+const error = ref<string | null>(null)
+const totalSen = computed(() => order.value?.total_sen ?? 0)
+// Fare (the same on every channel) + Facility charge (APAD) per ticket (doc 23, TBS structure), from the order.
+const chargeLines = computed<ChargeLine[]>(() => order.value?.charge_lines ?? [])
+const totalTickets = computed(() => Object.values(tickets).reduce((a, b) => a + (b || 0), 0))
 
-const hours = computed(() => [...new Set(trips.value.map((t) => t.departs_at.slice(11, 13) + ':00'))])
-const visibleTrips = computed(() =>
-    selectedHour.value ? trips.value.filter((t) => t.departs_at.slice(11, 13) + ':00' === selectedHour.value) : trips.value,
-)
+/** Departure hours in Malaysia time, as the counter reads them. */
+const localHour = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', timeZone: 'Asia/Kuala_Lumpur' }) + ':00'
+const localTime = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kuala_Lumpur' })
+const hours = computed(() => [...new Set(trips.value.map((t) => localHour(t.departs_at)))])
+const visibleTrips = computed(() => (selectedHour.value ? trips.value.filter((t) => localHour(t.departs_at) === selectedHour.value) : trips.value))
 const selectedTrip = computed(() => trips.value.find((t) => t.uuid === tripId.value) ?? null)
 const lowerSeats = computed(() => seats.value.filter((s) => s.deck === 'lower'))
 const upperSeats = computed(() => seats.value.filter((s) => s.deck === 'upper'))
 const seatSlots = computed(() => selectedSeats.value.map((s) => ({ key: s, label: `Seat ${s}` })))
 
+function problemText(e: unknown, fallback: string): string {
+    const problem = toProblem(e)
+    return problem?.detail ?? problem?.title ?? fallback
+}
+
+// Trips for the chosen day and destination, in departure order.
+watch([date, location], async () => {
+    trips.value = []
+    tripId.value = null
+    selectedHour.value = null
+    if (!date.value || !location.value) return
+    fetchingTrips.value = true
+    error.value = null
+    try {
+        const res = await api.get<{ data: Trip[] }>(path('/bus/trips'), { date: date.value, zone_id: location.value.id, sellable: 1, limit: 100 })
+        trips.value = res?.data ?? []
+    } catch (e) {
+        error.value = problemText(e, 'Unable to load trips.')
+    } finally {
+        fetchingTrips.value = false
+    }
+})
+
+async function loadSeats() {
+    seats.value = []
+    if (!tripId.value) return
+    try {
+        const res = await api.get<{ data: Seat[] }>(path(`/bus/trips/${tripId.value}/seats`))
+        seats.value = res?.data ?? []
+    } catch (e) {
+        error.value = problemText(e, 'Unable to load seats.')
+    }
+}
+
 function pickTrip(trip: Trip) {
     tripId.value = trip.uuid
     tripsExpanded.value = false
     selectedSeats.value = []
+    loadSeats()
 }
 
 function toggleSeat(seat: Seat) {
-    if (!seat.available) return
+    if (!seat.available || held.value) return
     const i = selectedSeats.value.indexOf(seat.seat_no)
     if (i >= 0) selectedSeats.value.splice(i, 1)
     else selectedSeats.value.push(seat.seat_no)
 }
 
 async function confirmSeats() {
-    // TODO(api): POST /orders to hold the seats with the operator.
+    if (!tripId.value) return
+    if (selectedSeats.value.length !== totalTickets.value) {
+        error.value = 'Selected seats does not match total tickets.'
+        return
+    }
+    busy.value = true
+    error.value = null
+    try {
+        const res = await api.post<{ data: SaleOrder }>(path('/orders'), {
+            type: 'booking',
+            trip_uuid: tripId.value,
+            tickets: { ...tickets },
+            seats: selectedSeats.value,
+            passengers: passengers.value,
+            contact_name: contactName.value,
+            contact_phone: contactPhone.value,
+            contact_email: contactEmail.value || undefined,
+            reference: reference.value || undefined,
+        })
+        order.value = res?.data ?? null
+    } catch (e) {
+        error.value = problemText(e, 'Unable to place booking.')
+        await loadSeats()
+    } finally {
+        busy.value = false
+    }
 }
 
 async function confirmPayment() {
-    // TODO(api): POST /orders/{uuid}/pay, then print the receipt through the counter agent.
-    emit('created')
+    if (!order.value || !payment.value) return
+    busy.value = true
+    error.value = null
+    try {
+        await api.post(path(`/orders/${order.value.uuid}/pay`), {
+            method: payment.value,
+            paid_sen: payment.value === 'cash' ? Math.round((paid.value ?? 0) * 100) : undefined,
+        })
+        // TODO(api): print the receipt through the counter agent (doc 08) once it is wired.
+        reset()
+        emit('created')
+    } catch (e) {
+        error.value = problemText(e, 'Unable to take the payment.')
+        if (toProblem(e)?.code === 'hold_expired') reset(false)
+    } finally {
+        busy.value = false
+    }
+}
+
+function reset(clearAll = true) {
+    order.value = null
+    payment.value = null
+    paid.value = null
+    selectedSeats.value = []
+    passengers.value = {}
+    if (clearAll) {
+        for (const key of Object.keys(tickets)) tickets[key] = 0
+        contactName.value = ''
+        contactPhone.value = ''
+        contactEmail.value = ''
+        reference.value = ''
+    }
+    loadSeats()
 }
 </script>
 
@@ -87,6 +202,15 @@ async function confirmPayment() {
                             <UFormField label="Reference">
                                 <UInput v-model="reference" placeholder="Reference" size="lg" class="w-full" />
                             </UFormField>
+                            <UFormField label="Customer Name" required>
+                                <UInput v-model="contactName" placeholder="Customer name" size="lg" class="w-full" />
+                            </UFormField>
+                            <UFormField label="Customer Phone" required>
+                                <UInput v-model="contactPhone" placeholder="012 345 6789" size="lg" class="w-full" />
+                            </UFormField>
+                            <UFormField label="Customer Email">
+                                <UInput v-model="contactEmail" type="email" placeholder="Optional" size="lg" class="w-full" />
+                            </UFormField>
                         </div>
 
                         <div class="mb-6">
@@ -108,7 +232,7 @@ async function confirmPayment() {
                                 <div class="text-sm">
                                     <div class="font-semibold text-gray-800 dark:text-white">{{ selectedTrip.company }}</div>
                                     <div class="text-gray-500">
-                                        <span v-if="selectedTrip.trip_no">Trip #{{ selectedTrip.trip_no }} · </span>{{ selectedTrip.departs_at.slice(11, 16) }}
+                                        <span v-if="selectedTrip.trip_no">Trip #{{ selectedTrip.trip_no }} · </span>{{ localTime(selectedTrip.departs_at) }}
                                     </div>
                                 </div>
                             </div>
@@ -139,7 +263,7 @@ async function confirmPayment() {
                                     :class="tripId === trip.uuid ? 'border-primary bg-primary/10' : 'border-(--ops-border) hover:bg-gray-50 dark:hover:bg-white/5'"
                                     @click="pickTrip(trip)"
                                 >
-                                    <div class="font-semibold text-gray-800 dark:text-white">{{ trip.departs_at.slice(11, 16) }} · {{ trip.company }}</div>
+                                    <div class="font-semibold text-gray-800 dark:text-white">{{ localTime(trip.departs_at) }} · {{ trip.company }}</div>
                                     <div class="text-xs text-gray-500">
                                         <span v-if="trip.trip_no">Trip #{{ trip.trip_no }}</span>
                                         <span v-if="trip.available_seats !== null"> · {{ trip.available_seats }} seats left</span>
@@ -156,13 +280,14 @@ async function confirmPayment() {
                         v-else
                         color="warning"
                         variant="soft"
-                        icon="i-bx-time"
-                        title="Booking has been created. Please make payment within 3 minutes."
+                        icon="i-bx-clock"
+                        title="Booking has been created. Please make payment within 5 minutes."
                     />
                 </SalePanel>
             </div>
 
             <div class="lg:col-span-5">
+                <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
                 <SalePanel title="Summary">
                     <dl class="mb-6 space-y-3">
                         <div class="flex justify-between">
@@ -177,6 +302,7 @@ async function confirmPayment() {
                             <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Seats</dt>
                             <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ selectedSeats.length ? selectedSeats.join(', ') : '-' }}</dd>
                         </div>
+                        <SaleChargeLines :lines="chargeLines" />
                         <div class="flex justify-between border-t border-(--ops-border) pt-3">
                             <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Total Price</dt>
                             <dd class="text-xl font-bold text-gray-900 dark:text-white">{{ formatSen(totalSen) }}</dd>
@@ -189,12 +315,13 @@ async function confirmPayment() {
                         size="xl"
                         color="success"
                         label="Confirm Seats"
-                        :disabled="!tripId || selectedSeats.length === 0"
+                        :loading="busy"
+                        :disabled="!tripId || selectedSeats.length === 0 || !contactName || !contactPhone"
                         @click="confirmSeats"
                     />
                     <template v-else>
                         <SalePaymentMethod v-model="payment" v-model:paid="paid" :total-sen="totalSen" />
-                        <UButton block size="xl" label="Confirm Payment" :disabled="!payment" @click="confirmPayment" />
+                        <UButton block size="xl" label="Confirm Payment" :loading="busy" :disabled="!payment" @click="confirmPayment" />
                     </template>
                 </SalePanel>
             </div>

@@ -17,13 +17,21 @@ export interface LimoRow {
     to_zone_name: string | null
     guest_name: string | null
     guest_phone: string | null
-    /** From the booking's assignment. TODO(api): field names from the generated client. */
+    from_zone_id: number | null
+    to_zone_id: number | null
+    /** The first car on the job (GET /fleet/bookings: first active `fleet_assignments` row). */
+    assignment_id: number | null
+    driver_id: number | null
     driver_name: string | null
     vehicle_plate: string | null
     flight_no: string | null
     remarks: string | null
-    /** Client changes waiting for staff (`fleet_booking_changes`, status pending). TODO(api): name from the generated client. */
-    pending_changes?: number
+    vehicle_class: string
+    vehicles_needed: number
+    pax_count: number
+    total_sen: number
+    /** Client changes waiting for staff (`fleet_booking_changes`, status pending). */
+    pending_changes: number
 }
 
 export type LimoStatus =

@@ -4,7 +4,7 @@ import type { DropdownMenuItem } from '@nuxt/ui'
 // Header (doc 09, "Look and layout"). Left: sidebar toggle, page search. Right, in this order: theme toggle
 // (fleet-management style), workspace switcher, notifications, user menu.
 const { collapsed, mobileOpen, resolveTo } = useOpsShell()
-const { groups } = useOpsMenu()
+const { links } = useOpsMenu()
 const { me } = useMe()
 const api = useApi()
 const { logout } = useAuth()
@@ -21,9 +21,7 @@ interface PageItem {
     to: string
 }
 const pages = computed<PageItem[]>(() =>
-    groups.value.flatMap((group) =>
-        group.items.map((item) => ({ label: item.label, suffix: group.title, to: resolveTo(item.to) })),
-    ),
+    links.value.map((link) => ({ label: link.label, suffix: link.trail.slice(-1)[0] ?? '', to: resolveTo(link.to) })),
 )
 const picked = ref<PageItem | undefined>()
 watch(picked, async (page) => {
@@ -41,25 +39,19 @@ async function signOut() {
 }
 
 /** User menu, as fleet-management's UserDropdown: round picture, then name and role (which links to the profile), sign out. */
-const displayName = computed(() => {
-    const profile = me.value?.profile
-    if (profile) return [profile.first_name, profile.surname].filter(Boolean).join(' ')
-    return me.value?.name ?? 'Signed out'
-})
+const displayName = computed(() => me.value?.name || me.value?.email || 'Signed out')
 const roleLabel = computed(() => me.value?.roles?.join(', ') || 'Member')
-const avatarUrl = computed(() => me.value?.profile?.avatar_url || undefined)
+// The picture set in Account settings (users.avatar_key); initials when there is none.
+const avatarUrl = computed<string | undefined>(() => me.value?.avatar_url ?? undefined)
 
-// Only apps that have a profile page (today: admin) make the name block a link.
-const router = useRouter()
-const hasProfilePage = router.getRoutes().some((route) => route.path.split('/').pop() === 'profile')
-const profileTo = computed(() => (hasProfilePage ? resolveTo('/profile') : null))
+// Account settings (OpsAccountSettings) is in every app: /profile, or /{location}/profile in taxi and vendor.
+const profileTo = computed(() => resolveTo('/profile'))
 
 const userItems = computed<DropdownMenuItem[][]>(() => [
     [
-        profileTo.value
-            ? { label: displayName.value, slot: 'account' as const, to: profileTo.value }
-            : { label: displayName.value, slot: 'account' as const, type: 'label' as const },
+        { label: displayName.value, slot: 'account' as const, to: profileTo.value },
     ],
+    [{ label: 'Account settings', icon: 'i-bx-cog', to: profileTo.value }],
     [{ label: 'Sign out', icon: 'i-bx-arrow-out-right-square-half', onSelect: signOut }],
 ])
 </script>

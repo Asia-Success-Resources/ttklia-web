@@ -1,8 +1,9 @@
 <script setup lang="ts" generic="T extends Record<string, unknown>">
 import type { TableColumn } from '@nuxt/ui'
+import type { PageMeta } from '../../../base/app/types/api'
 
 // One rounded-xl card: title, "Your most recent … list", Import / Export / Create on the right,
-// full-width search row, then the table and pagination (doc 09, "List page").
+// full-width search row, then the table and numbered pagination as in ttklia-v2 (doc 09, "List page").
 // Slots: #actions, #search, #table, #export.
 const props = withDefaults(
     defineProps<{
@@ -11,15 +12,18 @@ const props = withDefaults(
         rows: T[]
         columns: TableColumn<T>[]
         loading?: boolean
-        hasMore?: boolean
+        /** The page's place in the list (`useApiList().pagination`); no bar while it is null. */
+        pagination?: PageMeta | null
         createTo?: string
         canImport?: boolean
         canExport?: boolean
         note?: string
+        /** Statuses a row can be switched to from its status cell; none = the cell only shows the status. */
+        statusOptions?: string[]
     }>(),
-    { loading: false, hasMore: false, createTo: undefined, canImport: false, canExport: true, note: undefined },
+    { loading: false, pagination: null, createTo: undefined, canImport: false, canExport: true, note: undefined, statusOptions: () => [] },
 )
-const emit = defineEmits<{ more: []; export: []; import: [] }>()
+const emit = defineEmits<{ page: [page: number]; export: []; import: []; status: [row: T, status: string] }>()
 const search = defineModel<string>('search', { default: '' })
 
 // Date columns show DD/MM/YYYY (doc 09, "Dates and times"): a column with no cell of its own whose key
@@ -28,6 +32,17 @@ const tableColumns = computed<TableColumn<T>[]>(() =>
     props.columns.map((column) => {
         const key = 'accessorKey' in column ? String(column.accessorKey) : ''
         if (column.cell || !key) return column
+        // Status columns as on fleet-management's boards: a coloured block, with the picker when the page allows it.
+        if (key === 'status' || key.endsWith('_status')) {
+            return {
+                ...column,
+                cell: ({ row }) => h(resolveComponent('OpsStatusCell'), {
+                    status: row.original[key] as string | null,
+                    options: key === 'status' ? props.statusOptions : [],
+                    onChange: (status: string) => emit('status', row.original, status),
+                }),
+            }
+        }
         if (key.endsWith('_at')) return { ...column, cell: ({ row }) => formatDateTime(row.original[key] as string | null) }
         if (key === 'date' || key.endsWith('_date')) return { ...column, cell: ({ row }) => formatDate(row.original[key] as string | null) }
         return column
@@ -64,9 +79,7 @@ const tableColumns = computed<TableColumn<T>[]>(() =>
                     <UTable :data="props.rows" :columns="tableColumns" :loading="props.loading" empty="No records yet" />
                 </slot>
             </div>
-            <div v-if="props.hasMore" class="flex justify-center border-t border-gray-100 p-4 dark:border-gray-800">
-                <UButton label="Load more" color="neutral" variant="outline" @click="emit('more')" />
-            </div>
+            <OpsPagination v-if="props.pagination && props.pagination.total > 0" :meta="props.pagination" :loading="props.loading" @page="emit('page', $event)" />
         </div>
     </div>
 </template>

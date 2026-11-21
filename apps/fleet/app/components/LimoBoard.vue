@@ -3,47 +3,82 @@ import type { LimoColumnKey, LimoRow, LimoStatus } from '~/utils/limoBoard'
 
 // The limo board: the same table layout as fleet-management's limousine board, on `fleet_bookings` (doc 19).
 // A month list, then one coloured date group per pickup date, each a table with a frozen checkbox and RSVN column,
-// status chips, pickers and a summary row. Used by /limo (every booking), /limo/pending, /limo/transferred and
-// /limo/changes, which differ only in which bookings they show.
+// status chips, pickers and a summary row. Used by /limo (every booking), /limo/pending and /limo/transferred, which
+// differ only in which statuses they show.
 //
-// Reads GET /ops/w/{workspace}/fleet/bookings?service=limo, /zones and /drivers (ttklia-api). TODO(api): those are still
-// stubs and there is no staff update yet, so the board starts empty (never fake rows) and edits are not saved: each one says so.
+// GET /ops/w/{workspace}/fleet/bookings?service=limo&from&to (one month at a time) and …/months for the month list;
+// edits save at once: Enter in a cell (PATCH), the time picker, the status chip (cancel, cannot provide and transfer
+// ask first), the zone pickers (from_zone_id, to_zone_id) and the driver picker (assigns the driver with the vehicle
+// they last drove: POST /fleet/assignments; the old car comes off). "+ Add reservation number" keys a new booking.
+// The booking number opens the booking (/limo/{uuid}) for everything else.
 
 const props = withDefaults(
     defineProps<{
         title: string
-        /** Show only bookings in these statuses. */
+        /** Show only bookings in these statuses (filtered by the API). */
         statuses?: LimoStatus[]
-        /** Show only bookings with client changes waiting for staff (`fleet_booking_changes`, status pending). */
-        withPendingChanges?: boolean
         /** The "+ Add reservation number" row (only where new bookings are keyed). */
         canAdd?: boolean
     }>(),
-    { statuses: undefined, withPendingChanges: false, canAdd: false },
+    { statuses: undefined, canAdd: false },
 )
 
 const toast = useToast()
-const list = useApiList<LimoRow>({ path: '/fleet/bookings', workspaceScoped: true, query: { service: 'limo' } })
-const zones = useApiList<{ id: number; name: string; code: string }>({ path: '/zones', workspaceScoped: true })
-const drivers = useApiList<{ id: number; name: string; plate_no: string | null }>({ path: '/drivers', workspaceScoped: true })
+const api = useFleetApi()
+const { can } = useMe()
+const canWrite = computed(() => can('fleet.limo.write'))
+
+const today = todayYmd()
+const activeMonth = ref(today.slice(0, 7))
+const statusQuery = computed(() => props.statuses?.join(','))
+
+function monthRange(month: string) {
+    const [y, m] = month.split('-').map(Number) as [number, number]
+    return { from: ymd(new Date(y, m - 1, 1)), to: ymd(new Date(y, m, 0)) }
+}
+const list = useApiAll<LimoRow>({
+    path: '/fleet/bookings',
+    workspaceScoped: true,
+    query: () => ({ service: 'limo', ...monthRange(activeMonth.value), status: statusQuery.value, sort: 'pickup_asc' }),
+    max: 3000,
+})
+const zones = useApiAll<{ id: number; name: string; code: string }>({ path: '/zones', workspaceScoped: true })
+const drivers = useApiAll<{ id: number; name: string; usual_vehicle: string | null; usual_vehicle_id: number | null; day_status: string }>({
+    path: '/fleet/drivers/today',
+    workspaceScoped: true,
+})
+const monthCounts = ref<{ month: string; days: number }[]>([])
+async function loadMonths() {
+    try {
+        monthCounts.value = (await api.get<{ data: { month: string; days: number }[] }>('/fleet/bookings/months', { service: 'limo', status: statusQuery.value })).data
+    } catch {
+        monthCounts.value = []
+    }
+}
 onMounted(() => {
     list.load()
+    loadMonths()
     zones.load()
     drivers.load()
 })
+watch(activeMonth, () => list.load())
+const reload = () => Promise.all([list.load(), loadMonths()])
 
-function notSaved(what: string) {
-    toast.add({
-        title: `${what} not saved`,
-        description: 'The bookings API is not connected yet.',
-        color: 'warning',
-        icon: 'i-bx-alert-circle',
-    })
+function failed(what: string, e: unknown) {
+    toast.add({ title: `${what} not saved`, description: fleetError(e), color: 'error', icon: 'i-bx-alert-circle' })
+}
+async function patch(row: LimoRow, body: Record<string, unknown>, what: string) {
+    try {
+        await api.patch(`/fleet/bookings/${row.uuid}`, body)
+        toast.add({ title: `${what} saved`, color: 'success' })
+        await list.load()
+    } catch (e) {
+        failed(what, e)
+        await list.load()
+    }
 }
 
 // ---------------------------------------------------------------- months and date groups
-const today = todayYmd()
-const activeMonth = ref(today.slice(0, 7))
 /** Months and dates added on the board before any booking sits on them (fleet-management's "+" and "New Date"). */
 const addedMonths = ref<string[]>([])
 const addedDates = ref<string[]>([])
@@ -52,11 +87,7 @@ const searchQuery = ref('')
 
 const rowsByDate = computed(() => {
     const byDate: Record<string, LimoRow[]> = {}
-    for (const row of list.rows.value) {
-        if (props.statuses && !props.statuses.includes(row.status)) continue
-        if (props.withPendingChanges && !row.pending_changes) continue
-        ;(byDate[pickupDate(row.pickup_at)] ||= []).push(row)
-    }
+    for (const row of list.rows.value) (byDate[pickupDate(row.pickup_at)] ||= []).push(row)
     for (const rows of Object.values(byDate)) rows.sort((a, b) => a.pickup_at.localeCompare(b.pickup_at))
     return byDate
 })
@@ -64,14 +95,18 @@ const rowsByDate = computed(() => {
 const allDates = computed(() => [...new Set([...Object.keys(rowsByDate.value), ...addedDates.value])].sort())
 
 const months = computed(() => {
-    const keys = new Set([today.slice(0, 7), ...addedMonths.value, ...allDates.value.map((d) => d.slice(0, 7))])
-    return [...keys].sort().map((month) => ({ month, groups: allDates.value.filter((d) => d.startsWith(month)).length }))
+    const counts = new Map(monthCounts.value.map((m) => [m.month, m.days]))
+    const keys = new Set([today.slice(0, 7), ...addedMonths.value, ...counts.keys()])
+    return [...keys].sort().map((month) => ({
+        month,
+        groups: month === activeMonth.value ? allDates.value.filter((d) => d.startsWith(month)).length : (counts.get(month) ?? 0),
+    }))
 })
 
 function matches(row: LimoRow): boolean {
     const q = searchQuery.value.trim().toLowerCase()
     if (!q) return true
-    return [row.client_reference, row.reference, row.guest_name, row.driver_name, row.flight_no, row.vehicle_plate]
+    return [row.client_reference, row.reference, row.guest_name, row.driver_name, row.flight_no, row.vehicle_plate, row.from_text, row.to_text]
         .some((v) => v?.toLowerCase().includes(q))
 }
 
@@ -95,8 +130,8 @@ const monthLabel = computed(() => {
 })
 
 const monthBounds = computed(() => {
-    const [y, m] = activeMonth.value.split('-').map(Number) as [number, number]
-    return { min: ymd(new Date(y, m - 1, 1)), max: ymd(new Date(y, m, 0)) }
+    const { from, to } = monthRange(activeMonth.value)
+    return { min: from, max: to }
 })
 
 function selectMonth(month: string) {
@@ -153,21 +188,39 @@ function cancelAddGroup() {
 // ---------------------------------------------------------------- rows
 const newDrafts = reactive<Record<string, string>>({})
 
-function addReservation(date: string) {
-    if (!(newDrafts[date] ?? '').trim()) return
-    // TODO(api): POST /fleet/bookings (doc 04) with the RSVN and this pickup date, Idempotency-Key required.
-    notSaved('Booking')
+/** A new booking from its RSVN on that date (09:00 until the time is set); the rest is filled in on the row. */
+async function addReservation(date: string) {
+    const rsvn = (newDrafts[date] ?? '').trim()
+    if (!rsvn) return
+    try {
+        await api.post('/fleet/bookings', { client_reference: rsvn, pickup_at: `${date} 09:00`, vehicle_class: 'alphard' })
+        newDrafts[date] = ''
+        toast.add({ title: `Booking ${rsvn} added`, color: 'success' })
+        await reload()
+    } catch (e) {
+        failed('Booking', e)
+    }
 }
 
+/** The booking field each editable column saves to. */
+const FIELD: Partial<Record<LimoColumnKey | 'rsvn', string>> = {
+    rsvn: 'client_reference', passengerName: 'guest_name', flightNo: 'flight_no', remarks: 'remarks',
+}
 /** Inline edits save only on Enter; any other way out restores the saved value (as fleet-management). */
-function commitEdit(event: Event, field: string) {
+function commitEdit(event: Event, row: LimoRow, key: LimoColumnKey | 'rsvn', label: string) {
     const el = event.target as HTMLElement
+    const value = el.innerText.trim()
     el.blur()
-    // TODO(api): no staff update endpoint for fleet bookings in doc 04 yet.
-    notSaved(field)
+    const field = FIELD[key]
+    if (!field) return
+    patch(row, { [field]: value || null }, label)
 }
 function revertEdit(event: Event, saved: string | null) {
     ;(event.target as HTMLElement).innerText = saved ?? ''
+}
+function saveTime(row: LimoRow, value: string) {
+    if (!value) return
+    patch(row, { pickup_at: `${pickupDate(row.pickup_at)} ${value}` }, 'Time')
 }
 
 function statusStyle(value: string | null | undefined) {
@@ -210,24 +263,69 @@ function openPickerMenu(row: LimoRow, key: LimoColumnKey, event: MouseEvent) {
     if (pickerMenu.row === row && pickerMenu.key === key) pickerMenu.row = null
     else place(pickerMenu, row, key, event)
 }
-function setStatus() {
+
+const reasonAction = useReasonAction()
+/** Open statuses save at once; cancel and cannot provide ask for the reason; assigned comes from picking a driver. */
+function setStatus(status: LimoStatus) {
+    const row = statusMenu.row
     statusMenu.row = null
-    notSaved('Status')
+    if (!row || row.status === status) return
+    if (status === 'assigned') {
+        toast.add({ title: 'Pick a driver to assign the job', color: 'info', icon: 'i-bx-info-circle' })
+        return
+    }
+    if (status === 'transferred') {
+        navigateTo(`/limo/${row.uuid}?action=transfer`)
+        return
+    }
+    if (status === 'cancelled' || status === 'cannot_provide') {
+        const cancel = status === 'cancelled'
+        reasonAction.ask({
+            title: cancel ? `Cancel ${row.client_reference ?? row.reference}` : `Cannot provide ${row.client_reference ?? row.reference}`,
+            submitLabel: cancel ? 'Cancel booking' : 'Mark cannot provide',
+            run: async (reason) => {
+                await api.post(`/fleet/bookings/${row.uuid}/${cancel ? 'cancel' : 'cannot-provide'}`, cancel ? { reason, cancellation: 'no_charge' } : { reason })
+                toast.add({ title: cancel ? 'Booking cancelled (no charge; add a charge on the booking)' : 'Marked cannot provide', color: 'success' })
+                await list.load()
+            },
+        })
+        return
+    }
+    patch(row, { status }, 'Status')
 }
 
 const pickerNoun = computed(() => (pickerMenu.key === 'driverName' ? 'driver' : 'zone'))
 const pickerOptions = computed(() => {
     const q = pickerMenu.query.trim().toLowerCase()
     const options = pickerMenu.key === 'driverName'
-        ? drivers.rows.value.map((d) => ({ id: d.id, name: d.name, sub: d.plate_no ?? '' }))
+        ? drivers.rows.value.map((d) => ({ id: d.id, name: d.name, sub: d.day_status === 'available' ? (d.usual_vehicle ?? '') : d.day_status.replace(/_/g, ' ') }))
         : zones.rows.value.map((z) => ({ id: z.id, name: z.name, sub: z.code.toUpperCase() }))
     return q ? options.filter((o) => o.name.toLowerCase().includes(q)) : options
 })
-function setPicker() {
+async function setPicker(id: number) {
+    const row = pickerMenu.row
+    const key = pickerMenu.key
     pickerMenu.row = null
-    notSaved(pickerNoun.value === 'driver' ? 'Driver' : 'Zone')
+    if (!row) return
+    if (key === 'pickupZone') return patch(row, { from_zone_id: id }, 'Pickup zone')
+    if (key === 'dropoffZone') return patch(row, { to_zone_id: id }, 'Dropoff zone')
+    // Driver: their usual vehicle goes with them; the car on the job now comes off first.
+    const driver = drivers.rows.value.find((d) => d.id === id)
+    if (!driver?.usual_vehicle_id) {
+        toast.add({ title: 'No usual vehicle for this driver', description: 'Open the booking to choose the vehicle.', color: 'warning', icon: 'i-bx-alert-circle' })
+        return
+    }
+    try {
+        if (row.assignment_id) await api.post(`/fleet/assignments/${row.assignment_id}/release`)
+        await api.post('/fleet/assignments', { fleet_booking_uuid: row.uuid, driver_id: driver.id, vehicle_id: driver.usual_vehicle_id })
+        toast.add({ title: `${driver.name} assigned`, color: 'success' })
+    } catch (e) {
+        failed('Driver', e)
+    }
+    await list.load()
 }
 </script>
+
 
 <template>
     <div class="isolate flex h-[calc(100dvh-6rem)] min-h-0 overflow-hidden rounded-md bg-zinc-900 font-sans text-(--gm-board-text) md:h-[calc(100dvh-7rem)]">
@@ -285,7 +383,8 @@ function setPicker() {
 
             <!-- Date groups -->
             <div class="min-h-0 flex-1 overflow-y-auto px-4 py-4 md:px-6">
-                <p v-if="groups.length === 0" class="py-2 text-sm text-(--gm-board-placeholder)">No bookings this month.</p>
+                <p v-if="list.pending.value && !list.rows.value.length" class="py-2 text-sm text-(--gm-board-placeholder)">Loading…</p>
+                <p v-else-if="groups.length === 0" class="py-2 text-sm text-(--gm-board-placeholder)">No bookings this month.</p>
 
                 <div v-for="group in groups" :key="group.date" class="mb-2">
                     <div class="flex items-center" style="height: 40px">
@@ -301,8 +400,10 @@ function setPicker() {
                         <div style="width: max-content; min-width: 100%">
                             <!-- Header, rows and the add row in one bordered card; overflow-clip keeps the frozen columns working. -->
                             <div class="overflow-clip rounded-t-md rounded-bl-md border border-(--gm-board-border-strong) [overflow-clip-margin:0px]">
-                                <!-- Column header -->
-                                <div class="flex items-stretch bg-(--gm-board-header) text-[13px] text-(--gm-board-text-soft)" style="height: 42px">
+                                <!-- Column header: sticky inside the group's scroll box (max-h 70vh, as fleet-management), so it stays
+                                     on top while the date's rows scroll under it, until the last row has gone by. The card's
+                                     overflow-clip is not a scroll container, so it does not stop the sticking. -->
+                                <div class="sticky top-0 z-40 flex items-stretch bg-(--gm-board-header) text-[13px] text-(--gm-board-text-soft) shadow-[0_1px_0_var(--gm-board-border-strong)]" style="height: 42px">
                                     <div :style="{ width: `${CHECKBOX_WIDTH}px` }" class="sticky left-0 z-30 flex shrink-0 items-center justify-center overflow-hidden rounded-tl-md bg-(--gm-board-header)">
                                         <div class="absolute bottom-0 left-0 top-0 w-1.5" :style="{ backgroundColor: group.color }" />
                                         <input type="checkbox" class="size-4 rounded border border-(--gm-board-checkbox) bg-transparent accent-(--gm-focus)" aria-label="Select all">
@@ -335,19 +436,20 @@ function setPicker() {
                                     <div :style="{ width: `${NAME_WIDTH}px`, left: `${CHECKBOX_WIDTH}px` }" class="sticky z-30 flex shrink-0 items-center border-l border-(--gm-board-border) bg-(--gm-board-row) pr-2 group-hover/row:bg-(--gm-board-row-hover)">
                                         <span
                                             class="flex-1 truncate pl-3 text-[13px] outline-none"
-                                            contenteditable
                                             spellcheck="false"
-                                            @keydown.enter.prevent="commitEdit($event, 'RSVN')"
+                                            :contenteditable="canWrite"
+                                            @keydown.enter.prevent="commitEdit($event, row, 'rsvn', 'RSVN')"
                                             @keydown.esc="($event.target as HTMLElement).blur()"
                                             @blur="revertEdit($event, row.client_reference ?? row.reference)"
                                         >{{ row.client_reference ?? row.reference }}</span>
-                                        <span
+                                        <NuxtLink
                                             v-if="row.pending_changes"
+                                            :to="`/limo/changes?booking=${row.uuid}`"
                                             class="mr-1 shrink-0 rounded-full bg-(--gm-status-workshop) px-2 py-0.5 text-[11px] font-semibold text-black"
                                             :title="`${row.pending_changes} client change(s) waiting`"
-                                        >{{ row.pending_changes }} {{ row.pending_changes === 1 ? 'change' : 'changes' }}</span>
-                                        <NuxtLink :to="`/limo/changes?booking=${row.uuid}`" class="flex size-6 shrink-0 items-center justify-center text-(--gm-board-placeholder) opacity-0 transition hover:text-white group-hover/row:opacity-100" title="Open booking changes">
-                                            <UIcon name="i-bx-message-circle-plus" class="size-[18px]" />
+                                        >{{ row.pending_changes }} {{ row.pending_changes === 1 ? 'change' : 'changes' }}</NuxtLink>
+                                        <NuxtLink :to="`/limo/${row.uuid}`" class="flex size-6 shrink-0 items-center justify-center text-(--gm-board-placeholder) opacity-0 transition hover:text-white group-hover/row:opacity-100" :title="`Open booking ${row.reference}`">
+                                            <UIcon name="i-bx-arrow-out-up-right-square" class="size-[18px]" />
                                         </NuxtLink>
                                     </div>
 
@@ -360,6 +462,7 @@ function setPicker() {
                                                 :class="{ 'outline-2 -outline-offset-2 outline-(--gm-action) outline': statusMenu.row === row }"
                                                 :style="statusStyle(row.status)"
                                                 title="Change status"
+                                                :disabled="!canWrite"
                                                 @click="openStatusMenu(row, $event)"
                                             >
                                                 {{ limoStatus(row.status)?.label ?? row.status }}
@@ -372,6 +475,7 @@ function setPicker() {
                                                 type="button"
                                                 class="group/picker flex size-full items-center justify-center gap-1 px-2 text-[13px] hover:bg-(--gm-board-cell-hover)"
                                                 :class="{ 'outline-2 -outline-offset-2 outline-(--gm-action) outline': pickerMenu.row === row && pickerMenu.key === col.key }"
+                                                :disabled="!canWrite"
                                                 @click="openPickerMenu(row, col.key, $event)"
                                             >
                                                 <span class="truncate" :class="cellValue(row, col.key) ? 'text-(--gm-board-text)' : 'text-(--gm-board-placeholder)'">
@@ -393,7 +497,8 @@ function setPicker() {
                                                 :value="cellValue(row, 'time')"
                                                 class="time-input w-full rounded bg-transparent px-2 text-center text-[13px] outline-none focus:ring-2 focus:ring-(--gm-focus)"
                                                 :aria-label="`Pickup time for ${row.client_reference ?? row.reference}`"
-                                                @change="($event.target as HTMLInputElement).value = cellValue(row, 'time'); notSaved('Time')"
+                                                :disabled="!canWrite"
+                                                @change="saveTime(row, ($event.target as HTMLInputElement).value)"
                                             >
                                         </div>
 
@@ -401,9 +506,9 @@ function setPicker() {
                                         <div v-else :style="{ width: `${col.width}px` }" class="flex shrink-0 items-center justify-center border-l border-(--gm-board-border) text-[13px]">
                                             <span
                                                 class="w-full truncate px-2 text-center outline-none"
-                                                contenteditable
+                                                :contenteditable="canWrite"
                                                 spellcheck="false"
-                                                @keydown.enter.prevent="commitEdit($event, col.label)"
+                                                @keydown.enter.prevent="commitEdit($event, row, col.key, col.label)"
                                                 @keydown.esc="($event.target as HTMLElement).blur()"
                                                 @blur="revertEdit($event, cellValue(row, col.key))"
                                             >{{ cellValue(row, col.key) }}</span>
@@ -412,7 +517,7 @@ function setPicker() {
                                 </div>
 
                                 <!-- Add row (name frozen) -->
-                                <div v-if="props.canAdd" class="group/add flex items-stretch bg-(--gm-board-row)" style="height: 40px">
+                                <div v-if="props.canAdd && canWrite" class="group/add flex items-stretch bg-(--gm-board-row)" style="height: 40px">
                                     <div :style="{ width: `${CHECKBOX_WIDTH}px` }" class="sticky left-0 z-30 shrink-0 overflow-hidden rounded-bl-md bg-(--gm-board-row)">
                                         <div class="absolute bottom-0 left-0 top-0 w-1.5 opacity-40 transition group-hover/add:opacity-100" :style="{ backgroundColor: group.color }" />
                                     </div>
@@ -473,6 +578,8 @@ function setPicker() {
             </div>
         </div>
 
+        <OpsReasonModal :action="reasonAction" />
+
         <!-- Status and picker popovers: teleported, so the groups' scroll containers do not clip them -->
         <Teleport to="body">
             <template v-if="statusMenu.row">
@@ -485,7 +592,7 @@ function setPicker() {
                         type="button"
                         class="relative min-h-8 rounded-sm px-3 py-1 text-[14px] font-medium transition hover:brightness-110"
                         :style="statusStyle(option.value)"
-                        @click="setStatus"
+                        @click="setStatus(option.value)"
                     >
                         {{ option.label }}
                     </button>
@@ -511,7 +618,7 @@ function setPicker() {
                             :key="option.id"
                             type="button"
                             class="flex min-h-8 items-center justify-between gap-2 rounded-sm bg-(--gm-board-chip) px-3 py-1 text-[14px] font-medium text-white transition hover:bg-(--gm-board-chip-hover)"
-                            @click="setPicker"
+                            @click="setPicker(option.id)"
                         >
                             <span class="truncate">{{ option.name }}</span>
                             <span class="shrink-0 text-[11px] text-(--gm-board-text-sub)">{{ option.sub }}</span>

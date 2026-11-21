@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Vehicle types: list (table `taxi_line_classes`). Permission: taxi.vehicle_types.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/taxi/line-classes (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/taxi/line-classes (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Vehicle types' })
 
 interface Row extends Record<string, unknown> {
@@ -25,7 +25,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/taxi/line-classes', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/taxi/line-classes', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

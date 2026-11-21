@@ -1,50 +1,48 @@
 <script setup lang="ts">
-// Limo new: key a booking (table `fleet_bookings`). Permission: fleet.limo_new.write (doc 27).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// New limo booking (the limo sheet's new row, doc 19): the booking form, saved with POST /fleet/bookings, then the
+// booking opens to assign its car and driver. Bookings from WhatsApp are made from the Inbox instead.
+// Permission: fleet.limo.write (doc 27).
 useHead({ title: 'New limo booking' })
 
-const state = reactive<Record<string, string>>({
-    uuid: '',
-    reference: '',
-    service: '',
-    source: '',
-    client_reference: '',
-    guest_name: '',
-    guest_phone: '',
-    pax_count: ''
+const api = useFleetApi()
+const toast = useToast()
+const options = useFleetOptions()
+onMounted(() => {
+    options.clients.load()
+    options.zones.load()
+    options.places.load()
 })
-const saving = ref(false)
 
+const { form, fieldError, show, submit } = useFormModal(emptyBooking)
+show()
 async function save() {
-    // TODO(api): no write endpoint for this form in doc 04 yet.
+    let uuid = ''
+    const saved = await submit(async (d) => {
+        uuid = (await api.post<{ data: { uuid: string; reference: string } }>('/fleet/bookings', draftToBody(d))).data.uuid
+    })
+    if (saved && uuid) {
+        toast.add({ title: 'Booking saved', color: 'success' })
+        await navigateTo(`/limo/${uuid}`)
+    }
 }
 </script>
 
 <template>
-    <OpsFormPage title="Limo new" :saving="saving" @submit="save">
-            <UFormField label="Uuid" name="uuid">
-                <UInput v-model="state.uuid" class="w-full" />
-            </UFormField>
-            <UFormField label="Reference" name="reference">
-                <UInput v-model="state.reference" class="w-full" />
-            </UFormField>
-            <UFormField label="Service" name="service">
-                <UInput v-model="state.service" class="w-full" />
-            </UFormField>
-            <UFormField label="Source" name="source">
-                <UInput v-model="state.source" class="w-full" />
-            </UFormField>
-            <UFormField label="Client reference" name="client_reference">
-                <UInput v-model="state.client_reference" class="w-full" />
-            </UFormField>
-            <UFormField label="Guest name" name="guest_name">
-                <UInput v-model="state.guest_name" class="w-full" />
-            </UFormField>
-            <UFormField label="Guest phone" name="guest_phone">
-                <UInput v-model="state.guest_phone" class="w-full" />
-            </UFormField>
-            <UFormField label="Pax count" name="pax_count">
-                <UInput v-model="state.pax_count" class="w-full" />
-            </UFormField>
-    </OpsFormPage>
+    <div>
+        <OpsBreadcrumb title="New limo booking" />
+        <form class="rounded-2xl border border-(--ops-border) bg-(--ops-card)" @submit.prevent="save">
+            <div class="border-b border-(--ops-border) px-6 py-4">
+                <h2 class="text-lg font-medium text-gray-800 dark:text-white">Booking</h2>
+                <p class="text-sm text-gray-500">Times are Malaysia time. Assign the car and driver after saving.</p>
+            </div>
+            <div class="grid grid-cols-1 gap-4 p-6 text-sm sm:grid-cols-2">
+                <FleetBookingFields :data="form.data" :field-error="fieldError" :options="options.items" />
+            </div>
+            <UAlert v-if="form.error" class="mx-6 mb-4" color="error" variant="soft" :title="form.error" />
+            <div class="flex gap-3 border-t border-(--ops-border) px-6 py-4">
+                <UButton type="submit" label="Save booking" icon="i-bx-save" :loading="form.saving" />
+                <UButton label="Cancel" color="neutral" variant="outline" to="/limo" />
+            </div>
+        </form>
+    </div>
 </template>

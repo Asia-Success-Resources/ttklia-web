@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import type { AppNotification, NotificationFilter } from '../composables/useNotifications'
+import type { PageMeta } from '../../../base/app/types/api'
 
 // All notifications, ported from today's ttklia-v2 admin (admin/notifications/index.blade.php): a card with the
 // count, filter tabs (Bus Refund, Taxi Refund, Staff Request, Genting Request, from the API), then the list,
-// newest first, with "Load more" in place of page numbers. Opening it marks everything read, as there.
+// newest first, with numbered pages as there. Opening it marks everything read, as there.
 const { page, markAllRead } = useNotifications()
 const route = useRoute()
 const router = useRouter()
@@ -11,22 +12,22 @@ const router = useRouter()
 const rows = ref<AppNotification[]>([])
 const filters = ref<NotificationFilter[]>([])
 const total = ref(0)
-const nextCursor = ref<string | null>(null)
+const meta = ref<PageMeta | null>(null)
 const pending = ref(false)
 const error = ref('')
 const activeFilter = computed(() => (typeof route.query.filter === 'string' ? route.query.filter : null))
 
-async function load(cursor?: string) {
+async function load(pageNo = 1) {
     pending.value = true
     error.value = ''
     try {
-        const res = await page({ filter: activeFilter.value ?? undefined, cursor, limit: 20 })
+        const res = await page({ filter: activeFilter.value ?? undefined, page: pageNo, limit: 10 })
         if (!res) return
         const data = res.data ?? []
-        rows.value = cursor ? [...rows.value, ...data] : data
+        rows.value = data
         filters.value = res.filters ?? []
         total.value = res.total ?? 0
-        nextCursor.value = res.next_cursor ?? null
+        meta.value = res.meta ?? null
     } catch {
         error.value = 'Notifications could not be loaded.'
     } finally {
@@ -112,8 +113,6 @@ const tabOff = 'border border-gray-300 text-gray-700 hover:bg-gray-50 dark:borde
             </div>
         </div>
 
-        <div v-if="nextCursor || pending" class="flex justify-center border-t border-(--ops-border) px-6 py-4">
-            <UButton :loading="pending" variant="outline" color="neutral" label="Load more" @click="load(nextCursor ?? undefined)" />
-        </div>
+        <OpsPagination v-if="meta && meta.total > 0" :meta="meta" :loading="pending" @page="load" />
     </div>
 </template>

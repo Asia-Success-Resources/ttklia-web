@@ -20,13 +20,32 @@ onMounted(() => {
     )
 })
 
-const options = computed(() => ({
-    chart: { fontFamily: 'Outfit, sans-serif', toolbar: { show: false } },
-    colors: colors.value,
-    dataLabels: { enabled: false },
-    xaxis: { categories: props.categories },
-    noData: { text: 'No data yet' },
-}))
+// Axis text follows the theme (ApexCharts' default is near-black, unreadable on the dark card): gray-500 in light,
+// gray-400 in dark. Grid lines (the value lines across the chart) at 60% opacity, so they sit behind the data.
+const colorMode = useColorMode()
+const dark = computed(() => colorMode.value === 'dark')
+
+const options = computed(() => {
+    const text = dark.value ? '#9ca3af' : '#6b7280'
+    const line = dark.value ? 'rgba(75, 85, 99, 0.6)' : 'rgba(209, 213, 219, 0.6)'
+    return {
+        chart: { fontFamily: 'Outfit, sans-serif', toolbar: { show: false }, foreColor: text, background: 'transparent' },
+        theme: { mode: dark.value ? 'dark' : 'light' },
+        colors: colors.value,
+        dataLabels: { enabled: false },
+        xaxis: {
+            categories: props.categories,
+            labels: { style: { colors: text } },
+            axisBorder: { color: line },
+            axisTicks: { color: line },
+        },
+        yaxis: { labels: { style: { colors: text } } },
+        grid: { borderColor: line },
+        legend: { labels: { colors: text } },
+        tooltip: { theme: dark.value ? 'dark' : 'light' },
+        noData: { text: 'No data yet', style: { color: text } },
+    }
+})
 </script>
 
 <template>

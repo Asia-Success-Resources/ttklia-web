@@ -11,8 +11,10 @@ import type { WorkspaceRef } from '../../../base/app/types/api'
 // (no API configured) the button shows with an empty panel, as the menus show every item in preview.
 //
 // Switching (doc 09, doc 16):
-// - same app (KL2 → Lalaport in bus): only the location in the path changes, on the same page;
-// - another app (bus → taxi): that app's address (useAppAddress), with no new login (shared session).
+// - same app: taxi swaps the location in the path, on the same page; bus (no location in the path) reloads the same
+//   page with ?location=…, which saves the new location in its cookie (ops-auth middleware);
+// - another app (bus → taxi): that app's address (useAppAddress), with no new login (shared session); for bus,
+//   ?location=… so it opens at that location.
 // Global tile ("Overview", first): shown when /me says `global` (the user holds a global role); it opens admin.
 // TODO(api): /me does not list the operator portal, vendor outlets or Finance yet; those tiles come once it does.
 const { config } = useOpsShell()
@@ -37,22 +39,37 @@ interface Tile {
 }
 
 // Order and colours from doc 09: Global first, then bus (blue), taxi (amber), fleet (green), e-hailing.
-const TYPES: Record<string, { label: string; icon: string; tone: string; order: number; app: string; locationInPath: boolean }> = {
-    bus_terminal: { label: 'Bus CTS', icon: 'i-bx-bus', tone: 'bg-blue-500/15 text-blue-600 dark:text-blue-400', order: 1, app: 'bus', locationInPath: true },
-    taxi: { label: 'Taxi', icon: 'i-bx-taxi', tone: 'bg-amber-500/15 text-amber-600 dark:text-amber-400', order: 2, app: 'taxi', locationInPath: true },
-    fleet: { label: 'Fleet', icon: 'i-bx-car', tone: 'bg-green-500/15 text-green-600 dark:text-green-400', order: 3, app: 'fleet', locationInPath: false },
-    ride: { label: 'E-hailing', icon: 'i-bx-map', tone: 'bg-violet-500/15 text-violet-600 dark:text-violet-400', order: 4, app: 'ride', locationInPath: false },
+// `home`: the app's start page for a workspace (bus keeps its location in a cookie, set by ?location=).
+const TYPES: Record<string, { label: string; icon: string; tone: string; order: number; app: string; home: (slug: string) => string }> = {
+    bus_terminal: { label: 'Bus CTS', icon: 'i-bx-bus', tone: 'bg-blue-500/15 text-blue-600 dark:text-blue-400', order: 1, app: 'bus', home: (s) => `/?location=${encodeURIComponent(s)}` },
+    taxi: { label: 'Taxi', icon: 'i-bx-taxi', tone: 'bg-amber-500/15 text-amber-600 dark:text-amber-400', order: 2, app: 'taxi', home: (s) => `/${s}` },
+    fleet: { label: 'Fleet', icon: 'i-bx-car', tone: 'bg-green-500/15 text-green-600 dark:text-green-400', order: 3, app: 'fleet', home: () => '/' },
+    ride: { label: 'Teeko', icon: 'i-bx-map', tone: 'bg-violet-500/15 text-violet-600 dark:text-violet-400', order: 4, app: 'ride', home: () => '/' },
 }
 
 function target(workspace: WorkspaceRef): { to: string | null; external: boolean } {
     const type = TYPES[workspace.type]!
     if (type.app === config.app) {
-        // Same app: swap the location in the path and stay on the same page.
+        // Same app, location kept in a cookie (bus): reload this page with the new location, so every list and
+        // permission is read again for it.
+        if (config.savedLocationType) return { to: `${route.path}?location=${encodeURIComponent(workspace.slug)}`, external: true }
+        // Same app, location in the path (taxi): swap it and stay on the same page.
         if (!config.locationInPath || !slug.value) return { to: '/', external: false }
         return { to: route.fullPath.replace(`/${slug.value}`, `/${workspace.slug}`), external: false }
     }
     // Another app: its dashboard, at its own address (doc 09, "Switching").
-    return { to: appAddress(type.app, type.locationInPath ? `/${workspace.slug}` : '/'), external: true }
+    return { to: appAddress(type.app, type.home(workspace.slug)), external: true }
+}
+
+/**
+ * Is this workspace the one on screen? Only a workspace of this app can be. When the app knows its workspace (taxi
+ * from the path, bus from its saved location) it must match; otherwise (fleet, Teeko, or a taxi home page) the app's
+ * workspace is current when the user holds just one of its kind, as fleet and Teeko each have one.
+ */
+function isCurrent(workspace: WorkspaceRef): boolean {
+    if (config.app === 'admin' || TYPES[workspace.type]?.app !== config.app) return false
+    if (slug.value) return workspace.slug === slug.value
+    return (me.value?.workspaces ?? []).filter((w) => TYPES[w.type]?.app === config.app).length === 1
 }
 
 /** Global (doc 09): first tile, for users with a global role; it opens the admin app's overview. */
@@ -81,7 +98,7 @@ const tiles = computed<Tile[]>(() => [
             type: TYPES[w.type]!.label,
             icon: TYPES[w.type]!.icon,
             tone: TYPES[w.type]!.tone,
-            current: config.app !== 'admin' && w.slug === slug.value,
+            current: isCurrent(w),
             ...target(w),
         })),
 ])

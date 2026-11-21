@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Counter: queue: chee queue display and call (table `taxi_tickets`). Permission: taxi.counter_queue.read (doc 27).
-// GET /api/v1/ops/w/{workspace}/taxi/tickets (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/ops/w/{workspace}/taxi/tickets (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Counter: queue' })
 
 definePageMeta({ layout: 'counter' })
@@ -27,7 +27,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/taxi/tickets', workspaceScoped: true })
+const list = useApiList<Row>({ search, path: '/taxi/tickets', workspaceScoped: true })
 onMounted(() => list.load())
 </script>
 
@@ -39,8 +39,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

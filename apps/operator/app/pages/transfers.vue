@@ -3,7 +3,7 @@ import type { TableColumn } from '@nuxt/ui'
 
 // Transfers: move passengers (no table). Permission: operator.transfers.read (doc 27).
 // TODO(pending: G2) see doc 30.
-// GET /api/v1/operator-portal/transfers (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/operator-portal/transfers (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Transfers' })
 
 interface Row extends Record<string, unknown> {
@@ -20,7 +20,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/operator-portal/transfers' })
+const list = useApiList<Row>({ search, path: '/operator-portal/transfers' })
 onMounted(() => list.load())
 </script>
 
@@ -32,8 +32,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
         note="Waiting on: G2 (doc 30)."
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>

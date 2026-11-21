@@ -1,42 +1,8 @@
 <script setup lang="ts">
-import type { TableColumn } from '@nuxt/ui'
-
-// Kiosks: every kiosk, config, status (table `devices`). Permission: global.settings_kiosks.read (doc 27).
-// GET /api/v1/admin/devices (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// Kiosks: every kiosk app (table `devices`, doc 25 "Kiosk ads and kiosk settings"). Permission: global.settings_kiosks.read / write.
 useHead({ title: 'Kiosks' })
-
-interface Row extends Record<string, unknown> {
-    uuid: string
-    type: string
-    name: string
-    status: string
-    software_version: string | null
-    os: string | null
-}
-
-const columns: TableColumn<Row>[] = [
-    { accessorKey: 'type', header: 'Type' },
-    { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'status', header: 'Status' },
-    { accessorKey: 'software_version', header: 'Software version' },
-    { accessorKey: 'os', header: 'Os' },
-]
-
-const search = ref('')
-const list = useApiList<Row>({ path: '/admin/devices', query: { type: 'kiosk_agent' } })
-onMounted(() => list.load())
 </script>
 
 <template>
-    <OpsListPage
-        v-model:search="search"
-        title="Kiosks"
-        subject="kiosks"
-        :rows="list.rows.value"
-        :columns="columns"
-        :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
-    
-        @more="list.load(list.nextCursor.value ?? undefined)"
-    />
+    <DeviceList title="Kiosks" subject="kiosks" type="kiosk_app" write-permission="global.settings_kiosks.write" />
 </template>

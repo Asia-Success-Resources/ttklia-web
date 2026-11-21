@@ -1,0 +1,54 @@
+# Deploy ttklia-web (doc 34, "Deploying a release"; doc 12). Skeleton only: every step is a TODO.
+# A frontend-only release skips the worker step and the Docker part of the web hosts (doc 34).
+# Staging: every merge to main. Production: a tagged release, after approval (GitHub environment `production`).
+# AWS access is by OIDC (doc 16); no access keys, no SSH. Hosts run deploy-web.sh from ttklia-deploy via SSM.
+name: deploy
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: deploy-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    name: 1 · Build the Nuxt apps and upload to S3
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # TODO: npm ci, npm run typecheck, build each changed app once (the same artifact goes to staging, then production).
+      # TODO: configure AWS credentials by OIDC; upload the builds to S3.
+
+  web-1:
+    name: 3 · web-1
+    needs: build
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/') && 'production' || 'staging' }}
+    steps:
+      # TODO: take web-1 out of both ALB target groups (wait 30 s).
+      # TODO: SSM Run Command: deploy-web.sh for each changed app; check health; put it back.
+      - run: echo "TODO"
+
+  web-2:
+    name: 4 · web-2 (only after web-1 is healthy)
+    needs: web-1
+    runs-on: ubuntu-latest
+    environment: ${{ startsWith(github.ref, 'refs/tags/') && 'production' || 'staging' }}
+    steps:
+      # TODO: same as web-1.
+      - run: echo "TODO"
+
+  smoke:
+    name: 5 · Smoke tests, rollback on failure
+    needs: web-2
+    runs-on: ubuntu-latest
+    steps:
+      # TODO: smoke tests against the public host names; on failure redeploy the previous build.
+      - run: echo "TODO"

@@ -62,6 +62,40 @@ export default defineAppConfig({
             ]
         },
         {
+            "title": "Scheduled rides",
+            "items": [
+                {
+                    "label": "Scheduled rides",
+                    "to": "/scheduled",
+                    "icon": "i-bx-calendar",
+                    "permission": "ride.scheduled.read"
+                },
+                {
+                    "label": "Settings",
+                    "to": "/settings/scheduled",
+                    "icon": "i-bx-cog",
+                    "permission": "ride.settings_scheduled.read"
+                }
+            ]
+        },
+        {
+            "title": "Pickup queue",
+            "items": [
+                {
+                    "label": "Pickup queue",
+                    "to": "/pickup-queue",
+                    "icon": "i-bx-car",
+                    "permission": "ride.pickup_queue.read"
+                },
+                {
+                    "label": "Queue screens",
+                    "to": "/pickup-queue/screens",
+                    "icon": "i-bx-tv",
+                    "permission": "ride.pickup_queue_screens.read"
+                }
+            ]
+        },
+        {
             "title": "Messaging",
             "items": [
                 {

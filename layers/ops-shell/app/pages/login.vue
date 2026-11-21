@@ -3,7 +3,7 @@
 // left, form on the right. Used while there is no NUXT_PUBLIC_AUTH_URL (the single login at
 // auth.ttklia.com, doc 16, "Login"); with it set, ops-auth sends users there instead.
 // POST /auth/login (ttklia-api app/Http/Controllers/AuthController.php, from backend-fleet) takes
-// `username` or `email` plus `password`, and returns { data: { access_token, token_type, user } }.
+// `email` or `phone_e164` plus `password` (users.username was dropped on 20 Nov 2026, doc 03), and returns { data: { access_token, token_type, user } }.
 // The token is kept by useAuth (fleet-management's flow) in a 24-hour cookie.
 // TODO(api): the /auth/login route in routes/public.php is still a comment.
 import cover from '../assets/img/login-cover.jpeg'
@@ -31,10 +31,10 @@ async function submitLogin() {
     error.value = ''
     try {
         if (!runtime.apiBase) throw new ConfigMissing('NUXT_PUBLIC_API_BASE')
-        // Same field as fleet-management: an @ means an email address, otherwise a username.
+        // One field: an @ means an email address, otherwise a phone number in E.164 (+60…).
         const login = form.login.trim()
         const res = await api.post<{ data?: { access_token?: string } }>('/auth/login', {
-            ...(login.includes('@') ? { email: login } : { username: login }),
+            ...(login.includes('@') ? { email: login } : { phone_e164: login.replace(/[\s-]/g, '') }),
             password: form.password,
             remember: form.remember,
         })
@@ -46,7 +46,7 @@ async function submitLogin() {
         await navigateTo(returnPath())
     } catch (err) {
         if (err instanceof ConfigMissing) error.value = `Sign-in is not configured (${err.setting}).`
-        else error.value = toProblem(err)?.detail ?? 'Sign-in failed. Check your username or email and password.'
+        else error.value = toProblem(err)?.detail ?? 'Sign-in failed. Check your email or phone and password.'
     } finally {
         loading.value = false
     }
@@ -73,7 +73,7 @@ async function submitLogin() {
                 </h1>
 
                 <form class="space-y-4" @submit.prevent="submitLogin">
-                    <UFormField label="Username or email address" name="login" required>
+                    <UFormField label="Email address or phone" name="login" required>
                         <UInput v-model="form.login" type="text" autocomplete="username" required class="w-full" />
                     </UFormField>
 

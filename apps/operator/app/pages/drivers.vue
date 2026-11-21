@@ -2,7 +2,7 @@
 import type { TableColumn } from '@nuxt/ui'
 
 // Drivers: list (table `drivers`). Permission: operator.drivers.read (doc 27).
-// GET /api/v1/operator-portal/drivers (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
+// GET /api/operator-portal/drivers (ttklia-api). TODO(api): the endpoint may still be a stub returning no rows.
 useHead({ title: 'Drivers' })
 
 interface Row extends Record<string, unknown> {
@@ -25,7 +25,7 @@ const columns: TableColumn<Row>[] = [
 ]
 
 const search = ref('')
-const list = useApiList<Row>({ path: '/operator-portal/drivers' })
+const list = useApiList<Row>({ search, path: '/operator-portal/drivers' })
 onMounted(() => list.load())
 </script>
 
@@ -37,8 +37,8 @@ onMounted(() => list.load())
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"
-        :has-more="list.nextCursor.value !== null"
+        :pagination="list.pagination.value"
     
-        @more="list.load(list.nextCursor.value ?? undefined)"
+        @page="list.load"
     />
 </template>
