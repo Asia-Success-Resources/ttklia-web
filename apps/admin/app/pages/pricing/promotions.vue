@@ -12,7 +12,7 @@ interface Row extends Record<string, unknown> {
     product: string | null
     type: 'percent' | 'fixed'
     value: number
-    max_discount_sen: number | null
+    max_discount_rm: number | null
     commission_bp: number | null
     max_uses: number | null
     max_uses_per_user: number | null
@@ -41,7 +41,8 @@ const list = useApiList<Row>({ search, path: '/admin/pricing/promotions' })
 onMounted(() => list.load())
 const reload = () => list.load(list.pagination.value?.current_page ?? 1)
 
-const discount = (r: Row) => (r.type === 'percent' ? `${r.value / 100}%${r.max_discount_sen ? `, max RM${formatSen(r.max_discount_sen)}` : ''}` : `RM${formatSen(r.value)}`)
+// Percent: 10 = 10%; fixed: ringgit (ADR 0003, amendment of 21 Nov 2026).
+const discount = (r: Row) => (r.type === 'percent' ? `${r.value}%${r.max_discount_rm ? `, max ${formatRm(r.max_discount_rm)}` : ''}` : formatRm(r.value))
 
 const editing = ref<Row | null>(null)
 const { form, fieldError, show, submit } = useFormModal(() => ({
@@ -64,8 +65,8 @@ function open(row?: Row) {
                   code: row.code,
                   product: row.product ?? undefined,
                   type: row.type,
-                  amount: String(row.type === 'percent' ? row.value / 100 : row.value / 100),
-                  max_discount_rm: row.max_discount_sen === null ? '' : String(row.max_discount_sen / 100),
+                  amount: String(row.value),
+                  max_discount_rm: row.max_discount_rm === null ? '' : String(row.max_discount_rm),
                   commission_pct: row.commission_bp === null ? '' : String(row.commission_bp / 100),
                   max_uses: row.max_uses === null ? '' : String(row.max_uses),
                   max_uses_per_user: row.max_uses_per_user === null ? '' : String(row.max_uses_per_user),
@@ -88,8 +89,8 @@ async function save() {
                   code: d.code,
                   product: d.product ?? null,
                   type: d.type,
-                  value: num(d.amount, 100),
-                  max_discount_sen: num(d.max_discount_rm, 100),
+                  value: rmInput(d.amount),
+                  max_discount_rm: rmInput(d.max_discount_rm),
                   commission_bp: num(d.commission_pct, 100),
                   valid_from: d.valid_from,
               }
@@ -158,7 +159,7 @@ const columns: TableColumn<Row>[] = [
         <OpsFormField :label="form.data.type === 'percent' ? 'Discount (%)' : 'Discount (RM)'" required :error="fieldError('value')">
             <UInput v-model="form.data.amount" type="number" min="0" step="0.01" :disabled="used" class="w-full" />
         </OpsFormField>
-        <OpsFormField v-if="form.data.type === 'percent'" label="Maximum discount (RM)" :error="fieldError('max_discount_sen')">
+        <OpsFormField v-if="form.data.type === 'percent'" label="Maximum discount (RM)" :error="fieldError('max_discount_rm')">
             <UInput v-model="form.data.max_discount_rm" type="number" min="0" step="0.01" :disabled="used" class="w-full" />
         </OpsFormField>
         <OpsFormField label="Staff commission (%)" :error="fieldError('commission_bp')">

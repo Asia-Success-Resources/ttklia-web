@@ -1,0 +1,422 @@
+[
+    {
+        "name": "Woodlands",
+        "state": "Singapore",
+        "slug": "woodlands",
+        "actual_name": "Woodlands, Singapore"
+    },
+    {
+        "name": "Beach Road",
+        "state": "Singapore",
+        "slug": "beach-road",
+        "actual_name": "Beach Road, Singapore"
+    },
+    {
+        "name": "Mersing Jetty",
+        "state": "Johor",
+        "slug": "mersing-jetty",
+        "actual_name": "Mersing Jetty"
+    },
+    {
+        "name": "Skudai",
+        "state": "Johor",
+        "slug": "skudai",
+        "actual_name": "Skudai"
+    },
+    {
+        "name": "Pasir Gudang",
+        "state": "Johor",
+        "slug": "pasir-gudang",
+        "actual_name": "Pasir Gudang"
+    },
+    {
+        "name": "Yong Peng",
+        "state": "Johor",
+        "slug": "yong-peng",
+        "actual_name": "Yong Peng"
+    },
+    {
+        "name": "TUTA",
+        "state": "Johor",
+        "slug": "tuta",
+        "actual_name": "TUTA, Johor Bharu"
+    },
+    {
+        "name": "Larkin",
+        "state": "Johor",
+        "slug": "larkin",
+        "actual_name": "Larkin, Johor Bharu"
+    },
+    {
+        "name": "Masai",
+        "state": "Johor",
+        "slug": "masai",
+        "actual_name": "Masai"
+    },
+    {
+        "name": "Johor Jaya",
+        "state": "Johor",
+        "slug": "johor-jaya",
+        "actual_name": "Johor Jaya"
+    },
+    {
+        "name": "Kulai",
+        "state": "Johor",
+        "slug": "kulai",
+        "actual_name": "Kulai"
+    },
+    {
+        "name": "Batu Pahat",
+        "state": "Johor",
+        "slug": "batu-pahat",
+        "actual_name": "Batu Pahat"
+    },
+    {
+        "name": "Muar",
+        "state": "Johor",
+        "slug": "muar",
+        "actual_name": "Muar"
+    },
+    {
+        "name": "Mersing",
+        "state": "Johor",
+        "slug": "mersing",
+        "actual_name": "Mersing"
+    },
+    {
+        "name": "Alor Setar",
+        "state": "Kedah",
+        "slug": "alor-setar",
+        "actual_name": "Alor Setar"
+    },
+    {
+        "name": "Sungai Petani",
+        "state": "Kedah",
+        "slug": "sungai-petani",
+        "actual_name": "Sungai Petani"
+    },
+    {
+        "name": "Chang Lun",
+        "state": "Kedah",
+        "slug": "chang-lun",
+        "actual_name": "Chang Lun"
+    },
+    {
+        "name": "Jitra",
+        "state": "Kedah",
+        "slug": "jitra",
+        "actual_name": "Jitra"
+    },
+    {
+        "name": "KL TBS",
+        "state": "Kuala Lumpur",
+        "slug": "kl-tbs",
+        "actual_name": "KL TBS"
+    },
+    {
+        "name": "Lalaport BBCC",
+        "state": "Kuala Lumpur",
+        "slug": "lalaport-bbcc",
+        "actual_name": "Lalaport BBCC"
+    },
+    {
+        "name": "KL Sentral",
+        "state": "Kuala Lumpur",
+        "slug": "kl-sentral",
+        "actual_name": "KL Sentral"
+    },
+    {
+        "name": "KL City Centre (Pudu Sentral)",
+        "state": "Kuala Lumpur",
+        "slug": "kl-city-centre-pudu-sentral",
+        "actual_name": "KL City Centre (Pudu Sentral)"
+    },
+    {
+        "name": "Melaka Sentral",
+        "state": "Melaka",
+        "slug": "melaka-sentral",
+        "actual_name": "Melaka Sentral"
+    },
+    {
+        "name": "Seremban Terminal One",
+        "state": "Negeri Sembilan",
+        "slug": "seremban-terminal-one",
+        "actual_name": "Seremban Terminal One"
+    },
+    {
+        "name": "Kuala Rompin",
+        "state": "Pahang",
+        "slug": "kuala-rompin",
+        "actual_name": "Kuala Rompin"
+    },
+    {
+        "name": "Temerloh",
+        "state": "Pahang",
+        "slug": "temerloh",
+        "actual_name": "Temerloh"
+    },
+    {
+        "name": "Ump",
+        "state": "Pahang",
+        "slug": "ump",
+        "actual_name": "Ump"
+    },
+    {
+        "name": "Kuantan",
+        "state": "Pahang",
+        "slug": "kuantan",
+        "actual_name": "Kuantan"
+    },
+    {
+        "name": "Muadzam Shah",
+        "state": "Pahang",
+        "slug": "muadzam-shah",
+        "actual_name": "Muadzam Shah"
+    },
+    {
+        "name": "Tanjung Gemok",
+        "state": "Pahang",
+        "slug": "tanjung-gemok",
+        "actual_name": "Tanjung Gemok"
+    },
+    {
+        "name": "Awana Genting Highland",
+        "state": "Pahang",
+        "slug": "awana-genting-highland",
+        "actual_name": "Awana Genting Highland"
+    },
+    {
+        "name": "Manjung",
+        "state": "Perak",
+        "slug": "manjung",
+        "actual_name": "Manjung"
+    },
+    {
+        "name": "Hutang Melintang",
+        "state": "Perak",
+        "slug": "hutang-melintang",
+        "actual_name": "Hutang Melintang"
+    },
+    {
+        "name": "Kuala Kangsar",
+        "state": "Perak",
+        "slug": "kuala-kangsar",
+        "actual_name": "Kuala Kangsar"
+    },
+    {
+        "name": "Simpang",
+        "state": "Perak",
+        "slug": "simpang",
+        "actual_name": "Simpang"
+    },
+    {
+        "name": "Kampar",
+        "state": "Perak",
+        "slug": "kampar",
+        "actual_name": "Kampar"
+    },
+    {
+        "name": "Taiping",
+        "state": "Perak",
+        "slug": "taiping",
+        "actual_name": "Taiping"
+    },
+    {
+        "name": "Ipoh Amanjaya",
+        "state": "Perak",
+        "slug": "ipoh-amanjaya",
+        "actual_name": "Ipoh Amanjaya"
+    },
+    {
+        "name": "Setiawan",
+        "state": "Perak",
+        "slug": "setiawan",
+        "actual_name": "Setiawan"
+    },
+    {
+        "name": "Bidor",
+        "state": "Perak",
+        "slug": "bidor",
+        "actual_name": "Bidor"
+    },
+    {
+        "name": "Ayer Tawar",
+        "state": "Perak",
+        "slug": "ayer-tawar",
+        "actual_name": "Ayer Tawar"
+    },
+    {
+        "name": "Lumut",
+        "state": "Perak",
+        "slug": "lumut",
+        "actual_name": "Lumut"
+    },
+    {
+        "name": "Teluk Intan",
+        "state": "Perak",
+        "slug": "teluk-intan",
+        "actual_name": "Teluk Intan"
+    },
+    {
+        "name": "Kuala Perlis",
+        "state": "Perlis",
+        "slug": "kuala-perlis",
+        "actual_name": "Kuala Perlis"
+    },
+    {
+        "name": "Kangar",
+        "state": "Perlis",
+        "slug": "kangar",
+        "actual_name": "Kangar"
+    },
+    {
+        "name": "Butterworth",
+        "state": "Pulau Pinang",
+        "slug": "butterworth",
+        "actual_name": "Butterworth, Penang"
+    },
+    {
+        "name": "Sungai Nibong",
+        "state": "Pulau Pinang",
+        "slug": "sungai-nibong",
+        "actual_name": "Sg Nibong"
+    },
+    {
+        "name": "Penang Island",
+        "state": "Pulau Pinang",
+        "slug": "penang-island",
+        "actual_name": "Penang Island (Sungai Nibong)"
+    },
+    {
+        "name": "Sekinchan",
+        "state": "Selangor",
+        "slug": "sekinchan",
+        "actual_name": "Sekinchan"
+    },
+    {
+        "name": "LRT Putra Heights",
+        "state": "Selangor",
+        "slug": "lrt-putra-heights",
+        "actual_name": "LRT Putra Heights"
+    },
+    {
+        "name": "KLIA1",
+        "state": "Selangor",
+        "slug": "klia1",
+        "actual_name": "KLIA Terminal"
+    },
+    {
+        "name": "Subang Airport",
+        "state": "Selangor",
+        "slug": "subang-airport",
+        "actual_name": "Subang Airport"
+    },
+    {
+        "name": "Klang",
+        "state": "Selangor",
+        "slug": "klang",
+        "actual_name": "Klang"
+    },
+    {
+        "name": "Terminal 17 Shah Alam",
+        "state": "Selangor",
+        "slug": "terminal-17-shah-alam",
+        "actual_name": "Terminal 17 Shah Alam"
+    },
+    {
+        "name": "KL TBG",
+        "state": "Selangor",
+        "slug": "kl-tbg",
+        "actual_name": "KL TBG"
+    },
+    {
+        "name": "Tanjung Karang",
+        "state": "Selangor",
+        "slug": "tanjung-karang",
+        "actual_name": "Tanjung Karang"
+    },
+    {
+        "name": "Kuala Selangor",
+        "state": "Selangor",
+        "slug": "kuala-selangor",
+        "actual_name": "Kuala Selangor"
+    },
+    {
+        "name": "Sabak Bernam",
+        "state": "Selangor",
+        "slug": "sabak-bernam",
+        "actual_name": "Sabak Bernam"
+    },
+    {
+        "name": "Sungai Besar",
+        "state": "Selangor",
+        "slug": "sungai-besar",
+        "actual_name": "Sungai Besar"
+    },
+    {
+        "name": "Setiu",
+        "state": "Terengganu",
+        "slug": "setiu",
+        "actual_name": "Setiu"
+    },
+    {
+        "name": "Kuala Besut",
+        "state": "Terengganu",
+        "slug": "kuala-besut",
+        "actual_name": "KBR - Kuala Besut"
+    },
+    {
+        "name": "Kemaman",
+        "state": "Terengganu",
+        "slug": "kemaman",
+        "actual_name": "Kemaman"
+    },
+    {
+        "name": "Marang",
+        "state": "Terengganu",
+        "slug": "marang",
+        "actual_name": "Marang, Terengganu"
+    },
+    {
+        "name": "Merang",
+        "state": "Terengganu",
+        "slug": "merang",
+        "actual_name": "Merang"
+    },
+    {
+        "name": "Jerteh",
+        "state": "Terengganu",
+        "slug": "jerteh",
+        "actual_name": "Jerteh"
+    },
+    {
+        "name": "Kuala Terengganu",
+        "state": "Terengganu",
+        "slug": "kuala-terengganu",
+        "actual_name": "Kuala Terengganu"
+    },
+    {
+        "name": "Unisza",
+        "state": "Terengganu",
+        "slug": "unisza",
+        "actual_name": "Unisza"
+    },
+    {
+        "name": "Dungun",
+        "state": "Terengganu",
+        "slug": "dungun",
+        "actual_name": "Dungun"
+    },
+    {
+        "name": "Paka",
+        "state": "Terengganu",
+        "slug": "paka",
+        "actual_name": "Paka"
+    },
+    {
+        "name": "Kerteh",
+        "state": "Terengganu",
+        "slug": "kerteh",
+        "actual_name": "Kerteh"
+    }
+]

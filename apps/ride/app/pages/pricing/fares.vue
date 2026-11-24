@@ -11,18 +11,18 @@ interface Row extends Record<string, unknown> {
     product: string
     vehicle_class: string | null
     ticket_type: string | null
-    flat_sen: number | null
-    base_sen: number | null
-    per_km_sen: number | null
+    flat_rm: number | null
+    base_rm: number | null
+    per_km_rm: number | null
 }
 
 const columns: TableColumn<Row>[] = [
     { accessorKey: 'product', header: 'Product' },
     { accessorKey: 'vehicle_class', header: 'Vehicle class' },
     { accessorKey: 'ticket_type', header: 'Ticket type' },
-    { accessorKey: 'flat_sen', header: 'Flat (RM)', cell: ({ row }) => formatSen(row.original.flat_sen as number | null) },
-    { accessorKey: 'base_sen', header: 'Base (RM)', cell: ({ row }) => formatSen(row.original.base_sen as number | null) },
-    { accessorKey: 'per_km_sen', header: 'Per km (RM)', cell: ({ row }) => formatSen(row.original.per_km_sen as number | null) },
+    { accessorKey: 'flat_rm', header: 'Flat (RM)', cell: ({ row }) => formatRm(row.original.flat_rm as number | null) },
+    { accessorKey: 'base_rm', header: 'Base (RM)', cell: ({ row }) => formatRm(row.original.base_rm as number | null) },
+    { accessorKey: 'per_km_rm', header: 'Per km (RM)', cell: ({ row }) => formatRm(row.original.per_km_rm as number | null) },
 ]
 
 const search = ref('')

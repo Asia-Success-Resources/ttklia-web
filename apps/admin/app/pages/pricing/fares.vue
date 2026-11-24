@@ -12,12 +12,12 @@ interface Row extends Record<string, unknown> {
     vehicle_class: string | null
     ticket_type: string | null
     trip_direction: string | null
-    flat_sen: number | null
-    night_flat_sen: number | null
-    base_sen: number | null
-    per_km_sen: number | null
-    per_min_sen: number | null
-    min_fare_sen: number | null
+    flat_rm: number | null
+    night_flat_rm: number | null
+    base_rm: number | null
+    per_km_rm: number | null
+    per_min_rm: number | null
+    min_fare_rm: number | null
     valid_from: string
     valid_to: string | null
     version: number
@@ -31,8 +31,8 @@ interface Detail extends Row {
     dest_zone_id: number | null
     sst_rate_bp: number
     commission_bp: number
-    online_surcharge_sen: number | null
-    per_hour_sen: number | null
+    online_surcharge_rm: number | null
+    per_hour_rm: number | null
 }
 
 const PRODUCTS = [
@@ -79,7 +79,8 @@ async function loadZones(workspaceId?: number) {
 }
 
 const editing = ref<Detail | null>(null)
-const rm = (sen: number | null | undefined) => (sen === null || sen === undefined ? '' : String(sen / 100))
+// Prices are ringgit (ADR 0003, amendment of 21 Nov 2026).
+const rm = (v: number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const { form, fieldError, show, submit } = useFormModal(() => ({
     workspace_id: undefined as number | undefined,
     product: 'taxi_coupon',
@@ -114,14 +115,14 @@ async function open(row?: Row) {
             vehicle_class: d.vehicle_class ?? '',
             ticket_type: d.ticket_type ?? '',
             trip_direction: d.trip_direction ?? undefined,
-            flat: rm(d.flat_sen),
-            night_flat: rm(d.night_flat_sen),
-            online_surcharge: rm(d.online_surcharge_sen),
-            base: rm(d.base_sen),
-            per_km: rm(d.per_km_sen),
-            per_min: rm(d.per_min_sen),
-            per_hour: rm(d.per_hour_sen),
-            min_fare: rm(d.min_fare_sen),
+            flat: rm(d.flat_rm),
+            night_flat: rm(d.night_flat_rm),
+            online_surcharge: rm(d.online_surcharge_rm),
+            base: rm(d.base_rm),
+            per_km: rm(d.per_km_rm),
+            per_min: rm(d.per_min_rm),
+            per_hour: rm(d.per_hour_rm),
+            min_fare: rm(d.min_fare_rm),
             sst_pct: String(d.sst_rate_bp / 100),
             commission_pct: String(d.commission_bp / 100),
         })
@@ -132,7 +133,6 @@ async function open(row?: Row) {
         toast.add({ title: toProblem(e)?.detail ?? 'Unable to open it', color: 'error' })
     }
 }
-const sen = (v: string) => (v === '' ? null : Math.round(Number(v) * 100))
 async function save() {
     let newVersion = false
     const saved = await submit(async (d) => {
@@ -143,14 +143,14 @@ async function save() {
             vehicle_class: d.vehicle_class || null,
             ticket_type: d.ticket_type || null,
             trip_direction: d.trip_direction ?? null,
-            flat_sen: sen(d.flat),
-            night_flat_sen: sen(d.night_flat),
-            online_surcharge_sen: sen(d.online_surcharge),
-            base_sen: sen(d.base),
-            per_km_sen: sen(d.per_km),
-            per_min_sen: sen(d.per_min),
-            per_hour_sen: sen(d.per_hour),
-            min_fare_sen: sen(d.min_fare),
+            flat_rm: rmInput(d.flat),
+            night_flat_rm: rmInput(d.night_flat),
+            online_surcharge_rm: rmInput(d.online_surcharge),
+            base_rm: rmInput(d.base),
+            per_km_rm: rmInput(d.per_km),
+            per_min_rm: rmInput(d.per_min),
+            per_hour_rm: rmInput(d.per_hour),
+            min_fare_rm: rmInput(d.min_fare),
             sst_rate_bp: Math.round(Number(d.sst_pct || 0) * 100),
             commission_bp: Math.round(Number(d.commission_pct || 0) * 100),
             valid_from: d.valid_from || null,
@@ -179,8 +179,8 @@ async function remove(row: Row) {
 }
 
 const price = (r: Row) => {
-    if (r.flat_sen !== null) return `RM${formatSen(r.flat_sen)}${r.night_flat_sen ? ` (night RM${formatSen(r.night_flat_sen)})` : ''}`
-    const parts = [r.base_sen !== null && `RM${formatSen(r.base_sen)} base`, r.per_km_sen && `RM${formatSen(r.per_km_sen)}/km`, r.per_min_sen && `RM${formatSen(r.per_min_sen)}/min`]
+    if (r.flat_rm !== null) return `${formatRm(r.flat_rm)}${r.night_flat_rm ? ` (night RM${formatRm(r.night_flat_rm)})` : ''}`
+    const parts = [r.base_rm !== null && `${formatRm(r.base_rm)} base`, r.per_km_rm && `${formatRm(r.per_km_rm)}/km`, r.per_min_rm && `${formatRm(r.per_min_rm)}/min`]
     return parts.filter(Boolean).join(' + ') || '—'
 }
 const workspaceItems = computed(() => workspaces.rows.value.map((w) => ({ label: `${w.code} · ${w.name}`, value: w.slug })))
@@ -239,16 +239,16 @@ const columns: TableColumn<Row>[] = [
         </OpsFormField>
 
         <p class="pt-2 text-xs font-semibold uppercase tracking-wide text-gray-500 sm:col-span-2">Flat price</p>
-        <OpsFormField label="Fare (RM)" :error="fieldError('flat_sen')"><UInput v-model="form.data.flat" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Night fare (RM)" :error="fieldError('night_flat_sen')"><UInput v-model="form.data.night_flat" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Online surcharge (RM)" :error="fieldError('online_surcharge_sen')"><UInput v-model="form.data.online_surcharge" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Fare (RM)" :error="fieldError('flat_rm')"><UInput v-model="form.data.flat" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Night fare (RM)" :error="fieldError('night_flat_rm')"><UInput v-model="form.data.night_flat" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Online surcharge (RM)" :error="fieldError('online_surcharge_rm')"><UInput v-model="form.data.online_surcharge" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
 
         <p class="pt-2 text-xs font-semibold uppercase tracking-wide text-gray-500 sm:col-span-2">Metered price</p>
-        <OpsFormField label="Base (RM)" :error="fieldError('base_sen')"><UInput v-model="form.data.base" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Per km (RM)" :error="fieldError('per_km_sen')"><UInput v-model="form.data.per_km" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Per minute (RM)" :error="fieldError('per_min_sen')"><UInput v-model="form.data.per_min" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Per hour (RM)" :error="fieldError('per_hour_sen')"><UInput v-model="form.data.per_hour" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Minimum fare (RM)" :error="fieldError('min_fare_sen')"><UInput v-model="form.data.min_fare" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Base (RM)" :error="fieldError('base_rm')"><UInput v-model="form.data.base" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Per km (RM)" :error="fieldError('per_km_rm')"><UInput v-model="form.data.per_km" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Per minute (RM)" :error="fieldError('per_min_rm')"><UInput v-model="form.data.per_min" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Per hour (RM)" :error="fieldError('per_hour_rm')"><UInput v-model="form.data.per_hour" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Minimum fare (RM)" :error="fieldError('min_fare_rm')"><UInput v-model="form.data.min_fare" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
 
         <p class="pt-2 text-xs font-semibold uppercase tracking-wide text-gray-500 sm:col-span-2">Tax and start</p>
         <OpsFormField label="SST (%)" :error="fieldError('sst_rate_bp')"><UInput v-model="form.data.sst_pct" type="number" min="0" max="100" step="0.01" class="w-full" /></OpsFormField>

@@ -1,16 +1,21 @@
 <script setup lang="ts">
-// One passenger type with − and + around the count (today's "Tickets" rows).
+// One ticket type, laid out as in ttklia-v2's sale forms: the label, the count across the full
+// width, then − and + side by side underneath. Several sit in one row (`flex gap-3`), each `flex-1`.
 const props = defineProps<{ label: string }>()
 const count = defineModel<number>({ default: 0 })
+
+function set(value: unknown) {
+    const n = Math.floor(Number(value))
+    count.value = Number.isFinite(n) && n > 0 ? n : 0
+}
 </script>
 
 <template>
-    <div class="flex items-center justify-between gap-3 rounded-lg border border-(--ops-border) p-3">
-        <span class="text-sm font-medium text-gray-700 dark:text-gray-300">{{ props.label }}</span>
-        <div class="flex items-center gap-2">
-            <UButton icon="i-bx-minus" color="neutral" variant="outline" size="sm" :disabled="count <= 0" @click="count = Math.max(0, count - 1)" />
-            <UInput v-model.number="count" type="number" min="0" size="sm" class="w-14" :ui="{ base: 'text-center' }" />
-            <UButton icon="i-bx-plus" color="neutral" variant="outline" size="sm" @click="count++" />
+    <UFormField :label="props.label" class="min-w-0 flex-1">
+        <UInput :model-value="count" type="number" min="0" size="lg" class="w-full" :ui="{ base: 'text-center' }" @update:model-value="set" />
+        <div class="mt-1.5 flex gap-1">
+            <UButton icon="i-bx-minus" color="neutral" variant="outline" size="sm" block class="flex-1" :disabled="count <= 0" @click="count = Math.max(0, (count || 0) - 1)" />
+            <UButton icon="i-bx-plus" color="neutral" variant="outline" size="sm" block class="flex-1" @click="count = (count || 0) + 1" />
         </div>
-    </div>
+    </UFormField>
 </template>

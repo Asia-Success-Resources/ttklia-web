@@ -10,20 +10,20 @@ useHead({ title: 'Ticket types' })
 interface Row extends Record<string, unknown> {
     uuid: string
     channel_group: string
-    price_from_sen: number
-    price_to_sen: number | null
-    fee_sen: number | null
+    price_from_rm: number
+    price_to_rm: number | null
+    fee_rm: number | null
     percent_bp: number | null
-    max_sen: number | null
+    max_rm: number | null
 }
 
 const columns: TableColumn<Row>[] = [
     { accessorKey: 'channel_group', header: 'Channel group' },
-    { accessorKey: 'price_from_sen', header: 'Price from (RM)', cell: ({ row }) => formatSen(row.original.price_from_sen as number | null) },
-    { accessorKey: 'price_to_sen', header: 'Price to (RM)', cell: ({ row }) => formatSen(row.original.price_to_sen as number | null) },
-    { accessorKey: 'fee_sen', header: 'Fee (RM)', cell: ({ row }) => formatSen(row.original.fee_sen as number | null) },
+    { accessorKey: 'price_from_rm', header: 'Price from (RM)', cell: ({ row }) => formatRm(row.original.price_from_rm as number | null) },
+    { accessorKey: 'price_to_rm', header: 'Price to (RM)', cell: ({ row }) => formatRm(row.original.price_to_rm as number | null) },
+    { accessorKey: 'fee_rm', header: 'Fee (RM)', cell: ({ row }) => formatRm(row.original.fee_rm as number | null) },
     { accessorKey: 'percent_bp', header: 'Percent bp' },
-    { accessorKey: 'max_sen', header: 'Max (RM)', cell: ({ row }) => formatSen(row.original.max_sen as number | null) },
+    { accessorKey: 'max_rm', header: 'Max (RM)', cell: ({ row }) => formatRm(row.original.max_rm as number | null) },
 ]
 
 const search = ref('')

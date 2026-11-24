@@ -1,0 +1,184 @@
+// Dark mode for the ttklia.com pages. klia-bus itself has no dark theme: this is added on top.
+// It is driven by the base layer's colour mode (@nuxtjs/color-mode through Nuxt UI): `html.dark` follows the
+// system setting until the visitor picks light or dark with the switch in the header (KliaThemeToggle).
+//
+// Most of the site reads the design tokens in _tokens.scss, so swapping those does the bulk of the work. The rest
+// below is what does not go through a token: Bootstrap's compiled component colours, the vendor widgets
+// (vue-multiselect, vue-datepicker, SweetAlert2, Google Places), hard-coded tints, and the "dark band" sections
+// that use --ink as a background and must stay dark when --ink turns light.
+
+$dk-bg: #0B0F14;        // page
+$dk-surface: #151A21;   // cards, inputs
+$dk-surface-2: #1C222B; // raised / hover
+$dk-band: #06090D;      // utility bar, hero and why bands (the old --ink backgrounds)
+$dk-line: #2A313C;
+$dk-ink: #F3F4F6;
+$dk-ink-2: #CBD0D8;
+$dk-ink-3: #9AA3AF;
+
+html.dark body.klia-site {
+    color-scheme: dark;
+
+    // Tokens
+    --brand-600: #F0383B;
+    --brand-700: #FF5C5F;
+    --brand-50: rgba(240, 56, 59, 0.14);
+    --ink: #{$dk-ink};
+    --ink-2: #{$dk-ink-2};
+    --ink-3: #{$dk-ink-3};
+    --surface: #{$dk-surface};
+    --surface-2: #{$dk-surface-2};
+    --line: #{$dk-line};
+    --focus: #60A5FA;
+    --overlay: rgba(0, 0, 0, 0.6);
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.5);
+    --shadow-2: 0 8px 24px rgba(0, 0, 0, 0.55), 0 2px 6px rgba(0, 0, 0, 0.4);
+
+    // Bootstrap 5.2 root variables
+    --bs-body-bg: #{$dk-bg};
+    --bs-body-color: #{$dk-ink-2};
+    --bs-border-color: #{$dk-line};
+    --bs-heading-color: #{$dk-ink};
+    --bs-link-color: #F0383B;
+    --bs-link-hover-color: #FF5C5F;
+    --bs-primary: #F0383B;
+    --bs-primary-rgb: 240, 56, 59;
+    --bs-dark: #{$dk-ink};
+    --bs-dark-rgb: 243, 244, 246;
+    --bs-light: #{$dk-surface-2};
+    --bs-light-rgb: 28, 34, 43;
+    --bs-white-rgb: 21, 26, 33;
+    --bs-secondary-color: #{$dk-ink-3};
+    --bs-emphasis-color: #{$dk-ink};
+
+    background-color: $dk-bg;
+    color: $dk-ink-2;
+
+    // Headings and plain text that Bootstrap compiled to fixed colours
+    h1, h2, h3, h4, h5, h6, .h1, .h2, .h3, .h4, .h5, .h6 { color: var(--ink); }
+    .text-dark { color: var(--ink) !important; }
+    .text-muted, .text-secondary { color: var(--ink-3) !important; }
+    .text-body { color: var(--ink-2) !important; }
+    .bg-white, .bg-body { background-color: var(--surface) !important; }
+    .bg-light { background-color: var(--surface-2) !important; }
+    .border, .border-top, .border-bottom, .border-start, .border-end { border-color: var(--line) !important; }
+    hr { border-color: var(--line); opacity: 1; }
+
+    // Sections that use --ink as their background stay dark
+    .utility-bar, // removed from the header; kept in case it returns
+    .page-hero,
+    .page-banner,
+    .home-hero,
+    .why-band,
+    .auth-page,
+    .split-hero__visual,
+    .teeko-float__label,
+    .exchange-steps__num { background-color: $dk-band; }
+    .exchange-steps__num { color: $dk-ink; border: 1px solid $dk-line; }
+    .btn-check:checked + .chip { background: var(--ink); border-color: var(--ink); color: $dk-bg; }
+
+    // Buttons
+    .btn-dark { --bs-btn-bg: #{$dk-ink}; --bs-btn-border-color: #{$dk-ink}; --bs-btn-color: #{$dk-bg}; --bs-btn-hover-bg: #fff; --bs-btn-hover-color: #{$dk-bg}; --bs-btn-active-bg: #fff; --bs-btn-active-color: #{$dk-bg}; }
+    .btn-primary { --bs-btn-bg: #D90004; --bs-btn-border-color: #D90004; }
+    .btn-light:hover, .btn-light:active { background: var(--surface-2); }
+    .btn-outline-dark:hover, .btn-outline-secondary:hover,
+    .btn-outline-dark:active, .btn-outline-secondary:active { border-color: #3A424F; }
+    .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
+    // Forms
+    .form-control,
+    .form-select {
+        background-color: var(--surface-2);
+        border-color: var(--line);
+        color: var(--ink);
+        &::placeholder { color: var(--ink-3); }
+        &:disabled, &[readonly] { background-color: #12161C; color: var(--ink-3); }
+    }
+    .form-select { --bs-form-select-bg-img: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%239AA3AF' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+    .form-check-input { background-color: var(--surface-2); border-color: #3A424F; }
+    .form-check-input:checked { background-color: #D90004; border-color: #D90004; }
+    .input-group-text { background-color: var(--surface-2); border-color: var(--line); color: var(--ink-2); }
+    input:-webkit-autofill { -webkit-box-shadow: 0 0 0 1000px var(--surface-2) inset; -webkit-text-fill-color: var(--ink); }
+
+    // Bootstrap components (5.2 keeps their colours in component variables)
+    .card { --bs-card-bg: var(--surface); --bs-card-border-color: var(--line); --bs-card-cap-bg: var(--surface-2); --bs-card-color: var(--ink-2); }
+    .dropdown-menu { --bs-dropdown-bg: var(--surface); --bs-dropdown-border-color: var(--line); --bs-dropdown-link-color: var(--ink-2); --bs-dropdown-link-hover-bg: var(--surface-2); --bs-dropdown-link-hover-color: var(--ink); --bs-dropdown-divider-bg: var(--line); --bs-dropdown-header-color: var(--ink-3); }
+    .modal { --bs-modal-bg: var(--surface); --bs-modal-border-color: var(--line); --bs-modal-header-border-color: var(--line); --bs-modal-footer-border-color: var(--line); --bs-modal-color: var(--ink-2); }
+    .offcanvas, .offcanvas-lg, .offcanvas-md { --bs-offcanvas-bg: var(--surface); --bs-offcanvas-color: var(--ink-2); }
+    .table { --bs-table-bg: transparent; --bs-table-color: var(--ink-2); --bs-table-border-color: var(--line); --bs-table-striped-bg: rgba(255, 255, 255, 0.03); --bs-table-hover-bg: rgba(255, 255, 255, 0.05); --bs-table-striped-color: var(--ink-2); --bs-table-hover-color: var(--ink); }
+    .table-light { --bs-table-bg: var(--surface-2); --bs-table-color: var(--ink); --bs-table-border-color: var(--line); }
+    .list-group { --bs-list-group-bg: var(--surface); --bs-list-group-color: var(--ink-2); --bs-list-group-border-color: var(--line); --bs-list-group-action-hover-bg: var(--surface-2); --bs-list-group-action-hover-color: var(--ink); }
+    .accordion { --bs-accordion-bg: var(--surface); --bs-accordion-color: var(--ink-2); --bs-accordion-border-color: var(--line); --bs-accordion-btn-color: var(--ink); --bs-accordion-active-bg: var(--surface-2); --bs-accordion-active-color: var(--ink); --bs-accordion-btn-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23CBD0D8'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e"); --bs-accordion-btn-active-icon: var(--bs-accordion-btn-icon); }
+    .nav-tabs { --bs-nav-tabs-border-color: var(--line); --bs-nav-tabs-link-active-bg: var(--surface); --bs-nav-tabs-link-active-color: var(--ink); --bs-nav-tabs-link-active-border-color: var(--line) var(--line) var(--surface); --bs-nav-tabs-link-hover-border-color: var(--line); }
+    .pagination { --bs-pagination-bg: var(--surface); --bs-pagination-border-color: var(--line); --bs-pagination-color: var(--ink-2); --bs-pagination-hover-bg: var(--surface-2); --bs-pagination-hover-color: var(--ink); --bs-pagination-hover-border-color: var(--line); --bs-pagination-disabled-bg: var(--surface); --bs-pagination-disabled-border-color: var(--line); --bs-pagination-disabled-color: var(--ink-3); }
+    .breadcrumb { --bs-breadcrumb-divider-color: var(--ink-3); --bs-breadcrumb-item-active-color: var(--ink-3); }
+    .popover { --bs-popover-bg: var(--surface); --bs-popover-border-color: var(--line); --bs-popover-header-bg: var(--surface-2); --bs-popover-body-color: var(--ink-2); }
+    .toast { --bs-toast-bg: var(--surface); --bs-toast-header-bg: var(--surface-2); --bs-toast-color: var(--ink-2); --bs-toast-border-color: var(--line); }
+    .placeholder { background-color: var(--ink-3); }
+
+    // Light tints that were hard-coded (status pills, alerts, notices)
+    .confirm-status { --status-bg: rgba(16, 185, 129, 0.14); --status-fg: #34D399; }
+    .confirm-status--pending { --status-bg: rgba(245, 158, 11, 0.14); --status-fg: #FBBF24; }
+    .is-discount dd, .status--success { color: #34D399; }
+    .alert { --bs-alert-bg: var(--surface-2); --bs-alert-border-color: var(--line); --bs-alert-color: var(--ink-2); }
+    .alert-success { --bs-alert-bg: rgba(16, 185, 129, 0.12); --bs-alert-color: #6EE7B7; --bs-alert-border-color: rgba(16, 185, 129, 0.3); }
+    .alert-danger { --bs-alert-bg: rgba(240, 56, 59, 0.12); --bs-alert-color: #FCA5A5; --bs-alert-border-color: rgba(240, 56, 59, 0.35); }
+    .alert-warning { --bs-alert-bg: rgba(245, 158, 11, 0.12); --bs-alert-color: #FCD34D; --bs-alert-border-color: rgba(245, 158, 11, 0.3); }
+    .alert-info { --bs-alert-bg: rgba(59, 130, 246, 0.12); --bs-alert-color: #93C5FD; --bs-alert-border-color: rgba(59, 130, 246, 0.3); }
+    .auth__alert { background: rgba(16, 185, 129, 0.14); color: #34D399; }
+
+    // vue-multiselect
+    .multiselect, .multiselect__tags, .multiselect__input, .multiselect__single { background: transparent; color: var(--ink); }
+    .multiselect__tags { border-color: var(--line); }
+    .multiselect__input::placeholder, .multiselect__placeholder { color: var(--ink-3); }
+    .multiselect__content-wrapper { background: var(--surface); border-color: var(--line); }
+    .multiselect__option { color: var(--ink-2); }
+    .multiselect__option--highlight { background: var(--surface-2); color: var(--ink); }
+    .multiselect__option--selected { background: var(--brand-50); color: var(--ink); }
+    .multiselect__option--selected.multiselect__option--highlight { background: rgba(240, 56, 59, 0.24); color: var(--ink); }
+    .multiselect__spinner { background: transparent; }
+    .phone-field .multiselect__tags, .phone-field__code .multiselect { background: var(--surface-2); }
+
+    // vue-datepicker
+    .dp__theme_light {
+        --dp-background-color: #{$dk-surface};
+        --dp-text-color: #{$dk-ink};
+        --dp-hover-color: #{$dk-surface-2};
+        --dp-hover-text-color: #{$dk-ink};
+        --dp-hover-icon-color: #{$dk-ink-3};
+        --dp-primary-color: #D90004;
+        --dp-primary-text-color: #fff;
+        --dp-secondary-color: #5B6470;
+        --dp-border-color: #{$dk-line};
+        --dp-menu-border-color: #{$dk-line};
+        --dp-border-color-hover: #{$dk-ink-3};
+        --dp-disabled-color: #12161C;
+        --dp-disabled-color-text: #5B6470;
+        --dp-scroll-bar-background: #{$dk-surface-2};
+        --dp-scroll-bar-color: #3A424F;
+        --dp-icon-color: #{$dk-ink-3};
+        --dp-range-between-dates-background-color: #{$dk-surface-2};
+        --dp-range-between-dates-text-color: #{$dk-ink};
+    }
+
+    // Scrollbars on the horizontal rails
+    * { scrollbar-color: #3A424F transparent; }
+
+    // Google Places suggestions
+    .pac-container { background: var(--surface); border-color: var(--line); }
+    .pac-item { color: var(--ink-3); border-color: var(--line); }
+    .pac-item:hover, .pac-item-selected { background: var(--surface-2); }
+    .pac-item-query { color: var(--ink); }
+
+}
+
+// SweetAlert2 mounts its container on <body>, outside the layout's own elements.
+html.dark body.klia-site .swal2-popup {
+    background: $dk-surface;
+    color: $dk-ink-2;
+    .swal2-title { color: $dk-ink; }
+    .swal2-html-container { color: $dk-ink-2; }
+    .swal2-input, .swal2-textarea, .swal2-select { background: $dk-surface-2; border-color: $dk-line; color: $dk-ink; }
+}
+html.dark body.klia-site .swal2-icon.swal2-success [class^="swal2-success-circular-line"],
+html.dark body.klia-site .swal2-icon.swal2-success .swal2-success-fix { background-color: transparent !important; }

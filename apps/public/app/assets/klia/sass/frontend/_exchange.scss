@@ -1,0 +1,289 @@
+// Exchange ticket page (/collect-ticket). Two-column layout: the lookup form on
+// the left, a sticky summary with the fee and payment button on the right.
+
+.exchange-page {
+    padding-top: var(--space-8);
+    padding-bottom: var(--space-12);
+}
+
+.exchange-page__head {
+    max-width: 640px;
+
+    h1 { font-size: var(--fs-36); letter-spacing: -0.01em; }
+}
+
+// "How it works" strip
+.exchange-steps {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-6);
+    padding: 0;
+    list-style: none;
+}
+
+.exchange-steps__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3) var(--space-4);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    color: var(--ink-2);
+    font-size: var(--fs-14);
+}
+
+.exchange-steps__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--ink);
+    color: #fff;
+    font-size: var(--fs-14);
+    font-weight: 700;
+}
+
+// Layout
+.exchange {
+    display: grid;
+    gap: var(--space-4);
+    align-items: start;
+}
+
+.exchange__card {
+    padding: var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-1);
+
+    h2 { margin-bottom: var(--space-1); font-size: var(--fs-22); }
+}
+
+.exchange__card-head {
+    margin-bottom: var(--space-5);
+
+    p { margin: 0; color: var(--ink-3); font-size: var(--fs-14); }
+}
+
+// Terminal switch (KLIA2 / Lalaport) rendered as a segmented control
+.exchange__terminals {
+    display: inline-flex;
+    gap: 4px;
+    margin-bottom: var(--space-5);
+    padding: 4px;
+    background: var(--surface-2);
+    border-radius: 999px;
+}
+
+.exchange__terminal {
+    display: inline-flex;
+    align-items: center;
+    min-height: 36px;
+    padding: 0 var(--space-4);
+    border-radius: 999px;
+    color: var(--ink-2);
+    font-size: var(--fs-14);
+    font-weight: 500;
+    text-decoration: none;
+    transition: background var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+
+    &:hover { color: var(--ink); }
+
+    &.is-active {
+        background: var(--surface);
+        color: var(--ink);
+        box-shadow: var(--shadow-1);
+    }
+}
+
+// Fields
+.exchange__fields {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.exchange__field {
+    .form-label {
+        margin-bottom: var(--space-1);
+        color: var(--ink);
+        font-size: var(--fs-14);
+        font-weight: 500;
+    }
+
+    .form-control {
+        min-height: 48px;
+        padding: 0 var(--space-4);
+        border-radius: var(--radius-input);
+        font-size: var(--fs-16);
+    }
+
+    // vue-multiselect, matched to .form-control
+    .multiselect { min-height: 48px; color: var(--ink); }
+
+    .multiselect__tags {
+        min-height: 48px;
+        padding: 12px 40px 0 var(--space-4);
+        border: 1px solid var(--line);
+        border-radius: var(--radius-input);
+        font-size: var(--fs-16);
+    }
+
+    .multiselect--active .multiselect__tags {
+        border-color: var(--focus);
+        box-shadow: 0 0 0 1px var(--focus);
+    }
+
+    .multiselect__single,
+    .multiselect__input,
+    .multiselect__placeholder {
+        margin: 0;
+        padding: 0;
+        line-height: 22px;
+        font-size: var(--fs-16);
+        color: var(--ink);
+    }
+
+    .multiselect__placeholder { color: var(--ink-3); }
+
+    .multiselect__select { height: 46px; }
+
+    .multiselect__content-wrapper {
+        border-color: var(--line);
+        border-radius: var(--radius-input);
+        box-shadow: var(--shadow-2);
+    }
+}
+
+.exchange__actions {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    margin-top: var(--space-6);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+}
+
+.exchange__hint {
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+}
+
+// Summary
+.exchange__card--summary {
+    h2 { margin-bottom: var(--space-4); }
+}
+
+.exchange__empty {
+    display: grid;
+    justify-items: center;
+    gap: var(--space-2);
+    padding: var(--space-6) var(--space-4);
+    background: var(--surface-2);
+    border-radius: var(--radius-input);
+    text-align: center;
+
+    .icon { color: var(--ink-3); }
+    p { margin: 0; color: var(--ink-3); font-size: var(--fs-14); }
+}
+
+.exchange__list {
+    display: grid;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.exchange__row {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--space-4);
+    font-size: var(--fs-14);
+
+    dt { color: var(--ink-3); font-weight: 400; }
+    dd { margin: 0; color: var(--ink); font-weight: 500; text-align: right; }
+}
+
+.exchange__total {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    margin: var(--space-5) 0;
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+}
+
+.exchange__total-label {
+    color: var(--ink-2);
+    font-size: var(--fs-14);
+    font-weight: 500;
+}
+
+.exchange__total-value {
+    color: var(--ink);
+    font-size: var(--fs-22);
+    font-weight: 700;
+}
+
+.exchange__secure {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    margin: var(--space-3) 0 0;
+    color: var(--ink-3);
+    font-size: var(--fs-12);
+}
+
+@include media-breakpoint-up(md) {
+    .exchange-steps { grid-template-columns: repeat(3, 1fr); }
+
+    .exchange__fields { grid-template-columns: 1fr 1fr; }
+    .exchange__field--wide { grid-column: 1 / -1; }
+
+    .exchange__actions {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}
+
+@include media-breakpoint-up(lg) {
+    .exchange-page { padding-top: var(--space-10); }
+
+    .exchange {
+        grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+        gap: var(--space-6);
+    }
+
+    .exchange__summary {
+        position: sticky;
+        top: calc(var(--header-h) + var(--space-4));
+    }
+}
+
+// Exchange ticket in the sign-in page's layout (pages/collect-ticket.vue): the form and the summary stack inside the
+// card, the form loses its own card, and the summary becomes a tinted panel under it.
+.exchange-page--auth {
+    .auth__lead { margin-bottom: var(--space-6); }
+
+    .exchange { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+
+    .exchange__form .exchange__card {
+        padding: 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+    }
+
+    .exchange__card--summary {
+        background: var(--surface-2);
+        box-shadow: none;
+    }
+
+    .exchange__summary { position: static; }
+}

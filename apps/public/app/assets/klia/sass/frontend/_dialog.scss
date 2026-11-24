@@ -1,0 +1,183 @@
+// SweetAlert2 popups restyled to the site tokens. The defaults in
+// resources/js/web/app.js attach the tt-swal classes and turn off
+// SweetAlert's own button styling so the site's .btn variants are used.
+
+.swal2-container {
+    z-index: 2000;
+    padding: var(--space-4);
+
+    &.swal2-backdrop-show,
+    &.swal2-noanimation {
+        background: rgba(17, 24, 39, 0.55);
+        backdrop-filter: blur(3px);
+    }
+}
+
+.tt-swal.swal2-popup {
+    width: min(92vw, 440px);
+    padding: var(--space-8) var(--space-6) var(--space-6);
+    border-radius: var(--radius-search);
+    background: var(--surface);
+    box-shadow: var(--shadow-2);
+    color: var(--ink-2);
+    font-family: var(--font-sans);
+    text-align: center;
+}
+
+// Icons: a soft tinted disc with the glyph inside, no rings or borders.
+.tt-swal .swal2-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-5);
+    border: 0;
+    border-radius: 50%;
+
+    .swal2-icon-content {
+        font-size: 32px;
+        font-weight: 700;
+    }
+}
+
+.tt-swal .swal2-icon.swal2-success {
+    background: #ECFDF5;
+    color: #047857;
+
+    .swal2-success-ring,
+    .swal2-success-fix,
+    .swal2-success-circular-line-left,
+    .swal2-success-circular-line-right { display: none; }
+
+    [class^="swal2-success-line"] { background-color: #047857; height: 4px; border-radius: 2px; }
+    .swal2-success-line-tip { top: 36px; left: 14px; width: 18px; }
+    .swal2-success-line-long { top: 31px; right: 10px; width: 30px; }
+}
+
+.tt-swal .swal2-icon.swal2-error {
+    background: var(--brand-50);
+    color: var(--brand-600);
+
+    .swal2-x-mark-line-left,
+    .swal2-x-mark-line-right { top: 30px; left: 16px; width: 32px; height: 4px; border-radius: 2px; background-color: var(--brand-600); }
+}
+
+.tt-swal .swal2-icon.swal2-warning {
+    background: #FFFBEB;
+    color: #B45309;
+}
+
+.tt-swal .swal2-icon.swal2-info,
+.tt-swal .swal2-icon.swal2-question {
+    background: #EFF6FF;
+    color: #1D4ED8;
+}
+
+.tt-swal__title.swal2-title {
+    margin: 0 0 var(--space-2);
+    padding: 0;
+    color: var(--ink);
+    font-size: var(--fs-22);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.tt-swal__text.swal2-html-container {
+    margin: 0;
+    padding: 0;
+    color: var(--ink-3);
+    font-size: var(--fs-16);
+    line-height: 1.55;
+    overflow-wrap: anywhere;
+}
+
+// Form controls inside a prompt
+.tt-swal .swal2-input,
+.tt-swal .swal2-select,
+.tt-swal .swal2-textarea {
+    width: 100%;
+    margin: var(--space-5) 0 0;
+    box-shadow: none;
+    font-size: var(--fs-16);
+}
+
+.tt-swal .swal2-validation-message {
+    margin: var(--space-3) 0 0;
+    padding: var(--space-2) var(--space-3);
+    background: var(--brand-50);
+    border-radius: var(--radius-input);
+    color: var(--brand-700);
+    font-size: var(--fs-14);
+}
+
+// Buttons: full width on phones, side by side on larger screens.
+.tt-swal__actions.swal2-actions {
+    display: flex;
+    flex-direction: column-reverse;
+    gap: var(--space-3);
+    width: 100%;
+    margin: var(--space-6) 0 0;
+
+    .btn {
+        flex: 1;
+        width: 100%;
+        min-height: 46px;
+        margin: 0;
+    }
+
+    @include media-breakpoint-up(sm) {
+        flex-direction: row;
+        .btn { width: auto; }
+    }
+}
+
+.tt-swal .swal2-close {
+    top: var(--space-3);
+    right: var(--space-3);
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    color: var(--ink-3);
+    font-size: 28px;
+    transition: background var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+
+    &:hover { background: var(--surface-2); color: var(--ink); }
+    &:focus-visible { box-shadow: none; outline: 2px solid var(--focus); outline-offset: 2px; }
+}
+
+.tt-swal .swal2-timer-progress-bar {
+    background: var(--brand-600);
+}
+
+// Loading spinner inside the confirm button follows the brand red.
+.tt-swal .swal2-loader {
+    border-color: var(--brand-600) transparent var(--brand-600) transparent;
+}
+
+// Toast variant keeps the same type but sits in the corner.
+.swal2-toast.tt-swal {
+    width: auto;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-card);
+    text-align: left;
+
+    .swal2-icon { width: 32px; height: 32px; margin: 0 var(--space-3) 0 0; }
+    .tt-swal__title.swal2-title { font-size: var(--fs-16); margin: 0; }
+    .tt-swal__text.swal2-html-container { font-size: var(--fs-14); }
+}
+
+// Enter / leave: a short rise instead of the default bounce.
+.tt-swal.swal2-show { animation: tt-swal-in var(--dur-base) var(--ease-out); }
+.tt-swal.swal2-hide { animation: tt-swal-out var(--dur-fast) var(--ease-standard) forwards; }
+
+@keyframes tt-swal-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.98); }
+    to { opacity: 1; transform: none; }
+}
+
+@keyframes tt-swal-out {
+    to { opacity: 0; transform: translateY(8px) scale(0.98); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .tt-swal.swal2-show,
+    .tt-swal.swal2-hide { animation: none; }
+}

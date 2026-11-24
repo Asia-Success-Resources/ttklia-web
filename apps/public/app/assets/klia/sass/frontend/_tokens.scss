@@ -1,0 +1,68 @@
+// Design tokens for the public site. Everything visual on the frontend reads
+// from these custom properties; Bootstrap's Sass variables in frontend.scss are
+// set to the same values so existing utilities keep matching.
+
+:root {
+    // Colour
+    --brand: #FF0004;
+    --brand-600: #D90004;
+    --brand-700: #B30003;
+    --brand-50: #FFF1F1;
+    --ink: #111827;
+    --ink-2: #374151;
+    --ink-3: #6B7280;
+    --surface: #FFFFFF;
+    --surface-2: #F5F6F8;
+    --line: #E5E7EB;
+    --focus: #2563EB;
+    --overlay: rgba(17, 24, 39, 0.3);
+
+    // Typography
+    --font-sans: Roboto, system-ui, -apple-system, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    --fs-12: 0.75rem;
+    --fs-14: 0.875rem;
+    --fs-16: 1rem;
+    --fs-18: 1.125rem;
+    --fs-22: 1.375rem;
+    --fs-28: 1.75rem;
+    --fs-36: 2.25rem;
+    --fs-44: 2.75rem;
+
+    // Spacing (4px grid)
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+    --space-12: 48px;
+    --space-16: 64px;
+    --section-pad: 40px;
+
+    // Radius
+    --radius-input: 8px;
+    --radius-card: 12px;
+    --radius-search: 16px;
+
+    // Elevation
+    --shadow-1: 0 1px 2px rgba(17, 24, 39, 0.06), 0 1px 3px rgba(17, 24, 39, 0.08);
+    --shadow-2: 0 8px 24px rgba(17, 24, 39, 0.10), 0 2px 6px rgba(17, 24, 39, 0.06);
+
+    // Motion
+    --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --dur-fast: 150ms;
+    --dur-base: 240ms;
+    --dur-slow: 400ms;
+
+    // Layout
+    --header-h: 68px;
+}
+
+@media (min-width: 992px) {
+    :root {
+        --section-pad: 64px;
+    }
+}

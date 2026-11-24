@@ -152,6 +152,17 @@ export default defineAppConfig({
             ]
         },
         {
+            "title": "Compliance",
+            "items": [
+                {
+                    "label": "APAD reports",
+                    "to": "/global/apad-reports",
+                    "icon": "i-bx-envelope",
+                    "permission": "bus.apad_reports.read"
+                }
+            ]
+        },
+        {
             "title": "Platform",
             "items": [
                 {

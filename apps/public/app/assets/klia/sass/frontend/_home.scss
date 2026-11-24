@@ -1,0 +1,515 @@
+// Home page sections, top to bottom.
+
+.section-lead {
+    margin: calc(var(--space-6) * -1 + var(--space-2)) 0 0;
+    color: var(--ink-3);
+}
+
+.section-head .section-lead {
+    margin-top: var(--space-1);
+}
+
+// ---------------------------------------------------------------- Hero
+.home-hero {
+    position: relative;
+    // Above the sections that follow, so the date picker and passenger
+    // popovers can hang over them. No overflow clip for the same reason.
+    z-index: 2;
+    isolation: isolate;
+    padding: var(--space-8) 0 var(--space-6);
+    background: var(--ink);
+    color: #fff;
+}
+
+.home-hero__bg {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center 40%;
+}
+
+.home-hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+        linear-gradient(180deg, rgba(17, 24, 39, 0.55) 0%, rgba(17, 24, 39, 0.35) 45%, rgba(17, 24, 39, 0.85) 100%);
+}
+
+.home-hero__copy {
+    max-width: 720px;
+    margin-bottom: var(--space-6);
+}
+
+.home-hero__eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0 0 var(--space-3);
+    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--fs-14);
+    font-weight: 500;
+}
+
+.home-hero__title {
+    margin: 0;
+    color: #fff;
+    font-size: var(--fs-36);
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+}
+
+.home-hero__sub {
+    max-width: 56ch;
+    margin: var(--space-4) 0 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--fs-16);
+}
+
+.home-hero__trust {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2) var(--space-6);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+    color: rgba(255, 255, 255, 0.9);
+    font-size: var(--fs-14);
+    font-weight: 500;
+
+    li {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+}
+
+.home-hero .search-card {
+    color: var(--ink-2);
+}
+
+// Server-rendered stand-in for <search-card>, sized to the bus tab it opens on.
+.search-card--placeholder {
+    min-height: 448px;
+
+    @include media-breakpoint-up(lg) {
+        min-height: 204px;
+    }
+}
+
+.home-hero--app {
+    padding-top: var(--space-5);
+
+    .home-hero__sub,
+    .home-hero__eyebrow,
+    .home-hero__trust { display: none; }
+
+    .home-hero__title { font-size: var(--fs-28); }
+}
+
+@include media-breakpoint-up(lg) {
+    .home-hero {
+        padding: 96px 0 var(--space-12);
+    }
+
+    .home-hero__title {
+        font-size: 56px;
+    }
+
+    .home-hero__sub {
+        font-size: var(--fs-18);
+    }
+
+    .home-hero__copy {
+        margin-bottom: var(--space-10);
+    }
+}
+
+// ---------------------------------------------------------------- Featured ads
+.featured__row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 85%;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0 0 var(--space-2);
+    list-style: none;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+
+    > li { scroll-snap-align: start; }
+
+    @include media-breakpoint-up(md) { grid-auto-columns: calc((100% - var(--space-4)) / 2); }
+    @include media-breakpoint-up(lg) { grid-auto-columns: calc((100% - 2 * var(--space-4)) / 3); }
+}
+
+.featured__card {
+    display: block;
+    overflow: hidden;
+    border-radius: var(--radius-card);
+    background: var(--surface);
+
+    img {
+        display: block;
+        width: 100%;
+        height: auto;
+        aspect-ratio: 16 / 7;
+        object-fit: cover;
+    }
+}
+
+// ---------------------------------------------------------------- Services
+.services__grid {
+    display: grid;
+    gap: var(--space-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    @include media-breakpoint-up(md) { grid-template-columns: repeat(2, 1fr); }
+    @include media-breakpoint-up(lg) { grid-template-columns: repeat(3, 1fr); }
+
+    > li { display: flex; }
+}
+
+.service-card {
+    display: flex;
+    gap: var(--space-4);
+    width: 100%;
+    padding: var(--space-5);
+}
+
+.service-card__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    color: var(--brand);
+    background: var(--brand-50);
+    border-radius: var(--radius-card);
+
+    .icon { width: 32px; height: 32px; }
+}
+
+.service-card__body {
+    display: flex;
+    flex-direction: column;
+}
+
+.service-card__title {
+    color: var(--ink);
+    font-size: var(--fs-18);
+    font-weight: 700;
+}
+
+.service-card__text {
+    margin-top: var(--space-1);
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+}
+
+.service-card__cta {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: auto;
+    padding-top: var(--space-3);
+    color: var(--brand-600);
+    font-size: var(--fs-14);
+    font-weight: 500;
+}
+
+// ---------------------------------------------------------------- Popular routes
+.routes__grid {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: 1fr;
+
+    @include media-breakpoint-up(sm) { grid-template-columns: repeat(2, 1fr); }
+    @include media-breakpoint-up(lg) { grid-template-columns: repeat(4, 1fr); gap: var(--space-4); }
+}
+
+.route-card {
+    display: grid;
+    grid-template-columns: 14px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: var(--space-3);
+    height: 100%;
+    padding: var(--space-4) var(--space-5);
+
+    &:hover .route-card__arrow { transform: translateX(3px); }
+}
+
+.route-card__line {
+    grid-row: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 6px 0;
+}
+
+.route-card__dot {
+    width: 10px;
+    height: 10px;
+    border: 2px solid var(--ink-3);
+    border-radius: 50%;
+}
+
+.route-card__dot--end {
+    border-color: var(--brand);
+    background: var(--brand);
+}
+
+.route-card__track {
+    flex: 1;
+    width: 2px;
+    min-height: 14px;
+    margin: 3px 0;
+    background: repeating-linear-gradient(180deg, var(--line) 0 4px, transparent 4px 7px);
+}
+
+.route-card__stops {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.route-card__from {
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+}
+
+.route-card__to {
+    color: var(--ink);
+    font-size: var(--fs-18);
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.route-card__meta {
+    grid-column: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: var(--space-3);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+}
+
+.route-card__arrow {
+    color: var(--brand-600);
+}
+
+// ---------------------------------------------------------------- How it works
+.how__steps {
+    display: grid;
+    gap: var(--space-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    counter-reset: none;
+
+    @include media-breakpoint-up(md) { grid-template-columns: repeat(3, 1fr); }
+}
+
+.how__step {
+    position: relative;
+    padding: var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+}
+
+.how__num {
+    position: absolute;
+    top: var(--space-4);
+    right: var(--space-5);
+    color: var(--line);
+    font-size: var(--fs-44);
+    font-weight: 700;
+    line-height: 1;
+}
+
+.how__icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 48px;
+    height: 48px;
+    margin-bottom: var(--space-4);
+    color: #fff;
+    background: var(--brand-600);
+    border-radius: var(--radius-card);
+}
+
+.how__title {
+    margin-bottom: var(--space-2);
+    font-size: var(--fs-18);
+}
+
+.how__text {
+    margin: 0;
+    color: var(--ink-3);
+}
+
+// ---------------------------------------------------------------- Why band (dark)
+.why-band {
+    padding-block: var(--section-pad);
+    background: var(--ink);
+    color: rgba(255, 255, 255, 0.78);
+}
+
+.section + .why-band {
+    margin-top: 0;
+}
+
+.why-band + .section {
+    padding-top: var(--section-pad);
+}
+
+.why-band__head {
+    max-width: 640px;
+    margin-bottom: var(--space-8);
+}
+
+.why-band__title {
+    margin: 0;
+    color: #fff;
+    font-size: var(--fs-28);
+
+    @include media-breakpoint-up(lg) { font-size: var(--fs-36); }
+}
+
+.why-band__lead {
+    margin: var(--space-2) 0 0;
+    font-size: var(--fs-18);
+}
+
+.why-band__grid {
+    display: grid;
+    gap: var(--space-8);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    @include media-breakpoint-up(sm) { grid-template-columns: repeat(2, 1fr); }
+    @include media-breakpoint-up(lg) { grid-template-columns: repeat(4, 1fr); }
+}
+
+.why-band__item {
+    padding-top: var(--space-5);
+    border-top: 1px solid rgba(255, 255, 255, 0.16);
+
+    .icon { color: #FF5A5C; }
+
+    h3 {
+        margin: var(--space-4) 0 var(--space-2);
+        color: #fff;
+        font-size: var(--fs-18);
+    }
+
+    p {
+        margin: 0;
+        font-size: var(--fs-14);
+    }
+}
+
+// ---------------------------------------------------------------- CTA pair
+.cta-pair {
+    display: grid;
+    gap: var(--space-4);
+
+    @include media-breakpoint-up(md) { grid-template-columns: 1fr 1fr; }
+}
+
+.cta-card {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-3);
+    padding: var(--space-8);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+
+    > .icon { color: var(--brand-600); }
+}
+
+.cta-card--brand {
+    background: var(--brand-600);
+    border-color: var(--brand-600);
+    color: rgba(255, 255, 255, 0.9);
+
+    > .icon { color: #fff; }
+
+    .cta-card__title { color: #fff; }
+
+    .btn-light { color: var(--brand-700); font-weight: 500; }
+}
+
+.cta-card__title {
+    margin: 0;
+    font-size: var(--fs-22);
+}
+
+.cta-card__text {
+    flex: 1;
+    max-width: 44ch;
+    margin: 0;
+}
+
+.cta-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: 44px;
+    }
+}
+
+// ---------------------------------------------------------------- FAQ
+.home-faq__grid {
+    display: grid;
+    gap: var(--space-6);
+
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 1fr 2fr;
+        gap: var(--space-12);
+    }
+
+    .section-lead { margin: var(--space-1) 0 var(--space-4); }
+}
+
+.home-faq .faq {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+    padding: 0 var(--space-6);
+}
+
+// ---------------------------------------------------------------- Explore (closes the page)
+.explore {
+    background: var(--surface);
+    border-top: 1px solid var(--line);
+    padding-top: var(--section-pad) !important;
+}
+
+.js .explore .explore__tabs,
+.js .explore .explore__panel {
+    background: var(--surface-2);
+}

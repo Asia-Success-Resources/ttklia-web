@@ -15,7 +15,7 @@ export default defineNuxtConfig({
         head: {
             title: 'E-hailing',
             titleTemplate: '%s | Teeko',
-            // Tab icon: the TTKLIA one (v2/favicon.png, converted to .ico).
+            // Tab icon: the Teeko app icon (teeko-ride assets/teeko/logo.png, converted to .ico).
             link: [{ rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }],
         },
     },

@@ -20,11 +20,11 @@ interface ChargeLine extends Record<string, unknown> {
 interface ChargeRule extends Record<string, unknown> {
     id: number
     channel_group: 'own' | 'partner'
-    price_from_sen: number
-    price_to_sen: number | null
-    fee_sen: number | null
+    price_from_rm: number
+    price_to_rm: number | null
+    fee_rm: number | null
     percent_bp: number | null
-    max_sen: number | null
+    max_rm: number | null
     payer: string
     collected_by: string
     valid_from: string
@@ -64,17 +64,18 @@ const { form, fieldError, show, submit } = useFormModal(() => ({
     valid_from: '',
     note: '',
 }))
-const sen = (v: string) => (v === '' ? null : Math.round(Number(v) * 100))
+// Charges are ringgit (ADR 0003, amendment of 21 Nov 2026).
+const sen = (v: string) => rmInput(v)
 async function save() {
     // The terminal goes as ?workspace=slug; the API turns it into the rule's workspace.
     const saved = await submit((d) =>
         api.post(`/admin/pricing/bus-charges?workspace=${encodeURIComponent(terminal.value)}`, {
             channel_group: d.channel_group,
-            price_from_sen: sen(d.price_from_rm) ?? 0,
-            price_to_sen: sen(d.price_to_rm),
-            fee_sen: d.charge_kind === 'fee' ? sen(d.fee_rm) : null,
+            price_from_rm: sen(d.price_from_rm) ?? 0,
+            price_to_rm: sen(d.price_to_rm),
+            fee_rm: d.charge_kind === 'fee' ? sen(d.fee_rm) : null,
             percent_bp: d.charge_kind === 'percent' ? Math.round(Number(d.percent || 0) * 100) : null,
-            max_sen: d.charge_kind === 'percent' ? sen(d.max_rm) : null,
+            max_rm: d.charge_kind === 'percent' ? sen(d.max_rm) : null,
             payer: d.payer,
             collected_by: d.collected_by,
             valid_from: d.valid_from || null,
@@ -110,16 +111,16 @@ const ruleColumns: TableColumn<ChargeRule>[] = [
     {
         id: 'band',
         header: 'Ticket price',
-        cell: ({ row }) => `${formatSen(row.original.price_from_sen)} – ${row.original.price_to_sen === null ? 'no limit' : formatSen(row.original.price_to_sen)}`,
+        cell: ({ row }) => `${formatRm(row.original.price_from_rm)} – ${row.original.price_to_rm === null ? 'no limit' : formatRm(row.original.price_to_rm)}`,
     },
     {
         id: 'charge',
         header: 'Charge',
         cell: ({ row }) => {
             const r = row.original
-            if (r.fee_sen !== null) return formatSen(r.fee_sen)
+            if (r.fee_rm !== null) return formatRm(r.fee_rm)
             const pct = r.percent_bp !== null ? `${r.percent_bp / 100}%` : '—'
-            return r.max_sen !== null ? `${pct}, max ${formatSen(r.max_sen)}` : pct
+            return r.max_rm !== null ? `${pct}, max ${formatRm(r.max_rm)}` : pct
         },
     },
     { accessorKey: 'payer', header: 'Payer' },
@@ -176,12 +177,12 @@ const ruleColumns: TableColumn<ChargeRule>[] = [
         <OpsFormField label="Charged as" required>
             <USelect v-model="form.data.charge_kind" :items="[{ label: 'Flat fee', value: 'fee' }, { label: 'Percentage with a cap', value: 'percent' }]" class="w-full" />
         </OpsFormField>
-        <OpsFormField label="Ticket price from (RM)" :error="fieldError('price_from_sen')"><UInput v-model="form.data.price_from_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Ticket price to (RM, empty = no limit)" :error="fieldError('price_to_sen')"><UInput v-model="form.data.price_to_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField v-if="form.data.charge_kind === 'fee'" label="Fee (RM)" required :error="fieldError('fee_sen')"><UInput v-model="form.data.fee_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Ticket price from (RM)" :error="fieldError('price_from_rm')"><UInput v-model="form.data.price_from_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Ticket price to (RM, empty = no limit)" :error="fieldError('price_to_rm')"><UInput v-model="form.data.price_to_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField v-if="form.data.charge_kind === 'fee'" label="Fee (RM)" required :error="fieldError('fee_rm')"><UInput v-model="form.data.fee_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         <template v-else>
             <OpsFormField label="Percentage (%)" required :error="fieldError('percent_bp')"><UInput v-model="form.data.percent" type="number" min="0" max="100" step="0.01" class="w-full" /></OpsFormField>
-            <OpsFormField label="Cap (RM)" :error="fieldError('max_sen')"><UInput v-model="form.data.max_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+            <OpsFormField label="Cap (RM)" :error="fieldError('max_rm')"><UInput v-model="form.data.max_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         </template>
         <OpsFormField label="Paid by" required :error="fieldError('payer')">
             <USelect v-model="form.data.payer" :items="[{ label: 'Operator', value: 'operator' }, { label: 'Partner', value: 'partner' }]" class="w-full" />

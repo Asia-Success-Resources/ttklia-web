@@ -1,0 +1,514 @@
+// Site header: a sticky main bar with the logo, service navigation, theme switch, language and the account
+// menu. (klia-bus also had a slim utility bar above it; it was removed here, so --utility-h is 0.) Phones get a
+// compact bar and a sheet (#nav-sheet).
+
+.site-header {
+    position: sticky;
+    // Only the utility bar scrolls off; the main bar stays pinned.
+    top: calc(var(--utility-h) * -1);
+    z-index: 1030;
+    --utility-h: 0px;
+}
+
+// ---------------------------------------------------------------- Utility bar
+.utility-bar {
+    display: none;
+    height: var(--utility-h);
+    background: var(--ink);
+    color: rgba(255, 255, 255, 0.72);
+    font-size: var(--fs-12);
+
+    @include media-breakpoint-up(lg) {
+        display: block;
+    }
+}
+
+.utility-bar__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    height: 100%;
+}
+
+.utility-bar__tag {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    margin: 0;
+}
+
+.utility-bar__links {
+    display: flex;
+    gap: var(--space-5);
+    margin-left: auto;
+
+    a {
+        color: rgba(255, 255, 255, 0.72);
+        text-decoration: none;
+
+        &:hover,
+        &[aria-current="page"] { color: #fff; }
+    }
+}
+
+.utility-bar__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 28px;
+    padding: 0 var(--space-2);
+    border: 1px solid rgba(255, 255, 255, 0.24);
+    background: none;
+    color: #fff;
+    font-size: var(--fs-12);
+    font-weight: 500;
+    border-radius: 6px;
+
+    &:hover { border-color: rgba(255, 255, 255, 0.6); }
+}
+
+// ---------------------------------------------------------------- Main bar
+.main-bar {
+    position: relative;
+    background: var(--surface);
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: auto 0 0 0;
+        height: 1px;
+        background: var(--line);
+    }
+}
+
+.site-header.is-scrolled .main-bar {
+    box-shadow: var(--shadow-1);
+}
+
+.main-bar__inner {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+    height: var(--header-h);
+}
+
+.main-bar__logo {
+    display: inline-flex;
+    flex-shrink: 0;
+}
+
+.service-nav {
+    display: none;
+    align-self: stretch;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.service-nav__link {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+    color: var(--ink-2);
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: auto var(--space-3) 0;
+        z-index: 1;
+        height: 3px;
+        background: var(--brand);
+        transform: scaleX(0);
+    }
+
+    &:hover { color: var(--ink); }
+
+    &:hover .service-nav__icon { color: var(--brand); }
+
+    &[aria-current="page"] {
+        color: var(--ink);
+
+        .service-nav__icon { color: var(--brand); }
+
+        &::after { transform: none; }
+    }
+}
+
+.service-nav__icon {
+    width: 24px;
+    height: 24px;
+    color: var(--ink-3);
+}
+
+.main-bar__actions {
+    display: none;
+    align-items: center;
+    gap: var(--space-2);
+    margin-left: auto;
+}
+
+.main-bar__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    color: var(--ink-2);
+    font-weight: 500;
+    white-space: nowrap;
+    text-decoration: none;
+    border-radius: var(--radius-input);
+
+    &:hover { color: var(--ink); background: var(--surface-2); }
+}
+
+.main-bar__register {
+    min-height: 40px;
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    white-space: nowrap;
+}
+
+.account-button {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-2) 0 4px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink);
+    font-weight: 500;
+    border-radius: 999px;
+
+    &:hover { border-color: var(--ink-3); }
+}
+
+.account-button__avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: var(--brand-600);
+    color: #fff;
+    font-size: var(--fs-14);
+    font-weight: 700;
+}
+
+.account-button__avatar--sm {
+    width: 30px;
+    height: 30px;
+    font-size: var(--fs-12);
+}
+
+.account-button__name {
+    max-width: 12ch;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.account-menu {
+    min-width: 240px;
+}
+
+.account-menu__head {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+    margin-bottom: var(--space-1);
+    border-bottom: 1px solid var(--line);
+
+    p { margin: 0; }
+}
+
+.account-menu__name {
+    color: var(--ink);
+    font-weight: 700;
+}
+
+.account-menu__meta {
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+}
+
+.main-bar__mobile {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    margin-left: auto;
+}
+
+.icon-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    height: 44px;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    border-radius: var(--radius-input);
+
+    &:hover { background: var(--surface-2); }
+}
+
+@include media-breakpoint-up(lg) {
+    .service-nav,
+    .main-bar__actions {
+        display: flex;
+    }
+
+    .main-bar__mobile {
+        display: none;
+    }
+}
+
+// Between lg and xl the labels stay, icons go, to keep one line.
+@media (min-width: 992px) and (max-width: 1199.98px) {
+    .service-nav__icon { display: none; }
+    .main-bar__link .icon { display: none; }
+}
+
+.dropdown-menu {
+    border-color: var(--line);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-2);
+    padding: var(--space-2);
+
+    .dropdown-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        border-radius: var(--radius-input);
+        padding: var(--space-2) var(--space-3);
+
+        .icon { color: var(--ink-3); }
+
+        &[aria-current="true"] {
+            color: var(--brand-600);
+            font-weight: 500;
+        }
+
+        &:active {
+            background: var(--brand-50);
+            color: var(--ink);
+        }
+    }
+}
+
+// App build top bar (mobile-topbar.blade.php)
+.site-header__inner {
+    display: flex;
+    align-items: center;
+    min-height: 56px;
+}
+
+.site-header--app {
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+}
+
+.header-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: 44px;
+    padding: 0 var(--space-3);
+    border: 0;
+    background: none;
+    color: var(--ink-2);
+    font-weight: 500;
+    border-radius: var(--radius-input);
+}
+
+// ---------------------------------------------------------------- Phone sheet
+.nav-sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 1050;
+
+    &[hidden] { display: none; }
+}
+
+.nav-sheet__backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(17, 24, 39, 0.45);
+    opacity: 0;
+}
+
+.nav-sheet__panel {
+    position: absolute;
+    inset: 0 0 0 auto;
+    width: min(380px, 92vw);
+    overflow-y: auto;
+    padding: var(--space-3) var(--space-4) var(--space-8);
+    background: var(--surface);
+    box-shadow: var(--shadow-2);
+    transform: translateX(100%);
+}
+
+.nav-sheet.is-open {
+    .nav-sheet__backdrop { opacity: 1; }
+    .nav-sheet__panel { transform: none; }
+}
+
+.nav-sheet__head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--space-4);
+}
+
+.nav-sheet__label {
+    margin: var(--space-6) 0 var(--space-2);
+    color: var(--ink-3);
+    font-size: var(--fs-12);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+}
+
+.sheet-account {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-3);
+    background: var(--surface-2);
+    color: var(--ink);
+    text-decoration: none;
+    border-radius: var(--radius-card);
+
+    > span:nth-child(2) { display: flex; flex-direction: column; min-width: 0; }
+}
+
+.sheet-account__name { font-weight: 700; }
+.sheet-account__meta { color: var(--ink-3); font-size: var(--fs-14); }
+
+.sheet-auth {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: var(--space-3);
+
+    .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+    }
+}
+
+.sheet-services {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-2);
+}
+
+.sheet-service {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    min-height: 84px;
+    padding: var(--space-2);
+    border: 1px solid var(--line);
+    color: var(--ink);
+    font-size: var(--fs-14);
+    font-weight: 500;
+    text-align: center;
+    text-decoration: none;
+    border-radius: var(--radius-card);
+
+    .icon { width: 32px; height: 32px; color: var(--brand); }
+
+    &[aria-current="page"] { border-color: var(--brand-600); background: var(--brand-50); }
+}
+
+.nav-sheet__row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    min-height: 48px;
+    padding: 0 var(--space-2);
+    border: 0;
+    border-bottom: 1px solid var(--line);
+    background: none;
+    color: var(--ink);
+    text-align: left;
+    text-decoration: none;
+
+    .icon { color: var(--ink-3); }
+
+    &[aria-current="page"] { color: var(--brand-600); }
+}
+
+.sheet-lang {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    padding: 2px;
+    background: var(--surface-2);
+    border-radius: var(--radius-input);
+
+    a {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 40px;
+        padding: 0 var(--space-1);
+        color: var(--ink-2);
+        font-size: var(--fs-14);
+        font-weight: 500;
+        text-align: center;
+        text-decoration: none;
+        border-radius: 6px;
+
+        &[aria-current="true"] {
+            background: var(--surface);
+            color: var(--brand-600);
+            box-shadow: var(--shadow-1);
+        }
+    }
+}
+
+// Theme switch and language picker, moved from the removed utility bar into the main bar actions.
+.main-bar__theme {
+    display: inline-flex;
+    align-items: center;
+    margin: 0 var(--space-1) 0 var(--space-3);
+}
+
+.main-bar__lang {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 36px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--ink-2);
+    font-size: var(--fs-14);
+    font-weight: 500;
+    border-radius: var(--radius-input);
+    cursor: pointer;
+
+    &:hover { border-color: var(--ink-3); color: var(--ink); }
+}
+
+.sheet-theme {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    min-height: 44px;
+    color: var(--ink);
+    font-size: var(--fs-16);
+    font-weight: 500;
+}

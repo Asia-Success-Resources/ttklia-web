@@ -12,11 +12,11 @@ useHead({ title: 'Referral vouchers' })
 interface Row extends Record<string, unknown> {
     id: number
     name: string
-    new_user_voucher_sen: number
-    customer_referrer_voucher_sen: number | null
+    new_user_voucher_rm: number
+    customer_referrer_voucher_rm: number | null
     referrer_reward_trigger: string
     applies_to: string
-    min_spend_sen: number | null
+    min_spend_rm: number | null
     voucher_valid_days: number
     valid_from: string
     valid_to: string | null
@@ -38,7 +38,8 @@ const list = useApiList<Row>({ search, path: '/admin/settings/referrals' })
 onMounted(() => list.load())
 const live = computed(() => list.rows.value.find((r) => r.is_active) ?? null)
 
-const rm = (sen: number | null | undefined) => (sen === null || sen === undefined ? '' : String(sen / 100))
+// Voucher amounts are ringgit (ADR 0003, amendment of 21 Nov 2026).
+const rm = (v: number | null | undefined) => (v === null || v === undefined ? '' : String(v))
 const { form, fieldError, show, submit } = useFormModal(() => ({
     new_user_rm: '',
     referrer_rm: '',
@@ -53,26 +54,26 @@ function openEdit() {
     show(
         r
             ? {
-                  new_user_rm: rm(r.new_user_voucher_sen),
-                  referrer_rm: rm(r.customer_referrer_voucher_sen),
+                  new_user_rm: rm(r.new_user_voucher_rm),
+                  referrer_rm: rm(r.customer_referrer_voucher_rm),
                   trigger: r.referrer_reward_trigger,
                   applies_to: r.applies_to ? r.applies_to.split(',') : [],
-                  min_spend_rm: rm(r.min_spend_sen),
+                  min_spend_rm: rm(r.min_spend_rm),
                   valid_days: String(r.voucher_valid_days),
                   is_active: r.is_active,
               }
             : {},
     )
 }
-const sen = (value: string) => Math.round(Number(value || 0) * 100)
+const sen = (value: string) => rmInput(value) ?? 0
 async function save() {
     const saved = await submit((d) =>
         api.patch('/admin/settings/referrals', {
-            new_user_voucher_sen: sen(d.new_user_rm),
-            customer_referrer_voucher_sen: sen(d.referrer_rm),
+            new_user_voucher_rm: sen(d.new_user_rm),
+            customer_referrer_voucher_rm: sen(d.referrer_rm),
             referrer_reward_trigger: d.trigger,
             applies_to: d.applies_to,
-            min_spend_sen: d.min_spend_rm === '' ? null : sen(d.min_spend_rm),
+            min_spend_rm: d.min_spend_rm === '' ? null : sen(d.min_spend_rm),
             voucher_valid_days: Number(d.valid_days),
             is_active: d.is_active,
         }),
@@ -86,11 +87,11 @@ async function save() {
 const columns: TableColumn<Row>[] = [
     { accessorKey: 'valid_from', header: 'From' },
     { accessorKey: 'valid_to', header: 'Until', cell: ({ row }) => (row.original.valid_to ? formatDateTime(row.original.valid_to) : 'Now') },
-    { accessorKey: 'new_user_voucher_sen', header: 'New user (RM)', cell: ({ row }) => formatSen(row.original.new_user_voucher_sen) },
-    { accessorKey: 'customer_referrer_voucher_sen', header: 'Referrer (RM)', cell: ({ row }) => formatSen(row.original.customer_referrer_voucher_sen) },
+    { accessorKey: 'new_user_voucher_rm', header: 'New user (RM)', cell: ({ row }) => formatRm(row.original.new_user_voucher_rm) },
+    { accessorKey: 'customer_referrer_voucher_rm', header: 'Referrer (RM)', cell: ({ row }) => formatRm(row.original.customer_referrer_voucher_rm) },
     { accessorKey: 'referrer_reward_trigger', header: 'Referrer earns', cell: ({ row }) => (row.original.referrer_reward_trigger === 'on_registration' ? 'On sign-up' : 'On first paid order') },
     { accessorKey: 'applies_to', header: 'Spend on', cell: ({ row }) => row.original.applies_to.split(',').map((s) => SERVICES.find((x) => x.value === s)?.label ?? s).join(', ') },
-    { accessorKey: 'min_spend_sen', header: 'Min spend (RM)', cell: ({ row }) => (row.original.min_spend_sen === null ? '—' : formatSen(row.original.min_spend_sen)) },
+    { accessorKey: 'min_spend_rm', header: 'Min spend (RM)', cell: ({ row }) => (row.original.min_spend_rm === null ? '—' : formatRm(row.original.min_spend_rm)) },
     { accessorKey: 'voucher_valid_days', header: 'Valid (days)' },
     { accessorKey: 'is_active', header: 'Status', cell: ({ row }) => h(resolveComponent('OpsStatusCell'), { status: row.original.is_active ? 'active' : 'ended' }) },
 ]
@@ -115,8 +116,8 @@ const columns: TableColumn<Row>[] = [
     </OpsListPage>
 
     <OpsFormModal v-model:open="form.open" title="Change Referral Vouchers" :saving="form.saving" :error="form.error" submit-label="Save From Now" @submit="save">
-        <OpsFormField label="New user voucher (RM)" required :error="fieldError('new_user_voucher_sen')"><UInput v-model="form.data.new_user_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Customer referrer voucher (RM)" :error="fieldError('customer_referrer_voucher_sen')"><UInput v-model="form.data.referrer_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="New user voucher (RM)" required :error="fieldError('new_user_voucher_rm')"><UInput v-model="form.data.new_user_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Customer referrer voucher (RM)" :error="fieldError('customer_referrer_voucher_rm')"><UInput v-model="form.data.referrer_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         <OpsFormField label="Referrer earns it" required :error="fieldError('referrer_reward_trigger')">
             <USelect v-model="form.data.trigger" :items="[{ label: 'On first paid order', value: 'on_first_paid_order' }, { label: 'On sign-up', value: 'on_registration' }]" class="w-full" />
         </OpsFormField>
@@ -124,7 +125,7 @@ const columns: TableColumn<Row>[] = [
         <OpsFormField label="Can be spent on" required :error="fieldError('applies_to')">
             <USelectMenu v-model="form.data.applies_to" :items="SERVICES" value-key="value" multiple class="w-full" />
         </OpsFormField>
-        <OpsFormField label="Minimum spend (RM, optional)" :error="fieldError('min_spend_sen')"><UInput v-model="form.data.min_spend_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Minimum spend (RM, optional)" :error="fieldError('min_spend_rm')"><UInput v-model="form.data.min_spend_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         <OpsFormField label="Programme" :error="fieldError('is_active')">
             <OpsStatusToggle v-model="form.data.is_active" active-label="Running" inactive-label="Stopped" />
         </OpsFormField>

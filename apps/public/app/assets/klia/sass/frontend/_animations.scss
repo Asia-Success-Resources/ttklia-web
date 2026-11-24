@@ -1,0 +1,119 @@
+// Motion. Only transform and opacity animate (plus the search card height,
+// which keeps the page below it from jumping). Everything sits behind
+// prefers-reduced-motion: no-preference, so reduced motion gets instant state
+// changes; durations never exceed --dur-slow (400ms).
+
+@media (prefers-reduced-motion: no-preference) {
+
+    // Cross-document page transitions where the browser supports them.
+    @view-transition {
+        navigation: auto;
+    }
+
+    // Header line and nav
+    .main-bar { transition: box-shadow var(--dur-fast) var(--ease-standard); }
+    .service-nav__link::after { transition: transform var(--dur-base) var(--ease-standard); }
+    .service-nav__icon { transition: color var(--dur-fast) var(--ease-standard); }
+    .service-nav__link,
+    .main-bar__link,
+    .utility-bar__links a,
+    .account-button,
+    .icon-button,
+    .header-btn,
+    .nav-sheet__row,
+    .tabs__tab,
+    .switcher__tab,
+    .switcher__label,
+    .seg__button,
+    .stepper__btn,
+    .segmented__option,
+    .search-btn,
+    .text-link,
+    .explore__links a,
+    .site-footer a {
+        transition: color var(--dur-fast) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+    }
+
+    // Mobile sheet
+    .nav-sheet__panel { transition: transform var(--dur-base) var(--ease-standard); }
+    .nav-sheet__backdrop { transition: opacity var(--dur-base) var(--ease-standard); }
+
+    // Sliding underlines (service switcher, explore hub)
+    .switcher__underline,
+    .tabs__underline {
+        transition: transform var(--dur-base) var(--ease-standard), opacity var(--dur-fast) linear;
+    }
+
+    // Search panel swap: out-in crossfade with an 8px rise.
+    .panel-enter-active {
+        transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+    }
+    .panel-leave-active {
+        transition: opacity var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+    }
+    .panel-enter-from { opacity: 0; transform: translateY(8px); }
+    .panel-leave-to { opacity: 0; transform: translateY(-4px); }
+
+    .search-card__body.is-resizing {
+        transition: height var(--dur-base) var(--ease-standard);
+    }
+
+    .swap-btn { transition: transform var(--dur-base) var(--ease-standard), background-color var(--dur-fast) var(--ease-standard); }
+
+    // Popovers (passenger stepper)
+    .pop-enter-active,
+    .pop-leave-active {
+        transition: opacity var(--dur-fast) var(--ease-out), transform var(--dur-fast) var(--ease-out);
+    }
+    .pop-enter-from,
+    .pop-leave-to {
+        opacity: 0;
+        transform: scale(0.98);
+    }
+
+    // Date picker bottom sheet (phones)
+    .sheet-enter-active,
+    .sheet-leave-active {
+        transition: opacity var(--dur-base) var(--ease-standard);
+
+        .datefield__pop { transition: transform var(--dur-base) var(--ease-standard); }
+    }
+    .sheet-enter-from,
+    .sheet-leave-to {
+        opacity: 0;
+
+        .datefield__pop { transform: translateY(100%); }
+    }
+
+    // Explore hub: incoming panel fades and rises.
+    .js .explore__panel.is-active {
+        animation: panel-in var(--dur-base) var(--ease-out);
+    }
+
+    // Cards: lift on hover and focus.
+    .card-link,
+    .route-card__arrow {
+        transition: transform var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+    }
+
+    .teeko-float__label {
+        transition: opacity var(--dur-fast) var(--ease-standard), transform var(--dur-fast) var(--ease-standard);
+    }
+
+    // Section reveal (resources/js/web/reveal.js adds the classes).
+    .will-reveal {
+        opacity: 0;
+        transform: translateY(12px);
+        transition: opacity var(--dur-slow) var(--ease-out), transform var(--dur-slow) var(--ease-out);
+    }
+
+    .will-reveal.is-revealed {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@keyframes panel-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}

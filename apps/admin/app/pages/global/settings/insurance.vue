@@ -15,7 +15,7 @@ interface Row extends Record<string, unknown> {
     group_policy_no: string
     applies_to: string
     channels: string
-    premium_sen: number
+    premium_rm: number
     commission_bp: number
     default_selection: string
     valid_from: string
@@ -29,7 +29,7 @@ interface Detail extends Row {
     coverage_page_url: string
     wording_url: string
     summary_key: string
-    tax_sen: number
+    tax_rm: number
 }
 interface Declaration extends Record<string, unknown> {
     id: number
@@ -97,8 +97,8 @@ async function open(row?: Row) {
             insurer_organisation_id: d.insurer_organisation_id,
             distributor_organisation_id: d.distributor_organisation_id ?? undefined,
             group_policy_no: d.group_policy_no,
-            premium_rm: String(d.premium_sen / 100),
-            tax_rm: String(d.tax_sen / 100),
+            premium_rm: String(d.premium_rm),
+            tax_rm: String(d.tax_rm),
             commission_pct: String(d.commission_bp / 100),
             max_age: d.max_age === null ? '' : String(d.max_age),
             applies_to: d.applies_to.split(','),
@@ -122,8 +122,8 @@ async function save() {
             insurer_organisation_id: d.insurer_organisation_id,
             distributor_organisation_id: d.distributor_organisation_id ?? null,
             group_policy_no: d.group_policy_no,
-            premium_sen: Math.round(Number(d.premium_rm) * 100),
-            tax_sen: Math.round(Number(d.tax_rm || 0) * 100),
+            premium_rm: rmInput(d.premium_rm), // ringgit (ADR 0003, amendment of 21 Nov 2026)
+            tax_rm: rmInput(d.tax_rm) ?? 0,
             commission_bp: Math.round(Number(d.commission_pct || 0) * 100),
             max_age: d.max_age === '' ? null : Number(d.max_age),
             applies_to: d.applies_to.join(','),
@@ -148,7 +148,7 @@ async function save() {
 const columns: TableColumn<Row>[] = [
     { accessorKey: 'code', header: 'Code' },
     { accessorKey: 'name', header: 'Name' },
-    { accessorKey: 'premium_sen', header: 'Premium (RM)', cell: ({ row }) => formatSen(row.original.premium_sen) },
+    { accessorKey: 'premium_rm', header: 'Premium (RM)', cell: ({ row }) => formatRm(row.original.premium_rm) },
     { accessorKey: 'commission_bp', header: 'Commission', cell: ({ row }) => `${row.original.commission_bp / 100}%` },
     { accessorKey: 'applies_to', header: 'For' },
     { accessorKey: 'channels', header: 'Sold at' },
@@ -213,8 +213,8 @@ const declarationColumns: TableColumn<Declaration>[] = [
         </OpsFormField>
         <OpsFormField label="Group policy no" required :error="fieldError('group_policy_no')"><UInput v-model="form.data.group_policy_no" class="w-full" /></OpsFormField>
         <OpsFormField label="Maximum age" :error="fieldError('max_age')"><UInput v-model="form.data.max_age" type="number" min="1" class="w-full" /></OpsFormField>
-        <OpsFormField label="Premium per person (RM)" required :error="fieldError('premium_sen')"><UInput v-model="form.data.premium_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
-        <OpsFormField label="Tax (RM)" required :error="fieldError('tax_sen')"><UInput v-model="form.data.tax_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Premium per person (RM)" required :error="fieldError('premium_rm')"><UInput v-model="form.data.premium_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Tax (RM)" required :error="fieldError('tax_rm')"><UInput v-model="form.data.tax_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         <OpsFormField label="TTKLIA commission (%)" required :error="fieldError('commission_bp')"><UInput v-model="form.data.commission_pct" type="number" min="0" max="100" step="0.01" class="w-full" /></OpsFormField>
         <OpsFormField label="Default at checkout" required :error="fieldError('default_selection')"><USelect v-model="form.data.default_selection" :items="SELECTION" class="w-full" /></OpsFormField>
         <OpsFormField label="Sold with" required :error="fieldError('applies_to')">

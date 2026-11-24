@@ -14,7 +14,7 @@ interface Row extends Record<string, unknown> {
     name: string
     type: string
     location_type: string | null
-    toll_sen: number
+    toll_rm: number
     show_in_kiosk: boolean
     sort: number
     h3_resolution: number
@@ -69,7 +69,7 @@ function open(row?: Row) {
                   name: row.name,
                   type: row.type,
                   location_type: row.location_type ?? undefined,
-                  toll_rm: String(row.toll_sen / 100),
+                  toll_rm: String(row.toll_rm ?? 0),
                   show_in_kiosk: row.show_in_kiosk,
                   sort: String(row.sort),
                   h3_resolution: String(row.h3_resolution),
@@ -94,7 +94,7 @@ async function save() {
             name: d.name,
             type: d.type,
             location_type: d.location_type ?? null,
-            toll_sen: Math.round(Number(d.toll_rm || 0) * 100),
+            toll_rm: rmInput(d.toll_rm) ?? 0, // ringgit (ADR 0003, amendment of 21 Nov 2026)
             show_in_kiosk: d.show_in_kiosk,
             sort: Number(d.sort || 0),
             h3_resolution: Number(d.h3_resolution),
@@ -135,7 +135,7 @@ const columns: TableColumn<Row>[] = [
     { accessorKey: 'code', header: 'Code' },
     { accessorKey: 'name', header: 'Name' },
     { accessorKey: 'type', header: 'Type', cell: ({ row }) => TYPES.find((t) => t.value === row.original.type)?.label ?? row.original.type },
-    { accessorKey: 'toll_sen', header: 'Toll (RM)', cell: ({ row }) => formatSen(row.original.toll_sen) },
+    { accessorKey: 'toll_rm', header: 'Toll (RM)', cell: ({ row }) => formatRm(row.original.toll_rm) },
     { accessorKey: 'show_in_kiosk', header: 'Kiosk', cell: ({ row }) => (row.original.show_in_kiosk ? 'Shown' : '') },
     { accessorKey: 'version', header: 'Version' },
     actionsColumn<Row>((row) =>
@@ -179,7 +179,7 @@ const wsIds = computed(() => workspaces.rows.value.map((w) => ({ label: `${w.cod
         <OpsFormField label="Local or outstation" :error="fieldError('location_type')">
             <USelect v-model="form.data.location_type" :items="[{ label: '—', value: undefined }, { label: 'Local', value: 'local' }, { label: 'Outstation', value: 'outstation' }]" class="w-full" />
         </OpsFormField>
-        <OpsFormField label="Toll (RM)" :error="fieldError('toll_sen')"><UInput v-model="form.data.toll_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
+        <OpsFormField label="Toll (RM)" :error="fieldError('toll_rm')"><UInput v-model="form.data.toll_rm" type="number" min="0" step="0.01" class="w-full" /></OpsFormField>
         <OpsFormField label="Sort" :error="fieldError('sort')"><UInput v-model="form.data.sort" type="number" min="0" class="w-full" /></OpsFormField>
         <OpsFormField label="H3 resolution" :error="fieldError('h3_resolution')"><UInput v-model="form.data.h3_resolution" type="number" min="5" max="10" class="w-full" /></OpsFormField>
         <OpsFormField label="Kiosk" :error="fieldError('show_in_kiosk')">

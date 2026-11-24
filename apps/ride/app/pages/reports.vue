@@ -1,19 +1,22 @@
 <script setup lang="ts">
-// Reports: report. Permission: ride.reports.read (doc 27).
-// TODO(api): doc 04 has no endpoint for this screen yet; the list stays empty until it does.
+// Teeko reports (ReportController RIDE): rides per day and per driver, for the days picked, with CSV export.
+// GET /ops/w/{workspace}/reports/{rides|ride-drivers|driver-source}?from&to, …/export. Permission: ride.reports.read;
+// the Driver Source Report ride.reports.driver_source (doc 27, doc 36).
 useHead({ title: 'Reports' })
-const series = [{ name: 'Reports', data: [] as number[] }]
+const { can } = useMe()
+const tab = ref<'rides' | 'ride-drivers' | 'driver-source'>('rides')
+const tabs = computed(() => [
+    { label: 'Rides by day', value: 'rides' },
+    { label: 'By driver', value: 'ride-drivers' },
+    ...(can('ride.reports.driver_source') ? [{ label: 'Driver source', value: 'driver-source' }] : []),
+])
 </script>
 
 <template>
     <div>
-        <OpsBreadcrumb title="Reports" />
-        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:gap-6">
-            <OpsMetricCard label="Count" :value="null" icon="i-bx-hashtag" />
-            <OpsMetricCard label="Amount" :value="null" money icon="i-bx-wallet" />
-        </div>
-        <div class="mt-6 grid grid-cols-1 gap-4 md:gap-6">
-            <OpsChartCard title="Reports" :series="series" />
-        </div>
+        <UTabs v-model="tab" :items="tabs" :content="false" class="mb-4 w-full max-w-lg" />
+        <RideReport v-if="tab === 'rides'" key="rides" report="rides" title="Rides" by-day note="Requests per day and how they ended, rides booked ahead, fares and commission." />
+        <DriverSourceReport v-else-if="tab === 'driver-source'" key="source" />
+        <RideReport v-else key="drivers" report="ride-drivers" title="Rides by driver" note="Offers, accepted, completed and cancelled rides per driver, with fares and commission." />
     </div>
 </template>

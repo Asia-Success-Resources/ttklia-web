@@ -1,0 +1,248 @@
+[
+    {
+        "name": "Harbourfront",
+        "state": "Singapore",
+        "slug": "harbourfront",
+        "actual_name": "Harbourfront"
+    },
+    {
+        "name": "Tai Seng",
+        "state": "Singapore",
+        "slug": "tai-seng",
+        "actual_name": "SG Tai Seng"
+    },
+    {
+        "name": "Oxley Bizhub",
+        "state": "Singapore",
+        "slug": "oxley-bizhub",
+        "actual_name": "SG Oxley Bizhub"
+    },
+    {
+        "name": "The Plaza",
+        "state": "Singapore",
+        "slug": "the-plaza",
+        "actual_name": "SG The Plaza"
+    },
+    {
+        "name": "Tampoi",
+        "state": "Johor",
+        "slug": "tampoi",
+        "actual_name": "Tampoi"
+    },
+    {
+        "name": "Tangkak",
+        "state": "Johor",
+        "slug": "tangkak",
+        "actual_name": "Tangkak"
+    },
+    {
+        "name": "Resorts World Sentosa",
+        "state": "Singapore",
+        "slug": "resorts-world-sentosa",
+        "actual_name": "SG Resorts World Sentosa"
+    },
+    {
+        "name": "Melaka Sentral",
+        "state": "Johor",
+        "slug": "melaka-sentral",
+        "actual_name": "Melaka Sentral"
+    },
+    {
+        "name": "Farrer Park",
+        "state": "Singapore",
+        "slug": "farrer-park",
+        "actual_name": "Farrer Park"
+    },
+    {
+        "name": "JB Sentral",
+        "state": "Johor",
+        "slug": "jb-sentral",
+        "actual_name": "JB Sentral"
+    },
+    {
+        "name": "Kitchener Road",
+        "state": "Singapore",
+        "slug": "kitchener-road",
+        "actual_name": "Kitchener Road"
+    },
+    {
+        "name": "Katong V",
+        "state": "Singapore",
+        "slug": "katong-v",
+        "actual_name": "Katong V"
+    },
+    {
+        "name": "Bugis",
+        "state": "Singapore",
+        "slug": "bugis",
+        "actual_name": "Bugis"
+    },
+    {
+        "name": "Grand Central",
+        "state": "Singapore",
+        "slug": "grand-central",
+        "actual_name": "SG Grand Central"
+    },
+    {
+        "name": "Mustafa Centre",
+        "state": "Singapore",
+        "slug": "mustafa-centre",
+        "actual_name": "Mustafa Centre"
+    },
+    {
+        "name": "2nd Link",
+        "state": "Singapore",
+        "slug": "2nd-link",
+        "actual_name": "SG (2nd Link)"
+    },
+    {
+        "name": "Terminal Kota Iskandar",
+        "state": "Johor",
+        "slug": "terminal-kota-iskandar",
+        "actual_name": "Terminal Kota Iskandar"
+    },
+    {
+        "name": "Queen Street",
+        "state": "Singapore",
+        "slug": "queen-street",
+        "actual_name": "Queen Street"
+    },
+    {
+        "name": "Tampines",
+        "state": "Singapore",
+        "slug": "tampines",
+        "actual_name": "Tampines"
+    },
+    {
+        "name": "Choa Chu Kang",
+        "state": "Singapore",
+        "slug": "choa-chu-kang",
+        "actual_name": "SG Choa Chu Kang"
+    },
+    {
+        "name": "Jurong West Gate",
+        "state": "Singapore",
+        "slug": "jurong-west-gate",
+        "actual_name": "Jurong West Gate"
+    },
+    {
+        "name": "Woodlands",
+        "state": "Singapore",
+        "slug": "woodlands",
+        "actual_name": "Woodlands"
+    },
+    {
+        "name": "Taman Ungku Tun Aminah",
+        "state": "Johor",
+        "slug": "taman-ungku-tun-aminah",
+        "actual_name": "Taman Ungku Tun Aminah"
+    },
+    {
+        "name": "Larkin Sentral",
+        "state": "Johor",
+        "slug": "larkin-sentral",
+        "actual_name": "Larkin Sentral"
+    },
+    {
+        "name": "Johor Premium Outlet",
+        "state": "Johor",
+        "slug": "johor-premium-outlet",
+        "actual_name": "Johor Premium Outlet"
+    },
+    {
+        "name": "KSL Hotel",
+        "state": "Johor",
+        "slug": "ksl-hotel",
+        "actual_name": "KSL Hotel"
+    },
+    {
+        "name": "City Plaza",
+        "state": "Johor",
+        "slug": "city-plaza",
+        "actual_name": "City Plaza"
+    },
+    {
+        "name": "Kovan Hub",
+        "state": "Singapore",
+        "slug": "kovan-hub",
+        "actual_name": "Kovan Hub"
+    },
+    {
+        "name": "Jurong East",
+        "state": "Singapore",
+        "slug": "jurong-east",
+        "actual_name": "Jurong East"
+    },
+    {
+        "name": "Lavender",
+        "state": "Singapore",
+        "slug": "lavender",
+        "actual_name": "SG Lavender"
+    },
+    {
+        "name": "Grantral Complex",
+        "state": "Singapore",
+        "slug": "grantral-complex",
+        "actual_name": "SG Grantral Complex"
+    },
+    {
+        "name": "CIQ JB Sentral",
+        "state": "Johor",
+        "slug": "ciq-jb-sentral",
+        "actual_name": "CIQ JB Sentral"
+    },
+    {
+        "name": "Outram",
+        "state": "Singapore",
+        "slug": "outram",
+        "actual_name": "SG Outram"
+    },
+    {
+        "name": "Boon Lay",
+        "state": "Singapore",
+        "slug": "boon-lay",
+        "actual_name": "Boon Lay"
+    },
+    {
+        "name": "Yong Peng",
+        "state": "Johor",
+        "slug": "yong-peng",
+        "actual_name": "Yong Peng"
+    },
+    {
+        "name": "Skudai",
+        "state": "Johor",
+        "slug": "skudai",
+        "actual_name": "Skudai"
+    },
+    {
+        "name": "Beach Road",
+        "state": "Singapore",
+        "slug": "beach-road",
+        "actual_name": "SG Beach Road"
+    },
+    {
+        "name": "Seremban Terminal One",
+        "state": "Negeri Sembilan",
+        "slug": "seremban-terminal-one",
+        "actual_name": "Seremban Terminal One"
+    },
+    {
+        "name": "Hat Yai",
+        "state": "Thailand",
+        "slug": "hat-yai",
+        "actual_name": "Thailand, Hat Yai"
+    },
+    {
+        "name": "KLIA2",
+        "state": "Selangor",
+        "slug": "klia2",
+        "actual_name": "KLIA2"
+    },
+    {
+        "name": "KLIA1",
+        "state": "Selangor",
+        "slug": "klia1",
+        "actual_name": "KLIA1"
+    }
+]

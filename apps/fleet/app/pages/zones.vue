@@ -12,7 +12,7 @@ interface Row extends Record<string, unknown> {
     name: string
     type: string
     location_type: string | null
-    toll_sen: number
+    toll_rm: number
     h3_resolution: number
     version: number
 }
@@ -28,7 +28,7 @@ const columns: TableColumn<Row>[] = [
     { accessorKey: 'name', header: 'Name' },
     { accessorKey: 'type', header: 'Type', cell: ({ row }) => statusLabel(row.original.type) },
     { accessorKey: 'location_type', header: 'Local or outstation', cell: ({ row }) => statusLabel(row.original.location_type ?? '-') },
-    { accessorKey: 'toll_sen', header: 'Toll', cell: ({ row }) => (row.original.toll_sen ? formatSen(row.original.toll_sen) : '—') },
+    { accessorKey: 'toll_rm', header: 'Toll', cell: ({ row }) => (row.original.toll_rm ? formatRm(row.original.toll_rm) : '—') },
     { accessorKey: 'h3_resolution', header: 'H3 resolution' },
     { accessorKey: 'version', header: 'Version' },
 ]

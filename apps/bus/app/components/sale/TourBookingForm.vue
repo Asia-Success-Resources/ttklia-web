@@ -26,9 +26,9 @@ const error = ref<string | null>(null)
 
 const hasSchedules = computed(() => schedules.value.length > 0)
 const paxSlots = computed(() => {
-    const slots: { key: string; label: string }[] = []
+    const slots: { key: string; label: string; short?: string }[] = []
     for (const [type, label] of [['adult', 'Adult'], ['child', 'Child'], ['senior', 'Senior']] as const) {
-        for (let i = 1; i <= tickets[type]; i++) slots.push({ key: `${type}-${i}`, label: `${label} ${i}` })
+        for (let i = 1; i <= tickets[type]; i++) slots.push({ key: `${type}-${i}`, label: `Passenger ${slots.length + 1} - ${label}`, short: `Passenger 1` })
     }
     return slots
 })
@@ -101,12 +101,22 @@ async function createTourBooking() {
                         </UFormField>
                     </div>
 
-                    <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Tickets</h3>
-                    <div class="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                        <SaleTicketCount v-model="tickets.adult" label="Adult" />
-                        <SaleTicketCount v-model="tickets.child" label="Child" />
-                        <SaleTicketCount v-model="tickets.senior" label="Senior" />
+                    <div v-show="tour" class="mt-6 border-t border-(--ops-border) pt-6">
+                        <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Tickets</h3>
+                        <div class="mb-4 space-y-1 text-sm text-gray-600 dark:text-gray-400">
+                            <div>Adult Ticket Price: {{ formatSen(tour?.price_sen ?? 0) }}</div>
+                            <div>Child Ticket Price: {{ formatSen(tour?.price_sen ?? 0) }}</div>
+                            <div>Senior Ticket Price: {{ formatSen(tour?.price_sen ?? 0) }}</div>
+                        </div>
+                        <div class="flex gap-3">
+                            <SaleTicketCount v-model="tickets.adult" label="Adult" />
+                            <SaleTicketCount v-model="tickets.child" label="Child" />
+                            <SaleTicketCount v-model="tickets.senior" label="Senior" />
+                        </div>
                     </div>
+
+                    <!-- Passenger Details: one block per pax, as in the bus booking form -->
+                    <SalePassengers v-if="tour" v-model="passengers" :slots="paxSlots" />
                 </SalePanel>
             </div>
 
@@ -122,8 +132,16 @@ async function createTourBooking() {
                             <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ formatDate(schedule?.date ?? date) }}</dd>
                         </div>
                         <div class="flex justify-between">
-                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Pax</dt>
-                            <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ totalPax || '-' }}</dd>
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Adult Pax</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ tickets.adult }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Child Pax</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ tickets.child }}</dd>
+                        </div>
+                        <div class="flex justify-between">
+                            <dt class="text-sm font-medium text-gray-500 dark:text-gray-400">Senior Pax</dt>
+                            <dd class="text-sm font-medium text-gray-900 dark:text-white">{{ tickets.senior }}</dd>
                         </div>
                         <div class="flex justify-between border-t border-(--ops-border) pt-3">
                             <dt class="text-base font-medium text-gray-500 dark:text-gray-400">Total Price</dt>
@@ -132,11 +150,9 @@ async function createTourBooking() {
                     </dl>
                     <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
                     <SalePaymentMethod v-model="payment" v-model:paid="paid" :total-sen="totalSen" />
-                    <UButton block size="xl" label="Confirm Booking" :loading="busy" :disabled="!tour || totalPax === 0 || !payment" @click="createTourBooking" />
+                    <UButton block size="xl" label="Confirm Payment" :loading="busy" :disabled="!tour || totalPax === 0 || !payment" @click="createTourBooking" />
                 </SalePanel>
             </div>
         </div>
-
-        <SalePassengers v-model="passengers" :slots="paxSlots" />
     </div>
 </template>

@@ -13,3 +13,14 @@
     /* --app-primary: #DD0F24; */
     --app-primary: #00a6ff;
 }
+
+/* Number fields (ticket counts, cash paid): no up/down arrows; the − / + buttons change the count. */
+input[type='number'] {
+    -moz-appearance: textfield;
+    appearance: textfield;
+}
+input[type='number']::-webkit-inner-spin-button,
+input[type='number']::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}

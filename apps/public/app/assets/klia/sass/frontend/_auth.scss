@@ -1,0 +1,584 @@
+// Sign in / sign up / password pages. A split layout on large screens: brand
+// panel on the left, the form card on the right. The Vue forms (LoginForm,
+// RegisterForm) use the .field / .phone-field / .password-field primitives.
+
+// Full-bleed soft backdrop; the card is centred in the space left under the
+// header (and above the bottom nav on mobile).
+.auth-page {
+    position: relative;
+    display: flex;
+    min-height: calc(100vh - var(--header-h));
+    isolation: isolate;
+    // The KLCC skyline already shipped with the home hero; a dark tint keeps
+    // the white card readable on top of it.
+    background:
+        linear-gradient(180deg, rgba(17, 24, 39, 0.55) 0%, rgba(17, 24, 39, 0.35) 50%, rgba(17, 24, 39, 0.65) 100%),
+        url("/images/klcc.jpg") center 40% / cover no-repeat fixed;
+    background-color: var(--ink);
+
+    // iOS ignores fixed attachment; fall back to scroll there.
+    @supports (-webkit-touch-callout: none) {
+        background-attachment: scroll;
+    }
+}
+
+body.is-mobile .auth-page { min-height: calc(100vh - var(--header-h) - 64px); }
+
+.auth {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-6) var(--space-4);
+
+    @include media-breakpoint-up(lg) { padding: var(--space-10) var(--space-4); }
+}
+
+.auth-split {
+    display: grid;
+    width: 100%;
+    overflow: hidden;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-search);
+    box-shadow: 0 24px 64px rgba(17, 24, 39, 0.35);
+
+    @include media-breakpoint-up(lg) {
+        grid-template-columns: 5fr 7fr;
+        max-width: 1040px;
+        min-height: 560px;
+    }
+}
+
+.auth-split--wide {
+    @include media-breakpoint-up(lg) { grid-template-columns: 4fr 8fr; max-width: 1120px; }
+}
+
+.auth-brand {
+    position: relative;
+    display: none;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: var(--space-8);
+    background: radial-gradient(120% 90% at 0% 0%, #FF3B3E 0%, var(--brand-600) 45%, #7A0002 100%);
+    color: #fff;
+    overflow: hidden;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset: auto -25% -40% auto;
+        width: 420px;
+        height: 420px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.08);
+    }
+
+    &::after {
+        content: "";
+        position: absolute;
+        inset: -30% auto auto -20%;
+        width: 320px;
+        height: 320px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.06);
+    }
+
+    > * { position: relative; z-index: 1; }
+
+    @include media-breakpoint-up(lg) { display: flex; }
+}
+
+.auth-brand__logo {
+    height: 28px;
+    width: auto;
+    filter: brightness(0) invert(1);
+}
+
+.auth-brand__title {
+    margin: var(--space-6) 0 var(--space-3);
+    color: #fff;
+    font-size: var(--fs-28);
+    line-height: 1.2;
+    letter-spacing: -0.01em;
+}
+
+.auth-brand__text {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.85);
+    font-size: var(--fs-16);
+}
+
+.auth-brand__list {
+    display: grid;
+    gap: var(--space-3);
+    margin: var(--space-8) 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        font-size: var(--fs-14);
+        font-weight: 500;
+    }
+}
+
+.auth-brand__check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.16);
+
+    .icon { width: 16px; height: 16px; }
+}
+
+.auth-brand__foot {
+    margin-top: var(--space-8);
+    color: rgba(255, 255, 255, 0.7);
+    font-size: var(--fs-12);
+}
+
+.auth-card {
+    width: 100%;
+    padding: var(--space-8) var(--space-5);
+
+    @include media-breakpoint-up(md) { padding: var(--space-10) var(--space-10); }
+}
+
+// Standalone pages (forgot / reset / confirm / verify email): one centred
+// card with an icon disc, title, lead, form and a footer link.
+.auth__card {
+    width: 100%;
+    max-width: 460px;
+    padding: var(--space-8) var(--space-6);
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius-search);
+    box-shadow: 0 24px 64px rgba(17, 24, 39, 0.35);
+
+    @include media-breakpoint-up(md) { padding: var(--space-10) var(--space-8); }
+}
+
+.auth__logo-link {
+    display: block;
+    width: fit-content;
+    margin: 0 auto var(--space-6);
+}
+
+.auth__logo {
+    display: block;
+    height: 28px;
+    margin: 0 auto;
+}
+
+.auth__icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 64px;
+    height: 64px;
+    margin: 0 auto var(--space-5);
+    border-radius: 50%;
+    background: var(--brand-50);
+    color: var(--brand-600);
+
+    .icon { width: 30px; height: 30px; }
+}
+
+.auth__title {
+    margin: 0 0 var(--space-1);
+    font-size: var(--fs-28);
+    letter-spacing: -0.01em;
+}
+
+.auth__lead {
+    margin: 0 0 var(--space-6);
+    color: var(--ink-3);
+}
+
+.auth__card .auth__title,
+.auth__card .auth__lead { text-align: center; }
+
+// The address the verification mail went to, under the lead.
+.auth__email {
+    margin: calc(var(--space-6) * -1) 0 var(--space-6);
+    color: var(--ink);
+    font-size: var(--fs-16);
+    font-weight: 700;
+    text-align: center;
+    overflow-wrap: anywhere;
+}
+
+// Numbered steps (verify email)
+.auth-steps {
+    display: grid;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-6);
+    padding: var(--space-4) var(--space-5);
+    list-style: none;
+    background: var(--surface-2);
+    border-radius: var(--radius-card);
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: var(--space-3);
+        color: var(--ink-2);
+        font-size: var(--fs-14);
+    }
+}
+
+.auth-steps__num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--brand-700);
+    font-size: var(--fs-12);
+    font-weight: 700;
+}
+
+// Small reassurance lines under the form
+.auth-tips {
+    display: grid;
+    gap: var(--space-2);
+    margin: var(--space-5) 0 0;
+    padding: 0;
+    list-style: none;
+
+    li {
+        display: flex;
+        align-items: flex-start;
+        gap: var(--space-2);
+        color: var(--ink-3);
+        font-size: var(--fs-12);
+        line-height: 1.5;
+    }
+
+    .icon { flex-shrink: 0; width: 16px; height: 16px; margin-top: 1px; color: var(--brand-600); }
+}
+
+.field__hint {
+    margin: 0;
+    color: var(--ink-3);
+    font-size: var(--fs-12);
+}
+
+.auth__foot {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    margin: var(--space-6) 0 0;
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--line);
+    color: var(--ink-3);
+    font-size: var(--fs-14);
+    text-align: center;
+
+    a { display: inline-flex; align-items: center; gap: var(--space-1); color: var(--brand-600); font-weight: 500; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+}
+
+.auth__foot-sep { color: var(--line); }
+
+.auth__alert {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-2);
+    margin-bottom: var(--space-5);
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-input);
+    background: #ECFDF5;
+    color: #047857;
+    font-size: var(--fs-14);
+    text-align: left;
+
+    .icon { flex-shrink: 0; width: 18px; height: 18px; margin-top: 1px; }
+}
+
+.auth__alert--error {
+    background: var(--brand-50);
+    color: var(--brand-700);
+}
+
+.auth-form {
+    display: grid;
+    gap: var(--space-4);
+
+    .btn { width: 100%; }
+}
+
+.auth-submit {
+    width: 100%;
+    margin-top: var(--space-2);
+}
+
+// Segmented switch (email / phone)
+.auth-switch {
+    display: flex;
+    gap: 4px;
+    margin-bottom: var(--space-5);
+    padding: 4px;
+    background: var(--surface-2);
+    border-radius: 999px;
+}
+
+.auth-switch__btn {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    min-height: 40px;
+    padding: 0 var(--space-3);
+    border: 0;
+    border-radius: 999px;
+    background: transparent;
+    color: var(--ink-2);
+    font-size: var(--fs-14);
+    font-weight: 500;
+    transition: background var(--dur-fast) var(--ease-standard), color var(--dur-fast) var(--ease-standard);
+
+    &:hover { color: var(--ink); }
+    &[aria-selected="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-1); }
+}
+
+// ---------------------------------------------------------------- Field primitives
+.field-grid {
+    display: grid;
+    gap: var(--space-4);
+}
+
+.field-grid--2 {
+    @include media-breakpoint-up(md) { grid-template-columns: 1fr 1fr; }
+}
+
+.field-grid__full { grid-column: 1 / -1; }
+
+.field {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+    // Don't stretch the control when a sibling field in the row is taller (e.g. has a hint).
+    align-content: start;
+}
+
+.field__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-3);
+}
+
+.field__label {
+    margin: 0;
+    color: var(--ink);
+    font-size: var(--fs-14);
+    font-weight: 500;
+}
+
+.field__link {
+    color: var(--ink-3);
+    font-size: var(--fs-12);
+    font-weight: 500;
+    text-decoration: none;
+
+    &:hover { color: var(--brand-600); }
+}
+
+.field .form-control {
+    min-height: 48px;
+    padding: 0 var(--space-4);
+    border-radius: var(--radius-input);
+    font-size: var(--fs-16);
+}
+
+.field__error {
+    margin: 0;
+    color: var(--brand-600);
+    font-size: var(--fs-12);
+    font-weight: 500;
+}
+
+.field__note {
+    margin: 0;
+    color: #047857;
+    font-size: var(--fs-12);
+    font-weight: 500;
+}
+
+.field.is-invalid .form-control,
+.field.is-invalid .phone-field { border-color: var(--brand-600); }
+
+// Password with show / hide toggle
+.password-field {
+    position: relative;
+
+    .form-control { padding-right: 48px; }
+}
+
+.password-field__toggle {
+    position: absolute;
+    top: 50%;
+    right: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    height: 36px;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--ink-3);
+    transform: translateY(-50%);
+
+    &:hover { background: var(--surface-2); color: var(--ink); }
+}
+
+// Phone: country code select + number in one control
+.phone-field {
+    display: flex;
+    align-items: stretch;
+    border: 1px solid var(--line);
+    border-radius: var(--radius-input);
+    background: var(--surface);
+    transition: border-color var(--dur-fast) var(--ease-standard), box-shadow var(--dur-fast) var(--ease-standard);
+
+    &:focus-within { border-color: var(--focus); box-shadow: 0 0 0 1px var(--focus); }
+
+    // The number input sets the height: it loses its own border to the
+    // wrapper, so the whole control matches the other inputs on the page.
+    .form-control {
+        flex: 1 1 auto;
+        min-width: 0;
+        border: 0;
+        border-radius: 0 var(--radius-input) var(--radius-input) 0;
+        background: transparent;
+        box-shadow: none !important;
+    }
+}
+
+.field .phone-field .form-control { min-height: 46px; }
+
+.phone-field__code {
+    position: relative;
+    flex: 0 0 auto;
+    width: 112px;
+    border-right: 1px solid var(--line);
+
+    .multiselect { min-height: 0; height: 100%; }
+
+    .multiselect__tags {
+        display: flex;
+        align-items: center;
+        min-height: 0;
+        height: 100%;
+        padding: 0 28px 0 var(--space-3);
+        border: 0;
+        border-radius: var(--radius-input) 0 0 var(--radius-input);
+        background: transparent;
+        white-space: nowrap;
+    }
+
+    .multiselect__single,
+    .multiselect__input,
+    .multiselect__placeholder {
+        margin: 0;
+        padding: 0;
+        line-height: 22px;
+        font-size: var(--fs-16);
+        font-weight: 500;
+        color: var(--ink);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .multiselect__select { height: 100%; width: 28px; padding: 0; }
+
+    .multiselect__content-wrapper {
+        width: 300px;
+        max-width: 80vw;
+        border-color: var(--line);
+        border-radius: var(--radius-input);
+        box-shadow: var(--shadow-2);
+    }
+
+    // The location pin used by place pickers doesn't fit a country list.
+    .multiselect__option::before { display: none; }
+}
+
+// Country listed above its calling code in the dropdown
+.phone-field__option {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+}
+
+.phone-field__option-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.phone-field__option-code {
+    color: var(--ink-3);
+    font-size: var(--fs-12);
+}
+
+.multiselect__option--highlight .phone-field__option-code,
+.multiselect__option--selected .phone-field__option-code { color: inherit; opacity: 0.8; }
+
+// Checkboxes
+.check-field {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-3);
+    font-size: var(--fs-14);
+    color: var(--ink-2);
+
+    .form-check-input {
+        flex-shrink: 0;
+        width: 20px;
+        height: 20px;
+        margin: 1px 0 0;
+        border-color: #D1D5DB;
+        border-radius: 6px;
+    }
+
+    .form-check-input:checked { background-color: var(--brand-600); border-color: var(--brand-600); }
+
+    label { cursor: pointer; }
+    a { color: var(--brand-600); font-weight: 500; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+}
+
+.recaptcha-slot {
+    display: flex;
+    justify-content: center;
+
+    > div { max-width: 100%; }
+}
+
+.otp-field {
+    display: flex;
+    gap: var(--space-2);
+
+    .form-control { flex: 1; }
+    .btn { flex-shrink: 0; }
+}

@@ -1,0 +1,642 @@
+[
+    {
+        "name": "Acre Damansara",
+        "slug": "acre-damansara",
+        "actual_name": "ACRE DAMANSARA"
+    },
+    {
+        "name": "Air Hitam, Johor Bahru",
+        "slug": "air-hitam-johor-bahru",
+        "actual_name": "AIR HITAM, JOHOR BAHRU"
+    },
+    {
+        "name": "Air Hitam, Negeri Sembilan",
+        "slug": "air-hitam-negeri-sembilan",
+        "actual_name": "AIR HITAM, NEGERI SEMBILAN"
+    },
+    {
+        "name": "Akademik Laut Melaka",
+        "slug": "akademik-laut-melaka",
+        "actual_name": "AKADEMIK LAUT MELAKA"
+    },
+    {
+        "name": "Alam Sentral, Shah Alam",
+        "slug": "alam-sentral-shah-alam",
+        "actual_name": "ALAM SENTRAL, SHAH ALAM"
+    },
+    {
+        "name": "Allson Klana / The Aston Hotel, Nilai",
+        "slug": "allson-klana-the-aston-hotel-nilai",
+        "actual_name": "ALLSON KLANA / THE ASTON HOTEL, NILAI"
+    },
+    {
+        "name": "Alor Setar",
+        "slug": "alor-setar",
+        "actual_name": "ALOR SETAR"
+    },
+    {
+        "name": "Ampang",
+        "slug": "ampang",
+        "actual_name": "AMPANG"
+    },
+    {
+        "name": "Ampangan Seremban",
+        "slug": "ampangan-seremban",
+        "actual_name": "AMPANGAN SEREMBAN"
+    },
+    {
+        "name": "Anexxe Rest House, Kuantan",
+        "slug": "anexxe-rest-house-kuantan",
+        "actual_name": "ANEXXE REST HOUSE, KUANTAN"
+    },
+    {
+        "name": "Arab Malaysian Industrial Park, Nilai",
+        "slug": "arab-malaysian-industrial-park-nilai",
+        "actual_name": "ARAB MALAYSIAN INDUSTRIAL PARK NILAI"
+    },
+    {
+        "name": "Arau",
+        "slug": "arau",
+        "actual_name": "ARAU"
+    },
+    {
+        "name": "Ayer Keroh",
+        "slug": "ayer-keroh",
+        "actual_name": "AYER KEROH"
+    },
+    {
+        "name": "Bachok",
+        "slug": "bachok",
+        "actual_name": "BACHOK"
+    },
+    {
+        "name": "Bagan Datok",
+        "slug": "bagan-datok",
+        "actual_name": "BAGAN DATOK"
+    },
+    {
+        "name": "Bagan Lalang",
+        "slug": "bagan-lalang",
+        "actual_name": "BAGAN LALANG"
+    },
+    {
+        "name": "Bagan Serai",
+        "slug": "bagan-serai",
+        "actual_name": "BAGAN SERAI"
+    },
+    {
+        "name": "Balai Polis Sepang (IPD)",
+        "slug": "balai-polis-sepang-ipd",
+        "actual_name": "BALAI POLIS SEPANG (IPD)"
+    },
+    {
+        "name": "Balik Pulau",
+        "slug": "balik-pulau",
+        "actual_name": "BALIK PULAU"
+    },
+    {
+        "name": "Baling",
+        "slug": "baling",
+        "actual_name": "BALING"
+    },
+    {
+        "name": "Bandar Baharu",
+        "slug": "bandar-baharu",
+        "actual_name": "BANDAR BAHARU"
+    },
+    {
+        "name": "Bandar Baru Kundang",
+        "slug": "bandar-baru-kundang",
+        "actual_name": "BANDAR BARU KUNDANG"
+    },
+    {
+        "name": "Bandar Baru Muadzam Shah",
+        "slug": "bandar-baru-muadzam-shah",
+        "actual_name": "BANDAR BARU MUADZAM SHAH"
+    },
+    {
+        "name": "Bandar Baru Selayang",
+        "slug": "bandar-baru-selayang",
+        "actual_name": "BANDAR BARU SELAYANG"
+    },
+    {
+        "name": "Banting",
+        "slug": "banting",
+        "actual_name": "BANTING"
+    },
+    {
+        "name": "Batu Gajah",
+        "slug": "batu-gajah",
+        "actual_name": "BATU GAJAH"
+    },
+    {
+        "name": "Batu Pahat",
+        "slug": "batu-pahat",
+        "actual_name": "BATU PAHAT"
+    },
+    {
+        "name": "Beach Resorts Port Dickson",
+        "slug": "beach-resorts-port-dickson",
+        "actual_name": "BEACH RESORTS PORT DICKSON"
+    },
+    {
+        "name": "Behrang",
+        "slug": "behrang",
+        "actual_name": "BEHRANG"
+    },
+    {
+        "name": "Benta",
+        "slug": "benta",
+        "actual_name": "BENTA"
+    },
+    {
+        "name": "Bentong",
+        "slug": "bentong",
+        "actual_name": "BENTONG"
+    },
+    {
+        "name": "Berjaya Hill Resorts",
+        "slug": "berjaya-hill-resorts",
+        "actual_name": "BERJAYA HILL RESORTS"
+    },
+    {
+        "name": "Beruas",
+        "slug": "beruas",
+        "actual_name": "BERUAS"
+    },
+    {
+        "name": "Bestari Jaya, Rawang",
+        "slug": "bestari-jaya-rawang",
+        "actual_name": "BESTARI JAYA, RAWANG"
+    },
+    {
+        "name": "Bidor",
+        "slug": "bidor",
+        "actual_name": "BIDOR"
+    },
+    {
+        "name": "Bota Kanan",
+        "slug": "bota-kanan",
+        "actual_name": "BOTA KANAN"
+    },
+    {
+        "name": "Bukit Bintang, Bangsar",
+        "slug": "bukit-bintang-bangsar",
+        "actual_name": "BUKIT BINTANG, BANGSAR"
+    },
+    {
+        "name": "Bukit Gantang",
+        "slug": "bukit-gantang",
+        "actual_name": "BUKIT GANTANG"
+    },
+    {
+        "name": "Bukit Kayu Hitam",
+        "slug": "bukit-kayu-hitam",
+        "actual_name": "BUKIT KAYU HITAM"
+    },
+    {
+        "name": "Bukit Kerayong",
+        "slug": "bukit-kerayong",
+        "actual_name": "BUKIT KERAYONG"
+    },
+    {
+        "name": "Bukit Mertajam",
+        "slug": "bukit-mertajam",
+        "actual_name": "BUKIT MERTAJAM"
+    },
+    {
+        "name": "Bukit Tinggi Klang",
+        "slug": "bukit-tinggi-klang",
+        "actual_name": "BUKIT TINGGI KLANG"
+    },
+    {
+        "name": "Changlun",
+        "slug": "changlun",
+        "actual_name": "CHANGLUN"
+    },
+    {
+        "name": "Chenderiang",
+        "slug": "chenderiang",
+        "actual_name": "CHENDERIANG"
+    },
+    {
+        "name": "Cheras, Balakong",
+        "slug": "cheras-balakong",
+        "actual_name": "CHERAS, BALAKONG"
+    },
+    {
+        "name": "Chukai",
+        "slug": "chukai",
+        "actual_name": "CHUKAI"
+    },
+    {
+        "name": "Cyberjaya",
+        "slug": "cyberjaya",
+        "actual_name": "CYBERJAYA"
+    },
+    {
+        "name": "Denai Alam",
+        "slug": "denai-alam",
+        "actual_name": "DENAI ALAM"
+    },
+    {
+        "name": "Desa Moccis Sg. Buloh",
+        "slug": "desa-moccis-sg-buloh",
+        "actual_name": "DESA MOCCIS SG. BULOH"
+    },
+    {
+        "name": "Desaru",
+        "slug": "desaru",
+        "actual_name": "DESARU"
+    },
+    {
+        "name": "Dungun",
+        "slug": "dungun",
+        "actual_name": "DUNGUN"
+    },
+    {
+        "name": "Duta Kiara",
+        "slug": "duta-kiara",
+        "actual_name": "DUTA KIARA"
+    },
+    {
+        "name": "Empang Pecah",
+        "slug": "empang-pecah",
+        "actual_name": "EMPANG PECAH"
+    },
+    {
+        "name": "Gadong, Seremban",
+        "slug": "gadong-seremban",
+        "actual_name": "GADONG, SEREMBAN"
+    },
+    {
+        "name": "Gambang",
+        "slug": "gambang",
+        "actual_name": "GAMBANG"
+    },
+    {
+        "name": "Gemas",
+        "slug": "gemas",
+        "actual_name": "GEMAS"
+    },
+    {
+        "name": "Gopeng",
+        "slug": "gopeng",
+        "actual_name": "GOPENG"
+    },
+    {
+        "name": "Grik",
+        "slug": "grik",
+        "actual_name": "GRIK"
+    },
+    {
+        "name": "Gua Musang",
+        "slug": "gua-musang",
+        "actual_name": "GUA MUSANG"
+    },
+    {
+        "name": "Gurun",
+        "slug": "gurun",
+        "actual_name": "GURUN"
+    },
+    {
+        "name": "Holiday Inn, Johor Bharu",
+        "slug": "holiday-inn-johor-bharu",
+        "actual_name": "HOLIDAY INN, JOHOR BHARU"
+    },
+    {
+        "name": "Hutan Melintang",
+        "slug": "hutan-melintang",
+        "actual_name": "HUTAN MELINTANG"
+    },
+    {
+        "name": "Jementah",
+        "slug": "jementah",
+        "actual_name": "JEMENTAH"
+    },
+    {
+        "name": "Jengka, Pahang",
+        "slug": "jengka-pahang",
+        "actual_name": "JENGKA, PAHANG"
+    },
+    {
+        "name": "Jerantut",
+        "slug": "jerantut",
+        "actual_name": "JERANTUT"
+    },
+    {
+        "name": "Jerlun",
+        "slug": "jerlun",
+        "actual_name": "JERLUN"
+    },
+    {
+        "name": "Johol",
+        "slug": "johol",
+        "actual_name": "JOHOL"
+    },
+    {
+        "name": "Johor Bahru",
+        "slug": "johor-bahru",
+        "actual_name": "JOHOR BAHRU"
+    },
+    {
+        "name": "Kajang",
+        "slug": "kajang",
+        "actual_name": "KAJANG"
+    },
+    {
+        "name": "Karak",
+        "slug": "karak",
+        "actual_name": "KARAK"
+    },
+    {
+        "name": "Kemasik",
+        "slug": "kemasik",
+        "actual_name": "KEMASIK"
+    },
+    {
+        "name": "Kemayan",
+        "slug": "kemayan",
+        "actual_name": "KEMAYAN"
+    },
+    {
+        "name": "Kempas",
+        "slug": "kempas",
+        "actual_name": "KEMPAS"
+    },
+    {
+        "name": "Kepong",
+        "slug": "kepong",
+        "actual_name": "KEPONG"
+    },
+    {
+        "name": "Kg. Pasir Panjang",
+        "slug": "kg-pasir-panjang",
+        "actual_name": "KG. PASIR PANJANG"
+    },
+    {
+        "name": "Kg. Sungai Air Tawar",
+        "slug": "kg-sungai-air-tawar",
+        "actual_name": "KG. SUNGAI AIR TAWAR"
+    },
+    {
+        "name": "Klang, Shah Alam",
+        "slug": "klang-shah-alam",
+        "actual_name": "KLANG, SHAH ALAM"
+    },
+    {
+        "name": "KLIA",
+        "slug": "klia",
+        "actual_name": "KLIA"
+    },
+    {
+        "name": "Kluang",
+        "slug": "kluang",
+        "actual_name": "KLUANG"
+    },
+    {
+        "name": "Kodiang",
+        "slug": "kodiang",
+        "actual_name": "KODIANG"
+    },
+    {
+        "name": "Kolej Tuanku Jaafar, Mantin",
+        "slug": "kolej-tuanku-jaafar-mantin",
+        "actual_name": "KOLEJ TUANKU JAAFAR, MANTIN"
+    },
+    {
+        "name": "Kota Bharu",
+        "slug": "kota-bharu",
+        "actual_name": "KOTA BHARU"
+    },
+    {
+        "name": "Kota Tinggi",
+        "slug": "kota-tinggi",
+        "actual_name": "KOTA TINGGI"
+    },
+    {
+        "name": "Kuala Kangsar",
+        "slug": "kuala-kangsar",
+        "actual_name": "KUALA KANGSAR"
+    },
+    {
+        "name": "Kuala Kedah",
+        "slug": "kuala-kedah",
+        "actual_name": "KUALA KEDAH"
+    },
+    {
+        "name": "Kuala Kerau",
+        "slug": "kuala-kerau",
+        "actual_name": "KUALA KERAU"
+    },
+    {
+        "name": "Kuala Muda",
+        "slug": "kuala-muda",
+        "actual_name": "KUALA MUDA"
+    },
+    {
+        "name": "Kuala Selangor",
+        "slug": "kuala-selangor",
+        "actual_name": "KUALA SELANGOR"
+    },
+    {
+        "name": "Kuala Terengganu",
+        "slug": "kuala-terengganu",
+        "actual_name": "KUALA TERENGGANU"
+    },
+    {
+        "name": "Kulai",
+        "slug": "kulai",
+        "actual_name": "KULAI"
+    },
+    {
+        "name": "Lahat",
+        "slug": "lahat",
+        "actual_name": "LAHAT"
+    },
+    {
+        "name": "Lancang",
+        "slug": "lancang",
+        "actual_name": "LANCANG"
+    },
+    {
+        "name": "Linggi, Negeri Sembilan",
+        "slug": "linggi-negeri-sembilan",
+        "actual_name": "LINGGI, N.SEMBILAN"
+    },
+    {
+        "name": "Lumut",
+        "slug": "lumut",
+        "actual_name": "LUMUT"
+    },
+    {
+        "name": "Mantin",
+        "slug": "mantin",
+        "actual_name": "MANTIN"
+    },
+    {
+        "name": "Merlimau",
+        "slug": "merlimau",
+        "actual_name": "MERLIMAU"
+    },
+    {
+        "name": "Mersing",
+        "slug": "mersing",
+        "actual_name": "MERSING"
+    },
+    {
+        "name": "Mimaland",
+        "slug": "mimaland",
+        "actual_name": "MIMALAND"
+    },
+    {
+        "name": "Nibong Tebal, Perak",
+        "slug": "nibong-tebal-perak",
+        "actual_name": "NIBONG TEBAL, PERAK"
+    },
+    {
+        "name": "Nilai 3",
+        "slug": "nilai-3",
+        "actual_name": "NILAI 3"
+    },
+    {
+        "name": "OUG",
+        "slug": "oug",
+        "actual_name": "OUG"
+    },
+    {
+        "name": "Padang Besar",
+        "slug": "padang-besar",
+        "actual_name": "PADANG BESAR"
+    },
+    {
+        "name": "Pagoh",
+        "slug": "pagoh",
+        "actual_name": "PAGOH"
+    },
+    {
+        "name": "Pajam, Negeri Sembilan",
+        "slug": "pajam-negeri-sembilan",
+        "actual_name": "PAJAM, NEGERI SEMBILAN"
+    },
+    {
+        "name": "Port Klang",
+        "slug": "port-klang",
+        "actual_name": "PORT KLANG"
+    },
+    {
+        "name": "Puchong, Bukit Serdang",
+        "slug": "puchong-bukit-serdang",
+        "actual_name": "PUCHONG ,BUKIT SERDANG"
+    },
+    {
+        "name": "Pulau Indah",
+        "slug": "pulau-indah",
+        "actual_name": "PULAU INDAH"
+    },
+    {
+        "name": "Putrajaya, Bangi",
+        "slug": "putrajaya-bangi",
+        "actual_name": "PUTRAJAYA, BANGI"
+    },
+    {
+        "name": "Rantau Abang",
+        "slug": "rantau-abang",
+        "actual_name": "RANTAU ABANG"
+    },
+    {
+        "name": "Raub",
+        "slug": "raub",
+        "actual_name": "RAUB"
+    },
+    {
+        "name": "Rawang",
+        "slug": "rawang",
+        "actual_name": "RAWANG"
+    },
+    {
+        "name": "Sabak Bernam",
+        "slug": "sabak-bernam",
+        "actual_name": "SABAK BERNAM"
+    },
+    {
+        "name": "Sama Sama Hotel KLIA",
+        "slug": "sama-sama-hotel-klia",
+        "actual_name": "SAMA SAMA HOTEL KLIA"
+    },
+    {
+        "name": "Sedenak",
+        "slug": "sedenak",
+        "actual_name": "SEDENAK"
+    },
+    {
+        "name": "Setiu",
+        "slug": "setiu",
+        "actual_name": "SETIU"
+    },
+    {
+        "name": "Simpang Renggam",
+        "slug": "simpang-renggam",
+        "actual_name": "SIMPANG RENGGAM"
+    },
+    {
+        "name": "Sintok",
+        "slug": "sintok",
+        "actual_name": "SINTOK"
+    },
+    {
+        "name": "Subang Jaya",
+        "slug": "subang-jaya",
+        "actual_name": "SUBANG JAYA"
+    },
+    {
+        "name": "Sungai Petani",
+        "slug": "sungai-petani",
+        "actual_name": "SUNGAI PETANI"
+    },
+    {
+        "name": "Sungkai",
+        "slug": "sungkai",
+        "actual_name": "SUNGKAI"
+    },
+    {
+        "name": "Taman Negara",
+        "slug": "taman-negara",
+        "actual_name": "TAMAN NEGARA"
+    },
+    {
+        "name": "Tangkak",
+        "slug": "tangkak",
+        "actual_name": "TANGKAK"
+    },
+    {
+        "name": "Tanjung Malim",
+        "slug": "tanjung-malim",
+        "actual_name": "TANJUNG MALIM"
+    },
+    {
+        "name": "Teluk Intan",
+        "slug": "teluk-intan",
+        "actual_name": "TELUK INTAN"
+    },
+    {
+        "name": "Teluk Kemang",
+        "slug": "teluk-kemang",
+        "actual_name": "TELUK KEMANG"
+    },
+    {
+        "name": "Tronoh",
+        "slug": "tronoh",
+        "actual_name": "TRONOH"
+    },
+    {
+        "name": "UIAM Gombak",
+        "slug": "uiam-gombak",
+        "actual_name": "UIAM GOMBAK"
+    },
+    {
+        "name": "Yong Peng",
+        "slug": "yong-peng",
+        "actual_name": "YONG PENG"
+    }
+]

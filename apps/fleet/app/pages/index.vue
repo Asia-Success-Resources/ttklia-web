@@ -42,14 +42,6 @@ const card = 'rounded-2xl border border-(--ops-border) bg-(--ops-card)'
                 <NuxtLink to="/van/trips"><OpsMetricCard label="Van passengers today" :value="data.today.van_pax" icon="i-bx-group" /></NuxtLink>
             </div>
 
-            <div class="mt-4 grid grid-cols-2 gap-4 lg:grid-cols-5 md:mt-6 md:gap-6">
-                <NuxtLink :to="'/drivers/today'" :class="card" class="p-4"><p class="text-2xl font-bold">{{ data.today.drivers_off }}</p><p class="text-sm text-gray-500">Drivers off today</p></NuxtLink>
-                <NuxtLink to="/vehicles/issues" :class="card" class="p-4"><p class="text-2xl font-bold" :class="data.vehicles_off_road ? 'text-error' : ''">{{ data.open_issues }}</p><p class="text-sm text-gray-500">Open issues · {{ data.vehicles_off_road }} off the road</p></NuxtLink>
-                <NuxtLink to="/limo/changes" :class="card" class="p-4"><p class="text-2xl font-bold">{{ data.changes_waiting }}</p><p class="text-sm text-gray-500">Client changes waiting</p></NuxtLink>
-                <NuxtLink to="/reports/limo" :class="card" class="p-4"><p class="text-2xl font-bold">{{ data.month.cannot_provide }}</p><p class="text-sm text-gray-500">Cannot provide · {{ data.month.label }}</p></NuxtLink>
-                <NuxtLink to="/reports/limo" :class="card" class="p-4"><p class="text-2xl font-bold">{{ formatSen(data.month.revenue_sen) }}</p><p class="text-sm text-gray-500">Revenue · {{ data.month.limo_completed }} limo jobs done</p></NuxtLink>
-            </div>
-
             <div class="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-2 md:gap-6">
                 <OpsChartCard title="Last 7 days" type="bar" :series="[{ name: 'Limo jobs', data: data.chart_limo }, { name: 'Van trips', data: data.chart_van }]" :categories="data.chart_dates" />
                 <div :class="card" class="p-5">

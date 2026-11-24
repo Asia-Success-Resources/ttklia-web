@@ -22,6 +22,28 @@ export default defineNuxtConfig({
     runtimeConfig: {
         public: {
             app: 'public',
+            // klia-bus config('app.car_charter_enabled'), config('app.cashbacks_enabled'), services.teeko.contact_number.
+            kliaCarCharter: false,
+            kliaCashbacks: false,
+            // klia-bus app.llp_origin_enabled: buses from Lalaport BBCC as well as KLIA2.
+            kliaLalaport: false,
+            teekoWhatsapp: '',
+            googleMapsKey: '',
         },
+    },
+    // The ttklia.com pages copied from klia-bus (app/klia): their components keep their own names (TripsResult,
+    // SearchCard, XIcon, …). Only .vue files: search/dates.js and google-maps.js are helpers, not components.
+    components: [
+        { path: '~/klia/components', pathPrefix: false, extensions: ['vue'] },
+        '~/components',
+    ],
+    vite: {
+        css: {
+            preprocessorOptions: {
+                // klia-bus's frontend.scss: Bootstrap 5.2.3 plus its tokens. Its deprecation warnings are Bootstrap's.
+                scss: { quietDeps: true, silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function', 'mixed-decls'] },
+            },
+        },
+        optimizeDeps: { include: ['jquery'] },
     },
 })

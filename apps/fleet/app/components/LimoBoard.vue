@@ -517,7 +517,8 @@ async function setPicker(id: number) {
                                 </div>
 
                                 <!-- Add row (name frozen) -->
-                                <div v-if="props.canAdd && canWrite" class="group/add flex items-stretch bg-(--gm-board-row)" style="height: 40px">
+                                <!-- Add row: sticky just above the sticky summary (44 px), so a record can be added without scrolling to the end. -->
+                                <div v-if="props.canAdd && canWrite" class="group/add sticky z-[35] flex items-stretch bg-(--gm-board-row) shadow-[0_-1px_0_var(--gm-board-border-strong)]" style="height: 40px; bottom: 44px">
                                     <div :style="{ width: `${CHECKBOX_WIDTH}px` }" class="sticky left-0 z-30 shrink-0 overflow-hidden rounded-bl-md bg-(--gm-board-row)">
                                         <div class="absolute bottom-0 left-0 top-0 w-1.5 opacity-40 transition group-hover/add:opacity-100" :style="{ backgroundColor: group.color }" />
                                     </div>
@@ -534,8 +535,9 @@ async function setPicker(id: number) {
                                 </div>
                             </div>
 
-                            <!-- Summary: attached under the table, spanning to the end -->
-                            <div class="flex items-stretch" style="height: 44px">
+                            <!-- Summary: attached under the table, spanning to the end. Sticky at the bottom of the group's scroll
+                                 box (as the header is at the top), so it stays in view while the rows scroll above it. -->
+                            <div class="sticky bottom-0 z-40 flex items-stretch" style="height: 44px">
                                 <div :style="{ width: `${CHECKBOX_WIDTH + NAME_WIDTH}px` }" class="sticky left-0 z-30 shrink-0 bg-zinc-900" />
                                 <div class="flex min-w-0 flex-1 items-stretch overflow-hidden rounded-b-md border-x border-b border-(--gm-board-border-group) bg-(--gm-board-row)">
                                     <template v-for="col in LIMO_COLUMNS" :key="col.key">

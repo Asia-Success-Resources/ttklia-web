@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import type { PaymentMethod, SalePassenger } from '~/types/sale'
 import type { ChargeLine } from './ChargeLines.vue'
+import type { SaleSeat } from './SeatMap.vue'
 
-// "Create Booking" tab, laid out like today's BookingForm.vue: details, tickets and trip on the
-// left (7/12), Summary and payment on the right (5/12), seats and passengers below.
+// "Create Booking" tab, laid out exactly like ttklia-v2's BookingForm.vue: date and location, then
+// Tickets, then Select Trip (departure hour, then trip cards) on the left (7/12); Summary and payment
+// on the right (5/12); the seat map and Passenger Details full width below.
+// As in v2 there is no separate customer field: passenger 1 is the order's contact.
 // Trips: GET /bus/trips?date&zone_id&sellable=1; seats: GET /bus/trips/{uuid}/seats; ticket types: GET /bus/ticket-types.
 // Confirm Seats holds them with POST /orders (5 minutes); Confirm Payment calls POST /orders/{uuid}/pay.
 // The charge lines and total always come from the API's order, never worked out here.
@@ -11,8 +14,8 @@ const emit = defineEmits<{ created: [] }>()
 
 interface Zone { id: number; name: string }
 interface PassengerType { uuid: string; name: string }
-interface Trip { uuid: string; company: string; departs_at: string; trip_no: string | null; available_seats: number | null }
-interface Seat { uuid: string; seat_no: string; deck: 'lower' | 'upper'; available: boolean }
+interface Trip { uuid: string; company: string; departs_at: string; trip_no: string | null; capacity: number | null; available_seats: number | null }
+type Seat = SaleSeat
 interface SaleOrder { uuid: string; status: string; total_sen: number; charge_lines: ChargeLine[]; hold_expires_at: string | null; change_sen?: number | null }
 
 const api = useApi()
@@ -33,13 +36,10 @@ onMounted(async () => {
 const trips = ref<Trip[]>([])
 const seats = ref<Seat[]>([])
 const fetchingTrips = ref(false)
+const fetchingSeats = ref(false)
 
 const date = ref('')
 const location = ref<Zone | undefined>()
-const reference = ref('')
-const contactName = ref('')
-const contactPhone = ref('')
-const contactEmail = ref('')
 const tickets = reactive<Record<string, number>>({})
 const tripId = ref<string | null>(null)
 const tripsExpanded = ref(true)
@@ -60,12 +60,16 @@ const totalTickets = computed(() => Object.values(tickets).reduce((a, b) => a + 
 /** Departure hours in Malaysia time, as the counter reads them. */
 const localHour = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', timeZone: 'Asia/Kuala_Lumpur' }) + ':00'
 const localTime = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kuala_Lumpur' })
-const hours = computed(() => [...new Set(trips.value.map((t) => localHour(t.departs_at)))])
+const hours = computed(() => {
+    const counts = new Map<string, number>()
+    for (const t of trips.value) counts.set(localHour(t.departs_at), (counts.get(localHour(t.departs_at)) ?? 0) + 1)
+    return [...counts].map(([label, count]) => ({ label, count }))
+})
 const visibleTrips = computed(() => (selectedHour.value ? trips.value.filter((t) => localHour(t.departs_at) === selectedHour.value) : trips.value))
 const selectedTrip = computed(() => trips.value.find((t) => t.uuid === tripId.value) ?? null)
-const lowerSeats = computed(() => seats.value.filter((s) => s.deck === 'lower'))
-const upperSeats = computed(() => seats.value.filter((s) => s.deck === 'upper'))
-const seatSlots = computed(() => selectedSeats.value.map((s) => ({ key: s, label: `Seat ${s}` })))
+const tooFewSeats = (trip: Trip) => totalTickets.value > 0 && trip.available_seats !== null && trip.available_seats < totalTickets.value
+const seatSlots = computed(() => selectedSeats.value.map((s, i) => ({ key: s, label: `Passenger ${i + 1} - Seat ${s}`, short: `Seat ${s}` })))
+const contact = computed(() => passengers.value[selectedSeats.value[0] ?? ''] ?? null)
 
 function problemText(e: unknown, fallback: string): string {
     const problem = toProblem(e)
@@ -93,11 +97,14 @@ watch([date, location], async () => {
 async function loadSeats() {
     seats.value = []
     if (!tripId.value) return
+    fetchingSeats.value = true
     try {
         const res = await api.get<{ data: Seat[] }>(path(`/bus/trips/${tripId.value}/seats`))
         seats.value = res?.data ?? []
     } catch (e) {
         error.value = problemText(e, 'Unable to load seats.')
+    } finally {
+        fetchingSeats.value = false
     }
 }
 
@@ -108,17 +115,21 @@ function pickTrip(trip: Trip) {
     loadSeats()
 }
 
-function toggleSeat(seat: Seat) {
-    if (!seat.available || held.value) return
-    const i = selectedSeats.value.indexOf(seat.seat_no)
-    if (i >= 0) selectedSeats.value.splice(i, 1)
-    else selectedSeats.value.push(seat.seat_no)
+function pickHour(label: string) {
+    selectedHour.value = label
+    tripId.value = null
+    seats.value = []
+    selectedSeats.value = []
 }
 
 async function confirmSeats() {
     if (!tripId.value) return
     if (selectedSeats.value.length !== totalTickets.value) {
         error.value = 'Selected seats does not match total tickets.'
+        return
+    }
+    if (!contact.value?.name || !contact.value?.phone) {
+        error.value = 'Enter passenger 1\'s name and phone number.'
         return
     }
     busy.value = true
@@ -130,10 +141,9 @@ async function confirmSeats() {
             tickets: { ...tickets },
             seats: selectedSeats.value,
             passengers: passengers.value,
-            contact_name: contactName.value,
-            contact_phone: contactPhone.value,
-            contact_email: contactEmail.value || undefined,
-            reference: reference.value || undefined,
+            contact_name: contact.value.name,
+            contact_phone: contact.value.phone,
+            contact_email: contact.value.email || undefined,
         })
         order.value = res?.data ?? null
     } catch (e) {
@@ -172,17 +182,13 @@ function reset(clearAll = true) {
     passengers.value = {}
     if (clearAll) {
         for (const key of Object.keys(tickets)) tickets[key] = 0
-        contactName.value = ''
-        contactPhone.value = ''
-        contactEmail.value = ''
-        reference.value = ''
     }
     loadSeats()
 }
 </script>
 
 <template>
-    <div>
+    <div class="flex flex-col gap-6">
         <div class="grid grid-cols-1 gap-6 lg:grid-cols-12">
             <div class="lg:col-span-7">
                 <SalePanel title="Booking Details">
@@ -199,23 +205,12 @@ function reset(clearAll = true) {
                                     class="w-full"
                                 />
                             </UFormField>
-                            <UFormField label="Reference">
-                                <UInput v-model="reference" placeholder="Reference" size="lg" class="w-full" />
-                            </UFormField>
-                            <UFormField label="Customer Name" required>
-                                <UInput v-model="contactName" placeholder="Customer name" size="lg" class="w-full" />
-                            </UFormField>
-                            <UFormField label="Customer Phone" required>
-                                <UInput v-model="contactPhone" placeholder="012 345 6789" size="lg" class="w-full" />
-                            </UFormField>
-                            <UFormField label="Customer Email">
-                                <UInput v-model="contactEmail" type="email" placeholder="Optional" size="lg" class="w-full" />
-                            </UFormField>
                         </div>
 
-                        <div class="mb-6">
+                        <!-- Tickets (before trips so the count is chosen first) -->
+                        <div class="border-t border-(--ops-border) pt-6">
                             <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Tickets</h3>
-                            <div v-if="passengerTypes.length" class="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                            <div v-if="passengerTypes.length" class="grid grid-cols-2 gap-3">
                                 <SaleTicketCount
                                     v-for="type in passengerTypes"
                                     :key="type.uuid"
@@ -226,53 +221,72 @@ function reset(clearAll = true) {
                             <p v-else class="text-sm text-gray-500">No ticket types yet.</p>
                         </div>
 
-                        <div v-if="selectedTrip && !tripsExpanded" class="flex items-center justify-between rounded-lg border border-primary bg-primary/10 p-4">
-                            <div class="flex items-center gap-3">
-                                <UIcon name="i-bx-bus" class="size-6 text-primary" />
-                                <div class="text-sm">
-                                    <div class="font-semibold text-gray-800 dark:text-white">{{ selectedTrip.company }}</div>
-                                    <div class="text-gray-500">
-                                        <span v-if="selectedTrip.trip_no">Trip #{{ selectedTrip.trip_no }} · </span>{{ localTime(selectedTrip.departs_at) }}
+                        <!-- Trips: by departure hour, collapsed once one is picked -->
+                        <div class="mt-6 border-t border-(--ops-border) pt-6">
+                            <div v-if="selectedTrip && !tripsExpanded" class="flex items-center justify-between rounded-lg border border-primary bg-primary/10 p-4">
+                                <div class="flex items-center gap-3">
+                                    <UIcon name="i-bx-bus" class="size-6 text-primary" />
+                                    <div class="text-sm">
+                                        <div class="font-semibold text-gray-800 dark:text-white">{{ localTime(selectedTrip.departs_at) }} — {{ selectedTrip.company }}</div>
+                                        <div class="text-gray-500">
+                                            <span v-if="selectedTrip.trip_no">Trip #{{ selectedTrip.trip_no }} · </span>
+                                            <template v-if="selectedTrip.available_seats !== null">{{ selectedTrip.available_seats }} seats available</template>
+                                        </div>
                                     </div>
                                 </div>
+                                <UButton label="Change" size="sm" variant="outline" @click="tripsExpanded = true" />
                             </div>
-                            <UButton label="Change" size="sm" variant="outline" @click="tripsExpanded = true" />
-                        </div>
 
-                        <div v-else>
-                            <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Select Trip</h3>
-                            <div v-if="hours.length" class="mb-4">
-                                <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">Departure Hour</label>
-                                <div class="flex flex-wrap gap-2">
-                                    <UButton
-                                        v-for="h in hours"
-                                        :key="h"
-                                        :label="h"
-                                        size="sm"
-                                        :variant="selectedHour === h ? 'solid' : 'outline'"
-                                        @click="selectedHour = h; tripId = null"
-                                    />
-                                </div>
-                            </div>
-                            <div class="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                                <button
-                                    v-for="trip in visibleTrips"
-                                    :key="trip.uuid"
-                                    type="button"
-                                    class="rounded-lg border p-3 text-left text-sm transition"
-                                    :class="tripId === trip.uuid ? 'border-primary bg-primary/10' : 'border-(--ops-border) hover:bg-gray-50 dark:hover:bg-white/5'"
-                                    @click="pickTrip(trip)"
-                                >
-                                    <div class="font-semibold text-gray-800 dark:text-white">{{ localTime(trip.departs_at) }} · {{ trip.company }}</div>
-                                    <div class="text-xs text-gray-500">
-                                        <span v-if="trip.trip_no">Trip #{{ trip.trip_no }}</span>
-                                        <span v-if="trip.available_seats !== null"> · {{ trip.available_seats }} seats left</span>
+                            <div v-else>
+                                <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Select Trip</h3>
+
+                                <UFormField v-if="hours.length" label="Departure Hour" class="mb-4">
+                                    <div class="flex flex-wrap gap-2">
+                                        <UButton
+                                            v-for="h in hours"
+                                            :key="h.label"
+                                            :variant="selectedHour === h.label ? 'solid' : 'outline'"
+                                            @click="pickHour(h.label)"
+                                        >
+                                            {{ h.label }}
+                                            <UBadge :label="String(h.count)" size="sm" :color="selectedHour === h.label ? 'neutral' : 'primary'" variant="soft" class="rounded-full" />
+                                        </UButton>
                                     </div>
-                                </button>
-                            </div>
-                            <div v-if="trips.length === 0" class="rounded-lg border border-dashed border-(--ops-border) p-6 text-center text-sm text-gray-500">
-                                <p v-if="fetchingTrips">Loading...</p>
-                                <p v-else>Choose a date and location to see trips.</p>
+                                </UFormField>
+
+                                <div v-if="selectedHour && visibleTrips.length" class="space-y-3">
+                                    <button
+                                        v-for="trip in visibleTrips"
+                                        :key="trip.uuid"
+                                        type="button"
+                                        :disabled="tooFewSeats(trip)"
+                                        class="flex w-full items-center justify-between rounded-lg border p-3 text-left text-sm transition disabled:cursor-not-allowed disabled:opacity-40"
+                                        :class="tripId === trip.uuid ? 'border-primary bg-primary/10' : 'border-(--ops-border) hover:bg-gray-50 dark:hover:bg-white/5'"
+                                        @click="pickTrip(trip)"
+                                    >
+                                        <div class="flex items-center gap-3">
+                                            <UIcon name="i-bx-bus" class="size-6 text-gray-500" />
+                                            <div>
+                                                <div class="font-semibold text-gray-800 dark:text-white">{{ trip.company }}</div>
+                                                <div v-if="trip.trip_no" class="text-xs text-gray-500">Trip #{{ trip.trip_no }}</div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-center gap-3">
+                                            <span class="font-semibold text-gray-800 dark:text-white">{{ localTime(trip.departs_at) }}</span>
+                                            <UBadge
+                                                v-if="trip.available_seats !== null"
+                                                :label="`${trip.available_seats}/${trip.capacity ?? '-'}`"
+                                                :color="trip.available_seats > 10 ? 'success' : trip.available_seats > 0 ? 'warning' : 'error'"
+                                                variant="soft"
+                                            />
+                                        </div>
+                                    </button>
+                                </div>
+
+                                <div v-if="trips.length === 0" class="rounded-lg border border-dashed border-(--ops-border) p-6 text-center text-sm text-gray-500">
+                                    <p v-if="fetchingTrips">Loading...</p>
+                                    <p v-else>No trips available</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -287,7 +301,6 @@ function reset(clearAll = true) {
             </div>
 
             <div class="lg:col-span-5">
-                <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
                 <SalePanel title="Summary">
                     <dl class="mb-6 space-y-3">
                         <div class="flex justify-between">
@@ -309,6 +322,8 @@ function reset(clearAll = true) {
                         </div>
                     </dl>
 
+                    <UAlert v-if="error" class="mb-4" color="error" variant="soft" icon="i-bx-alert-circle" :title="error" />
+
                     <UButton
                         v-if="!held"
                         block
@@ -316,7 +331,7 @@ function reset(clearAll = true) {
                         color="success"
                         label="Confirm Seats"
                         :loading="busy"
-                        :disabled="!tripId || selectedSeats.length === 0 || !contactName || !contactPhone"
+                        :disabled="!tripId || selectedSeats.length === 0"
                         @click="confirmSeats"
                     />
                     <template v-else>
@@ -327,29 +342,12 @@ function reset(clearAll = true) {
             </div>
         </div>
 
-        <div v-if="tripId" class="mt-6 rounded-xl border border-(--ops-border) bg-(--ops-card) p-6 shadow-sm">
-            <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Select Seats</h3>
-            <div class="grid max-h-[50vh] gap-4 overflow-y-auto" :class="upperSeats.length ? 'grid-cols-1 lg:grid-cols-2' : 'grid-cols-1'">
-                <div v-for="deck in (upperSeats.length ? [{ name: 'Lower Deck', seats: lowerSeats }, { name: 'Upper Deck', seats: upperSeats }] : [{ name: '', seats: lowerSeats }])" :key="deck.name">
-                    <h5 v-if="deck.name" class="mb-2 text-sm font-semibold text-gray-700 dark:text-gray-300">{{ deck.name }}</h5>
-                    <div class="grid grid-cols-4 gap-2">
-                        <button
-                            v-for="seat in deck.seats"
-                            :key="seat.uuid"
-                            type="button"
-                            :disabled="!seat.available"
-                            class="rounded-md border p-2 text-center text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
-                            :class="selectedSeats.includes(seat.seat_no) ? 'border-primary bg-primary text-white' : 'border-(--ops-border) hover:bg-gray-50 dark:hover:bg-white/5'"
-                            @click="toggleSeat(seat)"
-                        >
-                            {{ seat.seat_no }}
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <p v-if="seats.length === 0" class="text-sm text-gray-500">No seat map for this trip yet.</p>
+        <!-- Seat Selection: full width, viewport-constrained -->
+        <div v-if="tripId && !held" class="rounded-xl border border-(--ops-border) bg-(--ops-card) p-6 shadow-sm">
+            <SaleSeatMap v-model="selectedSeats" :seats="seats" :max="totalTickets" :loading="fetchingSeats" />
         </div>
 
-        <SalePassengers v-model="passengers" :slots="seatSlots" />
+        <!-- Passenger Details: one block per selected seat -->
+        <SalePassengers v-if="!held" v-model="passengers" :slots="seatSlots" boxed />
     </div>
 </template>
