@@ -230,7 +230,7 @@ const cardHead = 'border-b border-(--ops-border) px-6 py-4'
                     <NuxtLink
                         v-for="c in data.company_credits"
                         :key="c.id"
-                        :to="resolveTo('/operators')"
+                        :to="resolveTo(`/operators/${c.id}`)"
                         class="flex items-center justify-between rounded-xl bg-gray-50 px-4 py-3 transition-colors hover:bg-gray-100 dark:bg-white/[0.04] dark:hover:bg-white/[0.08]"
                     >
                         <span class="mr-2 truncate text-sm font-medium text-gray-700 dark:text-gray-300">{{ c.name }}</span>

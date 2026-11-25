@@ -198,13 +198,13 @@ async function createCollection() {
             <SalePanel title="Collection Details">
                 <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
                     <SaleDatePicker v-model="date" />
-                    <UFormField label="Operator">
+                    <UFormField label="Operator" required>
                         <USelectMenu v-model="operator" :items="operatorItems" placeholder="Search Operator" size="lg" class="w-full" />
                     </UFormField>
-                    <UFormField label="Reference">
+                    <UFormField label="Reference" required>
                         <UInput v-model="reference" placeholder="Reference" size="lg" class="w-full" />
                     </UFormField>
-                    <UFormField v-show="manual" label="Location">
+                    <UFormField v-show="manual" label="Location" required>
                         <USelectMenu v-model="location" :items="zones.rows.value" label-key="name" placeholder="Search Location" size="lg" class="w-full" />
                     </UFormField>
                 </div>
@@ -245,10 +245,10 @@ async function createCollection() {
                             <UFormField label="Trip No">
                                 <UInput v-model="manualTripNo" placeholder="Enter trip number" size="lg" class="w-full" />
                             </UFormField>
-                            <UFormField label="Seat No (1 Seat)">
+                            <UFormField label="Seat No (1 Seat)" required>
                                 <UInput v-model="manualSeatNo" placeholder="Enter seat number" size="lg" class="w-full" />
                             </UFormField>
-                            <UFormField label="Time">
+                            <UFormField label="Time" required>
                                 <UInput v-model="manualTime" type="time" size="lg" class="w-full" />
                             </UFormField>
                         </div>

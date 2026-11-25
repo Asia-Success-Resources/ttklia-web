@@ -30,6 +30,13 @@ const remaining = computed(() => props.max - selected.value.length)
 const isSelected = (seat: SaleSeat) => selected.value.includes(seat.seat_no)
 const disabled = (seat: SaleSeat) => !isSelected(seat) && (!seat.available || remaining.value <= 0)
 
+// Selected: filled; available: green border; taken: the plain border, faded by `disabled`.
+function seatClass(seat: SaleSeat) {
+    if (isSelected(seat)) return 'border-primary bg-primary text-white'
+    if (seat.available) return 'border-success hover:bg-success/10'
+    return 'border-(--ops-border)'
+}
+
 function toggle(seat: SaleSeat) {
     if (isSelected(seat)) selected.value = selected.value.filter((s) => s !== seat.seat_no)
     else if (!disabled(seat)) selected.value = [...selected.value, seat.seat_no]
@@ -39,7 +46,7 @@ function toggle(seat: SaleSeat) {
 <template>
     <div>
         <div class="mb-4 flex flex-wrap items-center justify-between gap-2">
-            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ props.title ?? 'Select Seats' }}</h3>
+            <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ props.title ?? 'Select Seats' }}<span class="ms-0.5 text-error">*</span></h3>
             <div v-if="!props.loading" class="flex gap-4 text-sm text-gray-500 dark:text-gray-400">
                 <span>Available: <span class="font-semibold text-success">{{ available }}</span></span>
                 <span>Remaining: <span class="font-semibold text-primary">{{ remaining }}</span></span>
@@ -59,8 +66,8 @@ function toggle(seat: SaleSeat) {
                                     v-if="seat"
                                     type="button"
                                     :disabled="disabled(seat)"
-                                    class="size-11 rounded-md border text-center text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
-                                    :class="isSelected(seat) ? 'border-primary bg-primary text-white' : 'border-(--ops-border) hover:bg-gray-50 dark:hover:bg-white/5'"
+                                    class="size-11 rounded-md border-2 text-center text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
+                                    :class="seatClass(seat)"
                                     @click="toggle(seat)"
                                 >
                                     {{ seat.seat_no }}

@@ -1,6 +1,10 @@
 <script setup lang="ts">
 import type { TableColumn } from '@nuxt/ui'
+import type { OpsListFilter } from '~/types/list'
 
+// Routes, as ttklia-v2's admin/bus/routes index (BusRoute $indexFields): ID, Location(s), Code, Zone, Company,
+// Platform, then APAD (doc 23) and Actions. Search: code, location. Filter: Company, Zone.
+// TODO: v2's edit form and Duplicate action come with the form pages.
 // Routes: departure and arrival routes (table `bus_routes`). Permission: bus.routes.read (doc 27).
 // Each route shows whether APAD has verified it (doc 23). Staff with bus.routes.apad_verify record APAD's approval and
 // permit number; until then, a ticket collected on the route is reported to APAD quietly.
@@ -15,6 +19,9 @@ interface Row extends Record<string, unknown> {
     origin_name: string | null
     typical_travel_minutes: number | null
     operator_route_ref: string | null
+    zone: string | null
+    company: string | null
+    platform: string | null
     apad_status: 'verified' | 'not_verified'
     apad_permit_no: string | null
     apad_permit_expires_on: string | null
@@ -48,12 +55,12 @@ async function save() {
 }
 
 const columns: TableColumn<Row>[] = [
+    { accessorKey: 'id', header: 'ID' },
+    { accessorKey: 'destination_name', header: 'Location(s)' },
     { accessorKey: 'code', header: 'Code' },
-    { accessorKey: 'destination_name', header: 'Destination name' },
-    { accessorKey: 'direction', header: 'Direction' },
-    { accessorKey: 'origin_name', header: 'Origin name' },
-    { accessorKey: 'typical_travel_minutes', header: 'Typical travel minutes' },
-    { accessorKey: 'operator_route_ref', header: 'Operator route ref' },
+    { accessorKey: 'zone', header: 'Zone', cell: ({ row }) => row.original.zone ?? '-' },
+    { accessorKey: 'company', header: 'Company', cell: ({ row }) => row.original.company ?? '-' },
+    { accessorKey: 'platform', header: 'Platform', cell: ({ row }) => row.original.platform ?? '-' },
     { accessorKey: 'apad_status', header: 'APAD', cell: ({ row }) => apad(row.original) },
     actionsColumn<Row>((row) => (can('bus.routes.apad_verify') ? [{
         label: 'APAD approval', icon: 'i-bx-badge-check',
@@ -61,16 +68,29 @@ const columns: TableColumn<Row>[] = [
     }] : [])),
 ]
 
+const options = useBusOptions()
+const filters = computed<OpsListFilter[]>(() => [
+    { key: 'company_id', label: 'Company', items: options.operators.value },
+    { key: 'zone_id', label: 'Zone', items: options.zones.value },
+])
+const filterValues = ref<Record<string, string | undefined>>({})
+
 const search = ref('')
-const list = useApiList<Row>({ search, path: '/bus/routes', workspaceScoped: true })
-onMounted(() => list.load())
+const list = useApiList<Row>({ search, path: '/bus/routes', workspaceScoped: true, query: () => chosen(filterValues.value) })
+onMounted(() => {
+    list.load()
+    options.load('operators', 'zones')
+})
 </script>
 
 <template>
     <OpsListPage
         v-model:search="search"
+        v-model:filter-values="filterValues"
         title="Routes"
-        subject="routes"
+        subject="route"
+        :filters="filters"
+        @filter="list.load()"
         :rows="list.rows.value"
         :columns="columns"
         :loading="list.pending.value"

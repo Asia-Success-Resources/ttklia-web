@@ -33,7 +33,7 @@ const change = computed(() => {
             </button>
         </div>
         <div v-if="method === 'cash'" class="mb-4 space-y-4">
-            <UFormField label="Amount Paid">
+            <UFormField label="Amount Paid" required>
                 <UInput v-model="paid" type="number" step="0.01" min="0" size="lg" class="w-full" />
             </UFormField>
             <UFormField label="Change">

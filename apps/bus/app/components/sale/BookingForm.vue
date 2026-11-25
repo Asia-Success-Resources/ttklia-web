@@ -195,7 +195,7 @@ function reset(clearAll = true) {
                     <div v-if="!held">
                         <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
                             <SaleDatePicker v-model="date" />
-                            <UFormField label="Location">
+                            <UFormField label="Location" required>
                                 <USelectMenu
                                     v-model="location"
                                     :items="zones.rows.value"
@@ -209,7 +209,7 @@ function reset(clearAll = true) {
 
                         <!-- Tickets (before trips so the count is chosen first) -->
                         <div class="border-t border-(--ops-border) pt-6">
-                            <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Tickets</h3>
+                            <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Tickets<span class="ms-0.5 text-error">*</span></h3>
                             <div v-if="passengerTypes.length" class="grid grid-cols-2 gap-3">
                                 <SaleTicketCount
                                     v-for="type in passengerTypes"
@@ -238,19 +238,27 @@ function reset(clearAll = true) {
                             </div>
 
                             <div v-else>
-                                <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Select Trip</h3>
+                                <h3 class="mb-4 text-lg font-semibold text-gray-800 dark:text-white">Select Trip<span class="ms-0.5 text-error">*</span></h3>
 
                                 <UFormField v-if="hours.length" label="Departure Hour" class="mb-4">
                                     <div class="flex flex-wrap gap-2">
-                                        <UButton
+                                        <!-- Same size as ttklia-v2's hour buttons (rounded-xl, border-2, px-5 py-3, text-base) -->
+                                        <button
                                             v-for="h in hours"
                                             :key="h.label"
-                                            :variant="selectedHour === h.label ? 'solid' : 'outline'"
+                                            type="button"
+                                            class="relative rounded-xl border-2 px-5 py-3 text-base font-semibold transition"
+                                            :class="selectedHour === h.label
+                                                ? 'border-primary bg-primary text-white shadow-lg shadow-primary/25'
+                                                : 'border-gray-200 bg-white text-gray-700 hover:border-primary/50 hover:bg-primary/5 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700'"
                                             @click="pickHour(h.label)"
                                         >
                                             {{ h.label }}
-                                            <UBadge :label="String(h.count)" size="sm" :color="selectedHour === h.label ? 'neutral' : 'primary'" variant="soft" class="rounded-full" />
-                                        </UButton>
+                                            <span
+                                                class="ml-1.5 inline-flex size-5 items-center justify-center rounded-full text-xs font-bold"
+                                                :class="selectedHour === h.label ? 'bg-white/25 text-white' : 'bg-gray-100 text-gray-500 dark:bg-gray-700 dark:text-gray-400'"
+                                            >{{ h.count }}</span>
+                                        </button>
                                     </div>
                                 </UFormField>
 

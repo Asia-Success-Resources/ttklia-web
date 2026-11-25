@@ -2,7 +2,23 @@
 // Sections and order follow ttklia-v2 (app/Helpers/Helper.php getBusNavItems): dashboards first, Reports last.
 // Permissions follow doc 27's `<module>.<resource>.<action>` convention; doc 27 has no full
 // catalogue yet, so resource names are derived from the path. TODO(api): check them against the seeder.
+// Form fields at ttklia-v2's size (its inputClass: h-11, rounded-lg, px-4 py-2.5, text-sm), as the counter staff
+// know them; every input, select and select menu in the bus app uses it unless a size is given.
+const v2Field = {
+    variants: {
+        size: {
+            lg: { base: 'h-11 rounded-lg px-4 py-2.5 text-sm/5 gap-2', leading: 'ps-4', trailing: 'pe-4' },
+        },
+    },
+    defaultVariants: { size: 'lg' as const },
+}
+
 export default defineAppConfig({
+    ui: {
+        input: v2Field,
+        select: v2Field,
+        selectMenu: v2Field,
+    },
     ops: {
         "app": "bus",
         "title": "TTKLIA (Bus)",
@@ -11,6 +27,8 @@ export default defineAppConfig({
         // workspace switcher is kept in a cookie (useSavedLocation, doc 16).
         "locationInPath": false,
         "savedLocationType": "bus_terminal",
+        // List pages as ttklia-v2's generic index: search, Filter, Export, Import and Create on the title row.
+        "v2ListHeader": true,
         "menu": [
             {
                 "title": "Dashboard",

@@ -53,6 +53,21 @@ export interface OpsAppConfig {
     savedLocationType?: string
     menu: OpsMenuGroup[]
     brand?: Partial<OpsBrand>
+    /**
+     * List pages as ttklia-v2's generic index (vebase): search, Filter, Export, Import and "Create {item}" all on the
+     * title row, instead of the search on its own row below. The bus app turns it on.
+     */
+    v2ListHeader?: boolean
+}
+
+/** One dropdown in a list page's Filter panel (ttklia-v2 model `$filters`). `type: 'date'` shows a date field. */
+export interface OpsListFilter {
+    key: string
+    label: string
+    items?: { label: string; value: string }[]
+    type?: 'select' | 'multi' | 'date' | 'time'
+    /** Label of the empty choice; v2 shows "All" (or nothing when the filter has a default). */
+    emptyLabel?: string
 }
 
 export interface OpsField {

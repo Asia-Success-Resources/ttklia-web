@@ -85,11 +85,11 @@ async function createTourBooking() {
             <div class="lg:col-span-7">
                 <SalePanel title="Tour Booking Details">
                     <div class="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-                        <UFormField label="Select Tour" class="lg:col-span-2">
+                        <UFormField label="Select Tour" class="lg:col-span-2" required>
                             <USelectMenu v-model="tour" :items="tours.rows.value" label-key="name" placeholder="Search Tour" size="lg" class="w-full" />
                         </UFormField>
                         <SaleDatePicker v-if="!hasSchedules" v-model="date" />
-                        <UFormField v-else label="Time">
+                        <UFormField v-else label="Time" required>
                             <USelectMenu
                                 v-model="schedule"
                                 :items="schedules"

@@ -10,7 +10,7 @@ onMounted(() => {
 </script>
 
 <template>
-    <UFormField label="Date">
+    <UFormField label="Date" required>
         <AppDateInput v-model="date" size="lg" :min="today" />
         <div class="mt-2 flex gap-2">
             <UButton label="Today" size="xs" :variant="date === today ? 'solid' : 'outline'" @click="date = today" />
