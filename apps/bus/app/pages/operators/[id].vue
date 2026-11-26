@@ -10,6 +10,8 @@ import type { TableColumn, TabsItem } from '@nuxt/ui'
 // 6. tabs with counts: Routes, Trips, Bus Types, Buses, Bookings, each a paged list read with `company_id`.
 // GET /api/ops/w/{workspace}/bus/companies/{id}, …/credit/log, POST …/credit; the tab lists read /bus/routes,
 // /bus/trips, /seat-layouts, /vehicles and /bus/bookings. Permission: bus.operators.read (doc 27).
+// Ticket sales switch (v3, not in v2): PATCH …/bus/companies/{id}/sales {open}; off = its tickets cannot be sold at the
+// counter, kiosks, app or web. Shown to bus.operators.write.
 // TODO: v2's Edit and Edit Pricing buttons come with the company form and the pricing page.
 useHead({ title: 'Company' })
 
@@ -20,6 +22,9 @@ interface Company {
     logo_url: string | null
     system_provider: string | null
     status: string
+    sales_open: boolean
+    sales_paused_at: string | null
+    sales_paused_by: string | null
     stats: { month_bookings: number; month_revenue_sen: number; month_trips: number; total_routes: number }
     counts: { routes: number; trips: number; bus_types: number; buses: number; bookings: number }
     credit_balance_sen: number | null
@@ -109,6 +114,28 @@ async function updateBalance() {
         amountError.value = problem?.detail ?? problem?.title ?? 'Unable to update the credit balance.'
     } finally {
         saving.value = false
+    }
+}
+
+// --- Ticket sales switch ---
+const canManage = computed(() => can('bus.operators.write'))
+const salesSaving = ref(false)
+async function setSales(open: boolean) {
+    if (!company.value) return
+    salesSaving.value = true
+    try {
+        const res = await api.patch<{ data: Pick<Company, 'sales_open' | 'sales_paused_at' | 'sales_paused_by'> }>(path(`/bus/companies/${id}/sales`), { open })
+        if (res?.data) Object.assign(company.value, res.data)
+        toast.add({
+            title: open ? `Ticket sales for ${company.value.name} are on` : `Ticket sales for ${company.value.name} are paused`,
+            description: open ? undefined : 'Counters, kiosks, the app and the web cannot sell its tickets until you turn this back on.',
+            color: open ? 'success' : 'warning',
+        })
+    } catch (e) {
+        const problem = toProblem(e)
+        toast.add({ title: problem?.detail ?? problem?.title ?? 'Unable to change ticket sales.', color: 'error' })
+    } finally {
+        salesSaving.value = false
     }
 }
 
@@ -259,6 +286,29 @@ const card = 'rounded-2xl border border-(--ops-border) bg-(--ops-card)'
                 <div class="flex flex-wrap gap-2">
                     <UButton label="Back" icon="i-bx-arrow-back" color="neutral" variant="outline" :to="resolveTo('/operators')" />
                 </div>
+            </div>
+            <div v-if="company" class="mt-5 flex flex-wrap items-center justify-between gap-4 border-t border-(--ops-border) pt-4">
+                <div>
+                    <p class="flex items-center gap-2 text-sm font-semibold text-gray-800 dark:text-white/90">
+                        Ticket sales
+                        <UBadge :label="company.sales_open ? 'On sale' : 'Paused'" :color="company.sales_open ? 'success' : 'warning'" variant="soft" size="sm" />
+                    </p>
+                    <p class="mt-0.5 text-xs text-gray-500">
+                        <template v-if="company.sales_open">Its tickets can be sold at the counter, kiosks, the app and the web.</template>
+                        <template v-else>
+                            Paused<template v-if="company.sales_paused_by"> by {{ company.sales_paused_by }}</template><template v-if="company.sales_paused_at"> on {{ formatDateTime(company.sales_paused_at) }}</template>.
+                            Nothing of this company can be sold; bookings already paid are not affected.
+                        </template>
+                    </p>
+                </div>
+                <USwitch
+                    v-if="canManage"
+                    :model-value="company.sales_open"
+                    :loading="salesSaving"
+                    :disabled="salesSaving"
+                    :label="company.sales_open ? 'Selling' : 'Not selling'"
+                    @update:model-value="(on: boolean) => setSales(on)"
+                />
             </div>
         </div>
 

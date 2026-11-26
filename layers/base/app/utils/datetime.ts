@@ -26,16 +26,30 @@ export function formatDate(value: string | Date | null | undefined): string {
     return p ? `${p.day}/${p.month}/${p.year}` : '—'
 }
 
-/** RFC 3339 instant → "20/11/2026 14:05". */
-export function formatDateTime(value: string | Date | null | undefined): string {
-    const p = value ? parts(value) : null
-    return p ? `${p.day}/${p.month}/${p.year} ${p.hour}:${p.minute}` : '—'
+/** The clock part: "14:05" or, with `hour12`, "2:05 PM" (the workspace's `time_format`, useTimeFormat). */
+function clock(p: Record<string, string>, opts: { hour12?: boolean; seconds?: boolean; minutes?: boolean } = {}): string {
+    const tail = (opts.minutes === false ? '' : `:${p.minute}`) + (opts.seconds ? `:${p.second}` : '')
+    if (!opts.hour12) return `${p.hour}${opts.minutes === false ? ':00' : ''}${tail}`
+    const h = Number(p.hour)
+    return `${h % 12 || 12}${tail} ${h < 12 ? 'AM' : 'PM'}`
 }
 
-/** RFC 3339 instant → "14:05:09". */
-export function formatTime(value: string | Date | null | undefined): string {
+/** RFC 3339 instant → "20/11/2026 14:05", or "20/11/2026 2:05 PM" with `hour12`. */
+export function formatDateTime(value: string | Date | null | undefined, opts: { hour12?: boolean } = {}): string {
     const p = value ? parts(value) : null
-    return p ? `${p.hour}:${p.minute}:${p.second}` : '—'
+    return p ? `${p.day}/${p.month}/${p.year} ${clock(p, opts)}` : '—'
+}
+
+/** RFC 3339 instant → "14:05:09", or "2:05:09 PM" with `hour12`; `seconds: false` drops the seconds. */
+export function formatTime(value: string | Date | null | undefined, opts: { hour12?: boolean; seconds?: boolean } = {}): string {
+    const p = value ? parts(value) : null
+    return p ? clock(p, { hour12: opts.hour12, seconds: opts.seconds ?? true }) : '—'
+}
+
+/** RFC 3339 instant → its hour: "14:00", or "2 PM" with `hour12` (the sale form's departure hour buttons). */
+export function formatHour(value: string | Date | null | undefined, opts: { hour12?: boolean } = {}): string {
+    const p = value ? parts(value) : null
+    return p ? clock(p, { hour12: opts.hour12, minutes: false }) : '—'
 }
 
 /** Today in Kuala Lumpur as YYYY-MM-DD (the API's date format), shifted by whole days. */

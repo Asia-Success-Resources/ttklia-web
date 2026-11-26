@@ -57,9 +57,10 @@ const totalSen = computed(() => order.value?.total_sen ?? 0)
 const chargeLines = computed<ChargeLine[]>(() => order.value?.charge_lines ?? [])
 const totalTickets = computed(() => Object.values(tickets).reduce((a, b) => a + (b || 0), 0))
 
-/** Departure hours in Malaysia time, as the counter reads them. */
-const localHour = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', timeZone: 'Asia/Kuala_Lumpur' }) + ':00'
-const localTime = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kuala_Lumpur' })
+/** Departure hours and times in Malaysia time, 12- or 24-hour as the workspace is set (useTimeFormat). */
+const clock = useTimeFormat()
+const localHour = (iso: string) => clock.hour(iso)
+const localTime = (iso: string) => clock.time(iso)
 const hours = computed(() => {
     const counts = new Map<string, number>()
     for (const t of trips.value) counts.set(localHour(t.departs_at), (counts.get(localHour(t.departs_at)) ?? 0) + 1)

@@ -6,7 +6,8 @@ import type { SaleSession, SaleStat } from '~/types/sale'
 const props = defineProps<{ session: SaleSession | null; counts: SaleStat[]; money: SaleStat[] }>()
 const { me } = useMe()
 
-const startedAt = computed(() => (props.session ? formatDateTime(props.session.opened_at) : null))
+const clock = useTimeFormat()
+const startedAt = computed(() => (props.session ? clock.dateTime(props.session.opened_at) : null))
 
 function show(stat: SaleStat): string {
     if (stat.value === null) return '—'

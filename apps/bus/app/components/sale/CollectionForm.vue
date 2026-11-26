@@ -72,7 +72,9 @@ watch(detailsFilled, (filled) => {
 })
 
 const operatorItems = computed<Company[]>(() => companies.rows.value.map((c) => ({ ...c, label: c.name ?? c.operator_code })))
-const localTime = (iso: string) => new Date(iso).toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Kuala_Lumpur' })
+// 12- or 24-hour as the workspace is set (useTimeFormat)
+const clock = useTimeFormat()
+const localTime = (iso: string) => clock.time(iso)
 const tripGroups = computed(() => {
     const groups = new Map<string, Trip[]>()
     for (const t of trips.value) groups.set(t.company, [...(groups.get(t.company) ?? []), t])

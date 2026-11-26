@@ -3,7 +3,8 @@ import type { TableColumn } from '@nuxt/ui'
 
 // Devices list for Global → Devices and Settings → Kiosks (table `devices`, doc 08 Flow 9, doc 25 "Enrolment").
 // Add device: the device is added as pending and a one-time enrolment code (24 hours) is shown once, to type on the
-// device. Rename; revoke with a reason (token and certificate end for good).
+// device. Rename; revoke with a reason (token and certificate end for good). A kiosk app also has Kiosk Settings:
+// what it shows (services, languages, header), KioskSettingsModal.
 // GET /api/admin/devices, POST /admin/devices/enrolment-codes, PATCH /admin/devices/{uuid}, POST …/{uuid}/revoke.
 const props = defineProps<{ title: string; subject: string; type?: string; writePermission: string }>()
 
@@ -62,6 +63,14 @@ async function saveRename() {
     }
 }
 
+// Kiosk Settings: what a kiosk app shows (doc 25)
+const settingsFor = ref<{ uuid: string; name: string } | null>(null)
+const settingsOpen = ref(false)
+function showSettings(row: Row) {
+    settingsFor.value = { uuid: row.uuid, name: row.name }
+    settingsOpen.value = true
+}
+
 function revoke(row: Row) {
     reason.ask({
         title: `Revoke ${row.name}`,
@@ -86,6 +95,7 @@ const columns: TableColumn<Row>[] = [
     actionsColumn<Row>((row) =>
         can(props.writePermission) && row.status !== 'revoked'
             ? [
+                  ...(row.type === 'kiosk_app' ? [{ label: 'Kiosk settings', icon: 'i-bx-cog', onSelect: () => showSettings(row) }] : []),
                   { label: 'Rename', icon: 'i-bx-edit', onSelect: () => showRename({ uuid: row.uuid, name: row.name }) },
                   { label: 'Revoke', icon: 'i-bx-block', color: 'error', onSelect: () => revoke(row) },
               ]
@@ -128,5 +138,6 @@ const columns: TableColumn<Row>[] = [
     <OpsFormModal v-model:open="rename.open" title="Rename Device" :saving="rename.saving" :error="rename.error" submit-label="Save" @submit="saveRename">
         <OpsFormField label="Name" required full :error="renameError('name')"><UInput v-model="rename.data.name" class="w-full" /></OpsFormField>
     </OpsFormModal>
+    <KioskSettingsModal v-model:open="settingsOpen" :device="settingsFor" />
     <OpsReasonModal :action="reason" />
 </template>

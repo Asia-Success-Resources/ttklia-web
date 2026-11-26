@@ -69,11 +69,13 @@ interface RecentRow extends Record<string, unknown> {
     total_sen: number
 }
 const kindLabels: Record<RecentRow['kind'], string> = { booking: 'Booking', collection: 'Collection', tour: 'Tour', code: 'Code Sale' }
+// Times 12- or 24-hour as the workspace is set (Settings → Time format)
+const clock = useTimeFormat()
 const recentColumns: TableColumn<RecentRow>[] = [
     { accessorKey: 'kind', header: 'Type', cell: ({ row }) => kindLabels[row.original.kind] ?? row.original.kind },
     { accessorKey: 'title', header: 'Dest/Tour', cell: ({ row }) => row.original.title ?? '-' },
     { accessorKey: 'travel_date', header: 'Date', cell: ({ row }) => formatDate(row.original.travel_date ?? row.original.created_at) },
-    { accessorKey: 'created_at', header: 'Time Sold', cell: ({ row }) => formatTime(row.original.created_at) },
+    { accessorKey: 'created_at', header: 'Time Sold', cell: ({ row }) => clock.time(row.original.created_at, { seconds: true }) },
     { accessorKey: 'total_pax', header: 'Total Pax', cell: ({ row }) => row.original.total_pax ?? '-' },
     { accessorKey: 'total_sen', header: 'Amount', cell: ({ row }) => formatSen(row.original.total_sen) },
     { id: 'action', header: () => h('div', { class: 'text-right' }, 'Action') },

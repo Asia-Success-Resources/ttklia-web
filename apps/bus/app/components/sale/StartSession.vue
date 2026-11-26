@@ -20,6 +20,7 @@ const props = withDefaults(
 const emit = defineEmits<{ start: [counterId: number, openingFloatSen: number]; endOther: []; preview: [] }>()
 
 const { me, can } = useMe()
+const clock = useTimeFormat()
 const { resolveTo } = useOpsShell()
 const canCreateCounter = computed(() => props.preview || can('bus.counters.write'))
 const counterId = ref<number | null>(null)
@@ -55,7 +56,7 @@ function submit() {
             :title="`You have an active ${props.other.kind === 'product' ? 'product' : 'booking'} session`"
         >
             <template #description>
-                <p>Counter: {{ props.other.counter_name ?? '—' }} · Started: {{ formatDateTime(props.other.opened_at) }}</p>
+                <p>Counter: {{ props.other.counter_name ?? '—' }} · Started: {{ clock.dateTime(props.other.opened_at) }}</p>
                 <p class="mt-1">Please end your current session before starting a new one.</p>
                 <UButton class="mt-3" label="End Current Session" color="warning" @click="emit('endOther')" />
             </template>

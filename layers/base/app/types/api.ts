@@ -55,6 +55,8 @@ export interface WorkspaceRef {
     code: string
     name: string
     type: WorkspaceType
+    /** `workspaces.time_format`: how its screens show times (useTimeFormat). */
+    time_format?: '12h' | '24h'
 }
 
 /** `GET /me?workspace=…` (doc 27, "How it is enforced", step 5). TODO(api): final shape from the generated client. */

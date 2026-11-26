@@ -13,6 +13,7 @@ interface Row extends Record<string, unknown> {
     operator_code: string
     credit_balance_sen: number | null
     system_provider: string | null
+    sales_open: boolean
 }
 
 const { resolveTo } = useOpsShell()
@@ -31,6 +32,14 @@ const columns = computed<TableColumn<Row>[]>(() => [
         } as TableColumn<Row>]
         : []),
     { accessorKey: 'system_provider', header: 'System Provider', cell: ({ row }) => row.original.system_provider ?? '-' },
+    // The switch on the company page (bus.operators.write).
+    {
+        accessorKey: 'sales_open',
+        header: 'Ticket Sales',
+        cell: ({ row }) => h(resolveComponent('UBadge'), row.original.sales_open
+            ? { label: 'On sale', color: 'success', variant: 'soft' }
+            : { label: 'Paused', color: 'warning', variant: 'soft' }),
+    },
 ])
 
 const search = ref('')
