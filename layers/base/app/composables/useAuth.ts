@@ -9,8 +9,18 @@ const ONE_DAY = 60 * 60 * 24
  * ref and do not see each other's writes, so useApi (set up before sign-in) would keep sending no
  * token. The value lives in shared state; writes go through to the cookie.
  */
+let hostCookieCleared = false
+
 export function useAuthToken() {
-    const cookie = useCookie<string | null>(AUTH_TOKEN_COOKIE, { maxAge: ONE_DAY, sameSite: 'lax', path: '/' })
+    const domain = useRuntimeConfig().public.authCookieDomain || undefined
+    // A token saved before the cookie was shared sits on this host only and would be read ahead of the shared
+    // one: drop it once (a cookie set without a domain is removed only by a write without a domain).
+    if (domain && import.meta.client && !hostCookieCleared) {
+        hostCookieCleared = true
+        document.cookie = `${AUTH_TOKEN_COOKIE}=; Max-Age=0; path=/; SameSite=Lax`
+    }
+    // With a domain (NUXT_PUBLIC_AUTH_COOKIE_DOMAIN) every staff app on it shares the sign-in and the sign-out.
+    const cookie = useCookie<string | null>(AUTH_TOKEN_COOKIE, { maxAge: ONE_DAY, sameSite: 'lax', path: '/', domain })
     const state = useState<string | null>('ttklia-auth-token', () => cookie.value ?? null)
     return computed<string | null>({
         get: () => state.value,

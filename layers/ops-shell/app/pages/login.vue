@@ -17,6 +17,7 @@ const api = useApi()
 const { setToken, getToken } = useAuth()
 
 const form = reactive({ login: '', password: '', remember: false })
+const showPassword = ref(false)
 const loading = ref(false)
 const error = ref('')
 
@@ -78,7 +79,17 @@ async function submitLogin() {
                     </UFormField>
 
                     <UFormField label="Password" name="password" required>
-                        <UInput v-model="form.password" type="password" autocomplete="current-password" required class="w-full" />
+                        <UInput v-model="form.password" :type="showPassword ? 'text' : 'password'" autocomplete="current-password" required class="w-full" :ui="{ trailing: 'pe-1' }">
+                            <template #trailing>
+                                <UButton
+                                    color="neutral" variant="link" size="sm"
+                                    :icon="showPassword ? 'i-bx-hide' : 'i-bx-show'"
+                                    :aria-label="showPassword ? 'Hide password' : 'Show password'"
+                                    :aria-pressed="showPassword"
+                                    @click="showPassword = !showPassword"
+                                />
+                            </template>
+                        </UInput>
                     </UFormField>
 
                     <UCheckbox v-model="form.remember" label="Keep me logged in" class="pt-1" />

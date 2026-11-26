@@ -18,6 +18,9 @@ export default defineNuxtConfig({
             apiBase: '',
             // NUXT_PUBLIC_AUTH_URL, the single login at the auth domain
             authUrl: '',
+            // NUXT_PUBLIC_AUTH_COOKIE_DOMAIN, e.g. .staging.ttklia.com: the staff apps share one sign-in across
+            // their subdomains. Blank keeps the cookie on this host only (the passenger site, local dev).
+            authCookieDomain: '',
             // NUXT_PUBLIC_REVERB_HOST
             reverbHost: '',
             // NUXT_PUBLIC_APP, fixed per app in its own nuxt.config.ts
