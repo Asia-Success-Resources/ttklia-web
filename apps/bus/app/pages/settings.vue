@@ -45,6 +45,55 @@ onMounted(async () => {
     }
 })
 
+// Terminal charges: the collection fee (with the facility charge inside it), a new version from now on each save.
+// GET / PATCH /api/ops/w/{workspace}/settings/terminal-charges. Permission: bus.settings.read / write.
+interface ChargesHistory { valid_from: string; valid_from_local: string; collection_fee_rm: number; facility_fee_rm: number }
+interface Charges {
+    collection_fee_rm: number
+    facility_fee_rm: number
+    boarding_pass_fee_rm: number
+    boarding_pass_sst_rm: number
+    sst_rate_percent: number
+    history: ChargesHistory[]
+}
+const charges = ref<Charges | null>(null)
+const collectionFee = ref('')
+const chargesSaving = ref(false)
+const chargesError = ref<string | null>(null)
+const rm = (v: number) => `RM ${v.toFixed(2)}`
+const chargesChanged = computed(() => !!charges.value && collectionFee.value !== charges.value.collection_fee_rm.toFixed(2))
+
+function showCharges(c: Charges) {
+    charges.value = c
+    collectionFee.value = c.collection_fee_rm.toFixed(2)
+}
+
+onMounted(async () => {
+    if (!slug.value) return
+    try {
+        const res = await api.get<{ data: Charges }>(`/ops/w/${slug.value}/settings/terminal-charges`)
+        showCharges(res.data)
+    } catch (e) {
+        chargesError.value = toProblem(e)?.detail ?? 'Unable to load the terminal charges.'
+    }
+})
+
+async function saveCharges() {
+    if (!slug.value) return
+    chargesSaving.value = true
+    chargesError.value = null
+    try {
+        const res = await api.patch<{ data: Charges }>(`/ops/w/${slug.value}/settings/terminal-charges`, { collection_fee_rm: collectionFee.value })
+        showCharges(res.data)
+        toast.add({ title: 'Collection fee saved', description: 'New collections at the counter and the kiosks use it from now.', color: 'success' })
+    } catch (e) {
+        const p = toProblem(e)
+        chargesError.value = p?.errors?.collection_fee_rm?.[0] ?? p?.detail ?? 'Unable to save the collection fee.'
+    } finally {
+        chargesSaving.value = false
+    }
+}
+
 async function saveDisplay() {
     if (!slug.value) return
     displaySaving.value = true
@@ -90,6 +139,34 @@ async function saveDisplay() {
                 <UInput v-model="state.arrival_match_before_hours" class="w-full" />
             </UFormField>
     </OpsFormPage>
+
+    <div class="mt-6 rounded-lg border border-(--ops-border) bg-(--ops-card) p-5">
+        <h3 class="mb-1 text-lg font-semibold text-gray-800 dark:text-white">Terminal charges</h3>
+        <p class="mb-4 text-sm text-gray-500">
+            What a passenger pays to collect a boarding pass for a ticket bought elsewhere (operator website, Redbus,
+            BusOnlineTicket, Easybook), per seat, at the counter and the kiosks. A change applies to new collections from
+            the moment it is saved.
+        </p>
+        <UFormField label="Collection fee (RM, per seat)" name="collection_fee_rm" required>
+            <UInput v-model="collectionFee" type="number" min="0" step="0.01" :disabled="!canWrite || !charges" class="w-48" />
+        </UFormField>
+        <div v-if="charges" class="mt-3 text-sm text-gray-600 dark:text-gray-300">
+            Made up of the facility charge {{ rm(charges.facility_fee_rm) }} and the boarding pass fee
+            {{ rm(charges.boarding_pass_fee_rm) }} + SST {{ rm(charges.boarding_pass_sst_rm) }} ({{ charges.sst_rate_percent }}%).
+        </div>
+        <div v-if="charges?.history.length" class="mt-4">
+            <div class="mb-1 text-sm font-medium text-gray-700 dark:text-gray-200">Changes</div>
+            <ul class="text-sm text-gray-500">
+                <li v-for="h in charges.history" :key="h.valid_from">
+                    From {{ h.valid_from_local }}: collection {{ rm(h.collection_fee_rm) }} (facility {{ rm(h.facility_fee_rm) }})
+                </li>
+            </ul>
+        </div>
+        <p v-if="chargesError" class="mt-3 text-sm text-error">{{ chargesError }}</p>
+        <div v-if="canWrite" class="mt-4 flex justify-end">
+            <UButton label="Save" :loading="chargesSaving" :disabled="!chargesChanged" @click="saveCharges" />
+        </div>
+    </div>
 
     <div class="mt-6 rounded-lg border border-(--ops-border) bg-(--ops-card) p-5">
         <h3 class="mb-1 text-lg font-semibold text-gray-800 dark:text-white">Display</h3>
