@@ -70,5 +70,5 @@ export function resolveDate(value: unknown): Date {
     return d >= today && d <= last ? d : today
 }
 /** Carbon translatedFormat in the visitor's language. */
-export const LOCALE_TAGS: Record<string, string> = { en: 'en-GB', ms: 'ms-MY', zh: 'zh-CN' }
+export const LOCALE_TAGS: Record<string, string> = { en: 'en-GB', ms: 'ms-MY', zh: 'zh-CN', th: 'th-TH' }
 export const fmt = (d: Date, locale: string, opts: Intl.DateTimeFormatOptions) => new Intl.DateTimeFormat(LOCALE_TAGS[locale] ?? 'en-GB', opts).format(d)

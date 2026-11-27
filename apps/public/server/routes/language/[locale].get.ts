@@ -2,7 +2,7 @@
  * klia-bus `GET /language/{locale}`: remembers the visitor's language for a year and goes back to the page they were on.
  * TODO(api): also save it on the signed-in customer (users.locale) once the public site signs in through ttklia-api.
  */
-const LOCALES = ['en', 'ms', 'zh']
+const LOCALES = ['en', 'ms', 'zh', 'th']
 
 export default defineEventHandler((event) => {
     const locale = getRouterParam(event, 'locale') ?? ''

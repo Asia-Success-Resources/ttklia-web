@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // klia-bus resources/views/frontend/footer.blade.php.
 const { route, locale, carCharterEnabled } = useKlia()
-const languages: Record<string, string> = { en: 'English', zh: '简体中文', ms: 'Bahasa Melayu' }
+const languages: Record<string, string> = { en: 'English', zh: '简体中文', ms: 'Bahasa Melayu', th: 'ไทย' }
 const year = new Date().getFullYear()
 </script>
 

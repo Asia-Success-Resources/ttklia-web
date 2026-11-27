@@ -10,7 +10,7 @@ import { defineAsyncComponent } from 'vue'
 const langs = import.meta.glob('../assets/klia/lang/*.json', { eager: true, import: 'default' }) as Record<string, Record<string, string>>
 
 /** klia-bus Localize middleware: the `locale` cookie wins, else the browser's Accept-Language, else English. */
-const LOCALES = ['en', 'ms', 'zh']
+const LOCALES = ['en', 'ms', 'zh', 'th']
 function preferred(header: string | undefined): string {
     for (const part of (header ?? '').split(',')) {
         const code = part.split(';')[0]!.trim().toLowerCase().split('-')[0]!

@@ -23,7 +23,7 @@ const moreLinks = computed(() => {
 // The sheet lists "Exchange ticket" first (klia-bus partitions on route('collect')).
 const sheetFirst = computed(() => moreLinks.value.filter((l) => l.href === route('collect')))
 const sheetRest = computed(() => moreLinks.value.filter((l) => l.href !== route('collect')))
-const languages: Record<string, [string, string]> = { en: ['English', 'EN'], zh: ['简体中文', '中文'], ms: ['Bahasa Melayu', 'BM'] }
+const languages: Record<string, [string, string]> = { en: ['English', 'EN'], zh: ['简体中文', '中文'], ms: ['Bahasa Melayu', 'BM'], th: ['ไทย', 'TH'] }
 const firstName = computed(() => user.value?.name.trim().split(' ')[0] ?? '')
 const points = computed(() => Math.round(user.value?.points ?? 0).toLocaleString('en-US'))
 

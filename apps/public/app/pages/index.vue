@@ -45,7 +45,7 @@ if (!isTeeko.value) {
                     },
                 } : {}),
             },
-            { '@context': 'https://schema.org', '@type': 'WebSite', name: 'TTKLIA', url: `${origin}/`, inLanguage: ['en', 'zh', 'ms'] },
+            { '@context': 'https://schema.org', '@type': 'WebSite', name: 'TTKLIA', url: `${origin}/`, inLanguage: ['en', 'zh', 'ms', 'th'] },
             faqSchema(homeFaqs.value),
         ],
     })

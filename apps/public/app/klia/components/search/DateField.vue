@@ -118,7 +118,7 @@ const props = defineProps({
 });
 const emit = defineEmits(['update:modelValue']);
 
-const LOCALES = { en: 'en-GB', zh: 'zh-CN', ms: 'ms-MY' };
+const LOCALES = { en: 'en-GB', zh: 'zh-CN', ms: 'ms-MY', th: 'th-TH' };
 const locale = LOCALES[document.documentElement.lang] ?? document.documentElement.lang ?? 'en-GB';
 
 const startOfDay = (d) => new Date(d.getFullYear(), d.getMonth(), d.getDate());
