@@ -25,6 +25,7 @@ const DEV_PORT: Record<string, number> = {
     ride: 3005,
     operator: 3006,
     public: 3007,
+    auth: 3008,
 }
 
 export function useAppAddress() {

@@ -1,6 +1,9 @@
 /** Name of the cookie that holds the Sanctum token; useApi reads it to send `Authorization: Bearer …`. */
 export const AUTH_TOKEN_COOKIE = 'auth_token'
 
+/** The workspace of an app that has only one (its slug in `workspaces`), for the single login's address. */
+const APP_WORKSPACE: Record<string, string> = { admin: 'global', fleet: 'fleet', ride: 'ride' }
+
 /** Strictly 24 hours (in seconds), as fleet-management. */
 const ONE_DAY = 60 * 60 * 24
 
@@ -53,11 +56,17 @@ export function useAuth() {
         extendTokenLease(value)
     }
 
-    /** Where signed-out users go: the shared login if NUXT_PUBLIC_AUTH_URL is set, else this app's /login. */
-    function loginLocation(returnTo?: string) {
+    /**
+     * Where signed-out users go: the single login at NUXT_PUBLIC_AUTH_URL/{workspace} (auth.ttklia.com/lalaport,
+     * apps/auth) when it is set, else this app's /login. The workspace is the one the user was in (the bus app's
+     * saved location, the taxi app's path), else the app's own (admin → global, fleet, ride); none for the rest.
+     */
+    function loginLocation(returnTo?: string, workspace?: string | null) {
         if (runtime.authUrl) {
+            const ws = workspace ?? useSavedLocation().saved.value ?? APP_WORKSPACE[String(runtime.app ?? '')] ?? null
             const back = returnTo && import.meta.client ? `?return=${encodeURIComponent(window.location.origin + returnTo)}` : ''
-            return { url: `${runtime.authUrl}/login${back}`, external: true }
+            const base = String(runtime.authUrl).replace(/\/+$/, '')
+            return { url: `${base}/${ws ? encodeURIComponent(ws) : ''}${back}`, external: true }
         }
         return { url: returnTo && returnTo !== '/' ? `/login?return=${encodeURIComponent(returnTo)}` : '/login', external: false }
     }

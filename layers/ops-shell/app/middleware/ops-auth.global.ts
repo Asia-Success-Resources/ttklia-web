@@ -13,6 +13,8 @@
 export default defineNuxtRouteMiddleware(async (to) => {
     if (import.meta.server) return
     if (to.path === '/login') return
+    // The single login (apps/auth) is where signed-out users are sent: it never asks for a sign-in itself.
+    if (useRuntimeConfig().public.app === 'auth') return
 
     const { me, loaded } = useMe()
     const { token, setToken, getToken, loginLocation } = useAuth()
@@ -29,7 +31,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (!loaded.value || !me.value || !token.value || asked) {
         const valid = await getToken({ workspace: location, redirect: false })
         if (!valid) {
-            const target = loginLocation(to.fullPath)
+            const target = loginLocation(to.fullPath, location)
             return navigateTo(target.url, { external: target.external })
         }
     } else {

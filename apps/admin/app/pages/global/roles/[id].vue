@@ -100,13 +100,22 @@ function titleCase(s: string) {
 // A screen's name from its permission resource: "customers.pii" → "Customers · Personal Data",
 // "finance_einvoices" → "Finance E-Invoices".
 const WORDS: Record<string, string> = { Einvoices: 'E-Invoices', Einvoice: 'E-Invoice', Pii: 'Personal Data', Pos: 'POS', Sst: 'SST', Api: 'API', Otp: 'OTP', H3: 'H3' }
+// Resources whose names alone are easy to mix up (bus and taxi): "counter" is selling at the counter, "counters" is
+// the list where counters are added.
+const LABELS: Record<string, string> = { counters: 'Counters (add counter)' }
+const HINTS: Record<string, string> = {
+    counter: 'Selling at the counter: the sale screen and the staff member\'s own cash session.',
+    counters: 'The Counters list: add, rename or remove the counters staff pick when they start a session.',
+}
 const resourceLabel = (resource: string) =>
+    LABELS[resource] ??
     resource
         .split('.')
         .map((part) => titleCase(part).split(' ').map((w) => WORDS[w] ?? w).join(' '))
         .join(' · ')
 const resourceHint = (resource: string) =>
-    resource.endsWith('.pii') ? 'Personal data: see IC, passport, phone and e-mail unmasked. Each unmasked record viewed is logged (doc 27).' : undefined
+    HINTS[resource] ??
+    (resource.endsWith('.pii') ? 'Personal data: see IC, passport, phone and e-mail unmasked. Each unmasked record viewed is logged (doc 27).' : undefined)
 
 // ---------------------------------------------------------------- Workspace Access
 function toggleAccess(wsId: number) {
@@ -302,15 +311,23 @@ async function remove() {
                                 <h3 class="flex items-center text-sm font-semibold text-gray-700 dark:text-gray-300" :title="resourceHint(resource)">
                                     <UIcon :name="resource.endsWith('.pii') ? 'i-bx-shield' : 'i-bx-cube'" class="mr-1 size-4" :class="colorsOf(section(m).color).icon" />{{ resourceLabel(resource) }}
                                 </h3>
-                                <label class="flex cursor-pointer items-center gap-1">
-                                    <input type="checkbox" class="size-3.5 rounded accent-(--ui-primary)" :checked="allIn(entries)" :disabled="!canWrite" @change="toggleCard(entries)" />
+                                <label class="flex items-center gap-1" :class="canWrite ? 'cursor-pointer' : 'pointer-events-none'">
+                                    <!-- Read-only: not `disabled` (the browser greys ticked and unticked alike), just not clickable. -->
+                                    <input type="checkbox" class="size-3.5 rounded accent-(--ui-primary)" :checked="allIn(entries)" :tabindex="canWrite ? 0 : -1" :aria-readonly="!canWrite" @click="!canWrite && $event.preventDefault()" @change="canWrite && toggleCard(entries)" />
                                     <span class="text-[10px] text-gray-400">All</span>
                                 </label>
                             </div>
                             <div class="flex flex-wrap gap-2">
-                                <label v-for="e in entries" :key="e.name" class="inline-flex cursor-pointer items-center gap-1.5" :title="e.sensitive ? 'Sensitive: money or personal data' : e.name">
-                                    <input type="checkbox" class="size-3.5 rounded accent-(--ui-primary)" :checked="has(e.name)" :disabled="!canWrite" @change="toggle(e.name)" />
-                                    <span class="text-xs" :class="e.sensitive ? 'text-warning' : 'text-gray-600 dark:text-gray-400'">{{ titleCase(e.action) }}</span>
+                                <label v-for="e in entries" :key="e.name" class="inline-flex items-center gap-1.5" :class="canWrite ? 'cursor-pointer' : 'pointer-events-none'" :title="e.sensitive ? 'Sensitive: money or personal data' : e.name">
+                                    <input type="checkbox" class="size-3.5 rounded accent-(--ui-primary)" :checked="has(e.name)" :tabindex="canWrite ? 0 : -1" :aria-readonly="!canWrite" @click="!canWrite && $event.preventDefault()" @change="canWrite && toggle(e.name)" />
+                                    <!-- Granted: dark and bold; not granted: light, so the two are told apart at a glance. -->
+                                    <span
+                                        class="text-xs"
+                                        :class="[
+                                            has(e.name) ? 'font-semibold' : 'font-normal opacity-60',
+                                            e.sensitive ? 'text-warning' : has(e.name) ? 'text-gray-800 dark:text-white/90' : 'text-gray-500 dark:text-gray-400',
+                                        ]"
+                                    >{{ titleCase(e.action) }}</span>
                                 </label>
                             </div>
                         </div>

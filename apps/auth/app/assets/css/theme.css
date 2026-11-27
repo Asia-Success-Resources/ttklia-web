@@ -1,0 +1,6 @@
+/*
+ * auth app colours: the TTKLIA red. The colour scheme itself is shared (layers/base/app/assets/css/theme.css).
+ */
+:root {
+    --app-primary: #DD0F24;
+}

@@ -19,6 +19,7 @@ const APPS = [
     { name: 'operator', port: 3006, path: '/' },
     { name: 'public', port: 3007, path: '/' },
     { name: 'vendor', port: 3004, path: '/' },
+    { name: 'auth', port: 3008, path: '/' },
 ]
 
 const COLOURS = [36, 33, 35, 32, 34, 91, 96, 93, 95, 92] // ANSI: cyan, yellow, magenta, green, blue, …
