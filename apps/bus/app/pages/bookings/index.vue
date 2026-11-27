@@ -7,7 +7,8 @@ import type { OpsListFilter } from '~/types/list'
 // Sold At, Status. The search row: Search, Company, Zone, Kiosk, System Provider, Payment Method, Type, Ticket Type,
 // Collection, Status, Date, Time, then Search and Reset.
 // GET /api/ops/w/{workspace}/bus/bookings (ttklia-api). Permission: bus.bookings.read (doc 27).
-// TODO(api): v2's booking page (show), Payment Status filter and Export come in a later round.
+// The code and the Actions column open the booking page (bookings/[uuid].vue).
+// TODO(api): v2's Payment Status filter and Export come in a later round.
 useHead({ title: 'Bookings' })
 
 interface Row extends Record<string, unknown> {
@@ -30,10 +31,11 @@ interface Row extends Record<string, unknown> {
 }
 
 const options = useBusOptions()
+const { resolveTo } = useOpsShell()
 
 
 const columns: TableColumn<Row>[] = [
-    { accessorKey: 'code', header: 'Code', cell: ({ row }) => h('span', { class: 'font-medium text-gray-800 dark:text-white' }, row.original.code) },
+    { accessorKey: 'code', header: 'Code', cell: ({ row }) => h(resolveComponent('NuxtLink'), { to: resolveTo(`/bookings/${row.original.uuid}`), class: 'font-medium text-primary hover:underline' }, () => row.original.code) },
     { accessorKey: 'zone', header: 'Zone', cell: ({ row }) => row.original.zone ?? '-' },
     { accessorKey: 'operator', header: 'Operator', cell: ({ row }) => row.original.operator ?? '-' },
     { accessorKey: 'sold_by', header: 'Sold By', cell: ({ row }) => row.original.sold_by ?? '-' },
@@ -97,6 +99,7 @@ onMounted(() => {
         :loading="list.pending.value"
         :pagination="list.pagination.value"
         :can-export="false"
+        :show-to="(row) => resolveTo(`/bookings/${row.uuid}`)"
         @page="list.load"
     >
         <template #search>

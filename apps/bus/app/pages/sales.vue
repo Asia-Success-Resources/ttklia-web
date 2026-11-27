@@ -83,9 +83,9 @@ const recentColumns: TableColumn<RecentRow>[] = [
 const recent = useApiList<RecentRow>({ path: '/orders', workspaceScoped: true, query: { session: 'current' } })
 onMounted(() => recent.load())
 
-function reprint(_row: RecentRow) {
-    // TODO(api): fetch the receipt and print it through the counter agent, then log the print.
-}
+// Reprint: the boarding passes in the browser's print dialog (useBoardingPassPrint, logged as order.reprint).
+// TODO: through the counter agent (doc 08) once counters have one.
+const printer = useBoardingPassPrint()
 </script>
 
 <template>
@@ -137,7 +137,15 @@ function reprint(_row: RecentRow) {
                         <UTable :data="recent.rows.value" :columns="recentColumns" :loading="recent.pending.value" empty="No recent bookings found.">
                             <template #action-cell="{ row }">
                                 <div class="text-right">
-                                    <UButton label="Reprint" variant="link" size="sm" @click="reprint(row.original)" />
+                                    <UButton label="View" variant="link" size="sm" color="neutral" :to="resolveTo(`/bookings/${row.original.uuid}`)" />
+                                    <UButton
+                                        v-if="row.original.kind === 'booking' || row.original.kind === 'collection'"
+                                        label="Reprint"
+                                        variant="link"
+                                        size="sm"
+                                        :loading="printer.printing.value === row.original.uuid"
+                                        @click="printer.print(row.original.uuid)"
+                                    />
                                 </div>
                             </template>
                         </UTable>
@@ -182,5 +190,6 @@ function reprint(_row: RecentRow) {
                 </div>
             </template>
         </UModal>
+        <BoardingPassPrint />
     </div>
 </template>
