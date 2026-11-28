@@ -104,7 +104,7 @@ function seatRows(t: PrintedTicket): [string, string, boolean?][] {
 .bp-b { font-weight: 700; }
 .bp-price { font-size: 15px; font-weight: 700; }
 .bp-small { margin: 0 0 5px; font-size: 11px; }
-.bp-qr { width: 45mm; margin: 0 auto 5px; }
+.bp-qr { width: 61mm; margin: 0 auto 5px; } /* 35% bigger than 45mm (28 Nov 2026), easier for the turnstiles */
 .bp-qr svg { display: block; width: 100%; height: auto; }
 .bp-note { margin: 0; text-align: center; font-size: 11px; line-height: 1.6; }
 
